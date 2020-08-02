@@ -68,7 +68,7 @@ pipeline {
 		}
 		stage('Archive Artifacts'){
 			steps {
-				archiveArtifacts artifacts: 'bin/Release/Nanoleaf-Plugin.dll, bin/Release/Nanoleaf-Plugin.pdb, bin/Release/RestSharp.dll'
+				archiveArtifacts artifacts: 'Releases/Nanoleaf-Plugin.dll, Releases/Nanoleaf-Plugin.pdb, Releases/dependencies/RestSharp.dll, Releases/dependencies/Newtonsoft.Json.dll'
 			}			
 		}
 	}
