@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Nanoleaf_Plugin</RootNamespace>
+    <AssemblyName>Nanoleaf-Plugin</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\Lumos\LumosLIB\bin\Debug\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Lumos">
+      <HintPath>..\Lumos\Lumos\bin\Debug\Lumos.exe</HintPath>
+    </Reference>
+    <Reference Include="LumosLIB">
+      <HintPath>..\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=106.11.4.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>packages\RestSharp.106.11.4\lib\net452\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="API\EDeviceType.cs" />
+    <Compile Include="API\EventArgs\GestureEventArgs.cs" />
+    <Compile Include="API\EventArgs\EffectEventArgs.cs" />
+    <Compile Include="API\EventArgs\StateEventArgs.cs" />
+    <Compile Include="API\DiscoveredDevice.cs" />
+    <Compile Include="API\EventArgs\DiscoveredEventArgs.cs" />
+    <Compile Include="API\EventArgs\TouchEventArgs.cs" />
+    <Compile Include="API\EventArgs\LayoutEventArgs.cs" />
+    <Compile Include="API\Panel.cs" />
+    <Compile Include="API\Communication.cs" />
+    <Compile Include="API\JSON-Objects\AllPanelInfo.cs" />
+    <Compile Include="API\JSON-Objects\Effects.cs" />
+    <Compile Include="API\JSON-Objects\Events\EffectEvent.cs" />
+    <Compile Include="API\JSON-Objects\Events\GestureEvent.cs" />
+    <Compile Include="API\JSON-Objects\Events\LayoutEvent.cs" />
+    <Compile Include="API\JSON-Objects\Events\StateEvent.cs" />
+    <Compile Include="API\JSON-Objects\Events\TouchEvent.cs" />
+    <Compile Include="API\JSON-Objects\ExternalControlConnectionInfo.cs" />
+    <Compile Include="API\JSON-Objects\PanelLayout\Layout.cs" />
+    <Compile Include="API\JSON-Objects\StateOnOff.cs" />
+    <Compile Include="API\JSON-Objects\PanelLayout\PanelLayout.cs" />
+    <Compile Include="API\JSON-Objects\PanelLayout\PanelPosition.cs" />
+    <Compile Include="API\JSON-Objects\States.cs" />
+    <Compile Include="API\JSON-Objects\StateInfo.cs" />
+    <Compile Include="API\Controller.cs" />
+    <Compile Include="Plugin\Sources\Global\CanvasGestureSource.cs" />
+    <Compile Include="Plugin\Sources\CanvasTouchSource.cs" />
+    <Compile Include="Plugin\Sources\CanvasPositionSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentTouchedPanelsSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentNumberOfPanelsSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentOrientationSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentPowerstateSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentCTSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentSaturationSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentHueSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentBrightnessSource.cs" />
+    <Compile Include="Plugin\Sources\Global\CurrentEffectSource.cs" />
+    <Compile Include="Plugin\Sinks\CanvasSink.cs" />
+    <Compile Include="Plugin\NanoleafPlugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I
+xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.pdb" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I
+xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\RestSharp.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets" Condition="Exists('packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets'))" />
+  </Target>
+</Project>
