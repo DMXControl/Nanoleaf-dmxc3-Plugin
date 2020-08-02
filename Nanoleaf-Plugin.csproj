@@ -114,6 +114,7 @@ rem copy the plugin to build\Plugins
 
 xcopy "$(TargetDir)$(TargetName).dll" "$(ProjectDir)\Releases\" /F /R /Y /I
 xcopy "$(TargetDir)$(TargetName).pdb" "$(ProjectDir)\Releases\" /F /R /Y /I
-xcopy "$(TargetDir)\RestSharp.dll" "$(ProjectDir)\Releases\" /F /R /Y /I</PostBuildEvent>
+xcopy "$(TargetDir)\Newtonsoft.Json.dll" "$(ProjectDir)\Releases\dependencies\" /F /R /Y /I
+xcopy "$(TargetDir)\RestSharp.dll" "$(ProjectDir)\Releases\dependencies\" /F /R /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
