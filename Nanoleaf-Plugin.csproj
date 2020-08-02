@@ -106,9 +106,14 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I
-xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.pdb" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I
-xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\RestSharp.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I</PostBuildEvent>
-  </PropertyGroup>
+    <PostBuildEvent>
+rem copy the plugin to build\Plugins
+//xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
+//xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.pdb" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
+//xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\RestSharp.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
 
+xcopy "$(TargetDir)$(TargetName).dll" "$(ProjectDir)\Releases\" /F /R /Y /I
+xcopy "$(TargetDir)$(TargetName).pdb" "$(ProjectDir)\Releases\" /F /R /Y /I
+xcopy "$(TargetDir)\RestSharp.dll" "$(ProjectDir)\Releases\" /F /R /Y /I</PostBuildEvent>
+  </PropertyGroup>
 </Project>
