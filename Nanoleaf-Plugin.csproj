@@ -34,13 +34,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">
-      <HintPath>..\Lumos\LumosLIB\bin\Debug\log4net.dll</HintPath>
+      <HintPath>dep\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Lumos">
-      <HintPath>..\Lumos\Lumos\bin\Debug\Lumos.exe</HintPath>
+      <HintPath>dep\Lumos.exe</HintPath>
     </Reference>
     <Reference Include="LumosLIB">
-      <HintPath>..\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
+      <HintPath>dep\LumosLIB.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -110,11 +110,5 @@
 xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.pdb" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I
 xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\RestSharp.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /Y /I</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets" Condition="Exists('packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\SQLitePCL.native.sqlite3.v110_xp.0.9.3\build\SQLitePCL.native.sqlite3.v110_xp.targets'))" />
-  </Target>
+
 </Project>
