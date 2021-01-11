@@ -105,9 +105,6 @@ namespace Nanoleaf_Plugin
         }
         protected override void initializePlugin()
         {
-
-            SettingsManager s = SettingsManager.getInstance();
-            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTHTOKEN, 0), String.Empty), string.Empty);
         }
 
         protected override void shutdownPlugin()
@@ -121,6 +118,8 @@ namespace Nanoleaf_Plugin
 
         protected override void startupPlugin()
         {
+            SettingsManager s = SettingsManager.getInstance();
+            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTHTOKEN, 0), String.Empty), string.Empty);
             Log.Info("Start");
             try
             {
