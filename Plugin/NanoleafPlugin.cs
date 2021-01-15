@@ -1,5 +1,4 @@
 ﻿using LumosLIB.Kernel.Log;
-using LumosLIB.Tools.I18n;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using org.dmxc.lumos.Kernel.Plugin;
@@ -10,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using T = using LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin
 {
@@ -105,6 +105,8 @@ namespace Nanoleaf_Plugin
         }
         protected override void initializePlugin()
         {
+            SettingsManager s = SettingsManager.getInstance();
+            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTHTOKEN, 0), String.Empty), string.Empty);
         }
 
         protected override void shutdownPlugin()
@@ -118,8 +120,6 @@ namespace Nanoleaf_Plugin
 
         protected override void startupPlugin()
         {
-            SettingsManager s = SettingsManager.getInstance();
-            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTHTOKEN, 0), String.Empty), string.Empty);
             Log.Info("Start");
             try
             {
