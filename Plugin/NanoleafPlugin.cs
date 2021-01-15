@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using T = using LumosLIB.Tools.I18n.DummyT;
+using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin
 {
