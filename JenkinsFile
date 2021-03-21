@@ -75,12 +75,12 @@ pipeline {
 		}
 		stage('Archive Artifacts'){
 			steps {
-				bat "xcopy "$WORKSPACE\bin\release\Nanoleaf-Plugin.dll" "$WORKSPACE\Releases\" /F /R /Y /I"
-				bat "xcopy "$WORKSPACE\bin\release\Nanoleaf-Plugin.pdb" "$WORKSPACE\Releases\" /F /R /Y /I"
-				bat "xcopy "$WORKSPACE\bin\release\Newtonsoft.Json.dll" "$WORKSPACE\Releases\dependencies\" /F /R /Y /I"
-				bat "xcopy "$WORKSPACE\bin\release\RestSharp.dll" "$WORKSPACE\Releases\dependencies\" /F /R /Y /I"
-				bat "xcopy "$WORKSPACE\NanoleafGUI-Plugin\bin\release\NanoleafGUI-Plugin.dll" "$WORKSPACE\Releases\" /F /R /Y /I"
-				bat "xcopy "$WORKSPACE\NanoleafGUI-Plugin\bin\release\NanoleafGUI-Plugin.pdb" "$WORKSPACE\Releases\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\bin\\release\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I\"
+				bat "xcopy \"$WORKSPACE\\bin\\release\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I\"
+				bat "xcopy \"$WORKSPACE\\bin\\release\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I\"
+				bat "xcopy \"$WORKSPACE\\bin\\release\\RestSharp.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I\"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\release\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I\"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\release\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I\"
 				
 				archiveArtifacts artifacts: 'Releases/Nanoleaf-Plugin.dll, Releases/Nanoleaf-Plugin.pdb, Releases/NanoleafGUI-Plugin.dll, Releases/NanoleafGUI-Plugin.pdb, Releases/dependencies/RestSharp.dll, Releases/dependencies/Newtonsoft.Json.dll'
 			}			
