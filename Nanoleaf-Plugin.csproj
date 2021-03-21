@@ -120,7 +120,7 @@ rem copy the plugin to build\Plugins
 
 xcopy "$(TargetDir)$(TargetName).dll" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
 xcopy "$(TargetDir)$(TargetName).pdb" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
-xcopy "$(TargetDir)\Newtonsoft.Json.dll" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\\dependencies\" /F /R /Y /I
-xcopy "$(TargetDir)\RestSharp.dll" "E:\Git-Repos\Lumo\Lumos\Lumos\bin\Debug\Plugins\dependencies\" /F /R /Y /I</PostBuildEvent>
+xcopy "$(TargetDir)\Newtonsoft.Json.dll" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\dependencies\" /F /R /Y /I
+xcopy "$(TargetDir)\RestSharp.dll" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\dependencies\" /F /R /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
