@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>NanoleafGUI_Plugin</RootNamespace>
     <AssemblyName>NanoleafGUI-Plugin</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -42,19 +42,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>dep\LumosControls.dll</HintPath>
+      <HintPath>..\dep\LumosControls.dll</HintPath>
     </Reference>
     <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\..\Lumos\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
     </Reference>
     <Reference Include="LumosGUI">
-      <HintPath>dep\LumosGUI.exe</HintPath>
+      <HintPath>..\dep\LumosGUI.exe</HintPath>
     </Reference>
     <Reference Include="LumosGUI">
       <HintPath>..\..\Lumos\Lumos\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
     </Reference>
     <Reference Include="LumosLIB">
-      <HintPath>dep\LumosLIB.dll</HintPath>
+      <HintPath>..\dep\LumosLIB.dll</HintPath>
     </Reference>
     <Reference Include="LumosLIB">
       <HintPath>..\..\Lumos\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
