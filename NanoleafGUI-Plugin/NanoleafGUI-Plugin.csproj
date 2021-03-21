@@ -111,7 +111,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName).dll" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /F /R /Y /I
-xcopy "$(TargetDir)$(TargetName).pdb" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /F /R /Y /I</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName).dll" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /C /F /R /Y /I
+xcopy "$(TargetDir)$(TargetName).pdb" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /C /F /R /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
