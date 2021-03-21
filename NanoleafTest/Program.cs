@@ -1,5 +1,4 @@
-﻿using LumosLIB.Tools;
-using Nanoleaf_Plugin.API;
+﻿using Nanoleaf_Plugin.API;
 using System;
 using System.Linq;
 using System.Threading;
@@ -29,7 +28,8 @@ namespace NanoleafTest
                 while (alive)
                 {
                     var rgbw = new Panel.RGBW(val, 0, 0, 0);
-                    controler.Panels.ToArray().ForEach(p => p.StreamingColor = rgbw);
+                    foreach (var p in controler.Panels.ToArray())
+                        p.StreamingColor = rgbw;
                     Task.Delay(1).Wait();
                     val++;
                 }
