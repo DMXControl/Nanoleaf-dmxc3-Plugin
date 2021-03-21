@@ -62,14 +62,14 @@ pipeline {
 				
 				//  Then add the current build number in the version number and build the branch
 				changeAsmVer versionPattern: '$BUILD_NUMBER', regexPattern: '(Assembly(.*)Version\\("(.+)\\.(.+)\\.(.+)\\.(.+)")', replacementPattern: 'Assembly\$2Version("\$3.\$4.\$5.%s"'
-				bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Debug /t:Clean;Rebuild /p:Platform=\"Any CPU\" "
+				bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Debug /t:Clean;Rebuild /p:Platform=\"Any CPU\";PreBuildEvent=;PostBuildEvent= "
 			}
 		}
 		stage('Build Release Configuration'){
 			steps {
 				script {
 					//  Build the release configuration of the project
-					bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Release /t:Clean;Rebuild /p:Platform=\"Any CPU\" "
+					bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Release /t:Clean;Rebuild /p:Platform=\"Any CPU\";PreBuildEvent=;PostBuildEvent= "
 				}
 			}
 		}
