@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,8 +71,10 @@ namespace Nanoleaf_Plugin.API
                     client.MulticastLoopback = true;
                     while (discoveryThreadRunning)
                     {
-                        log.Info("Discover started");
+                        log.Debug("Discover started");
+                        NanoleafPlugin.DiscoverState = "Started";
                         var result = client.ReceiveAsync().GetAwaiter().GetResult();
+                        NanoleafPlugin.DiscoverState = "Result Received";
                         string message = Encoding.Default.GetString(result.Buffer);
                         if (message.Contains("nl-devicename"))
                         {
@@ -93,8 +96,8 @@ namespace Nanoleaf_Plugin.API
                             discoveredDevices.Add(device);
                             deviceDiscovered?.Invoke(null, new DiscoveredEventArgs(device));
                         }
-                        log.Info("Discover passed");
-
+                        log.Debug("Discover passed");
+                        NanoleafPlugin.DiscoverState = "Passed";
                     }
                 }
                 catch (Exception e)
@@ -111,6 +114,7 @@ namespace Nanoleaf_Plugin.API
                         , e);
                 }
                 log.Debug("Discover stopped");
+                NanoleafPlugin.DiscoverState = "Stopped";
                 client.Close();
                 discoveryThreadRunning = false;
             }, token);
@@ -580,11 +584,15 @@ namespace Nanoleaf_Plugin.API
                             {
                                 args.Result.Read(buffer, 0, buffer.Length);
                             }
-                            catch (Exception e) when( e is IOException|| e is WebException)//Timeout! Restart Listener without Logging
+                            catch (Exception e) when (e is IOException || e is WebException)//Timeout! Restart Listener without Logging
                             {
                                 restart = true;
                                 isListening = false;
                                 return;
+                            }
+                            catch (Exception e) when (e is TargetInvocationException)
+                            {
+                                NanoleafPlugin.Log.Info("Connection Refused");
                             }
                             catch (Exception e)
                             {

@@ -21,7 +21,7 @@ namespace NanoleafTest
             Communication.StaticOnGestureEvent += Communication_StaticOnGestureEvent;
             Communication.StaticOnEffectEvent += Communication_StaticOnEffectEvent;
             Communication.StaticOnStateEvent += Communication_StaticOnStateEvent;
-            controler = new Controller(ip);
+            controler = new Controller(ip, null);
             bool alive = true;
             Thread taskStream = new Thread(() =>
             {

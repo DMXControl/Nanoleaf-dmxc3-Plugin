@@ -27,8 +27,19 @@ namespace NanoleafGUI_Plugin
     public class NanoleafGUI_Plugin : GuiPluginBase, IResourceProvider
     { 
         private const string SETTINGS_CATEGORY_ID = "Settings:Nanoleaf";
-        private const string NANOLEAF_SHOW_IN_INPUTASSIGNMENT = "NANOLEAF.SHOW_IN_INPUTASSIGNMENT";
-        private const string NANOLEAF_KNOWN_CONTROLER_IPS = "NANOLEAF.KNOWN_CONTROLER_IPS";
+
+        internal const string NANOLEAF_SHOW_IN_INPUTASSIGNMENT = "NANOLEAF.SHOW_IN_INPUTASSIGNMENT";
+        internal const string NANOLEAF_DISCOVER = "NANOLEAF.DISCOVER";
+        internal const string NANOLEAF_AUTOREQUEST_TOKEN = "NANOLEAF.AUTOREQUEST_TOKEN";
+        internal const string NANOLEAF_AUTOCONNECT = "NANOLEAF.AUTOCONNECT";
+        internal const string NANOLEAF_REFRESH_RATE = "NANOLEAF.REFRESH_RATE";
+
+        internal const string NANOLEAF_DISCOVER_STATE = "NANOLEAF.DISCOVER_STATE";
+        internal const string NANOLEAF_DISCOVERED_CONTROLLERS = "NANOLEAF.DISCOVERED_CONTROLLERS";
+        internal const string NANOLEAF_CONTROLLERS = "NANOLEAF.CONTROLLERS";
+
+        internal const string NANOLEAF_REQUEST_TOKEN = "NANOLEAF.REQUEST_TOKEN";
+
         private SettingsBranch settingsBranch;
         public NanoleafGUI_Plugin(): base("295c2ab8-4d2b-4741-a1bd-16de8f4da957", "NanoleafGUI-Plugin")
         {
@@ -42,15 +53,14 @@ namespace NanoleafGUI_Plugin
             ResourceManager.getInstance().registerResourceProvider(this);
             this.settingsBranch = (SettingsBranch)PEManager.getInstance().GetBranchByID("Settings");
 
-            var nanoleafNode = new ConfigurableSettingsNode(SETTINGS_CATEGORY_ID, T._("Nanoleaf"), "Nanoleaf");
+            var nanoleafNode = new FormSettingsNode(SETTINGS_CATEGORY_ID, T._("Nanoleaf"), "Nanoleaf");
             nanoleafNode.DisplayWhere = EDisplayCategory.APPLICATION_SETTINGS;
+            nanoleafNode.PropertiesForm = typeof(NanoleafSettingsForm);
             settingsBranch.AddRecursive(settingsBranch.ID, nanoleafNode);
         }
-
         protected override void shutdownPlugin()
         {
         }
-
         protected override void startupPlugin()
         {
         }
@@ -58,11 +68,6 @@ namespace NanoleafGUI_Plugin
         {
             base.connectionEstablished();
             SettingsManager sm = SettingsManager.getInstance();
-            //if (!sm.RegisteredSettings.Any(s => s.Path.Equals(NANOLEAF_SHOW_IN_INPUTASSIGNMENT)))
-            //{
-            //    sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), NANOLEAF_SHOW_IN_INPUTASSIGNMENT, String.Empty), true);
-            //    sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Known Controler IPs"), NANOLEAF_KNOWN_CONTROLER_IPS, T._("Tipe here the IP adresses of your Controllers.") + Environment.NewLine + T._("Example:") + Environment.NewLine + "192.168.10.33; 192.168.10.35; ...; 192.168.10.42"), "192.168.1.123");
-            //}
         }
         public override void connectionClosing()
         {
@@ -82,7 +87,6 @@ namespace NanoleafGUI_Plugin
             }
             return false;
         }
-
         public ReadOnlyCollection<LumosDataMetadata> allResources(EResourceDataType type)
         {
             if (type == EResourceDataType.SYMBOL)
@@ -100,7 +104,6 @@ namespace NanoleafGUI_Plugin
 
             return null;
         }
-
         public byte[] loadResource(EResourceDataType type, string name)
         {
             if (type == EResourceDataType.SYMBOL)

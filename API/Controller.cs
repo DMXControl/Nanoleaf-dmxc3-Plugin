@@ -1,4 +1,7 @@
 ﻿using LumosLIB.Kernel.Log;
+using LumosLIB.Tools;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -146,33 +149,80 @@ namespace Nanoleaf_Plugin.API
         public event EventHandler NewPanelAdded;
         public event EventHandler PanelLayoutChanged;
         public event EventHandler AuthTokenReceived;
+        public event EventHandler UpdatedInfos;
 
         private ExternalControlConnectionInfo externalControlInfo;
 
+        public Controller(JToken json)
+        {
+            IP = (string)json[nameof(IP)];
+            Auth_token = (string)json[nameof(Auth_token)];
+            Name = (string)json[nameof(Name)];
+            Model = (string)json[nameof(Model)];
+            Manufacturer = (string)json[nameof(Manufacturer)];
+            SerialNumber = (string)json[nameof(SerialNumber)];
+            HardwareVersion = (string)json[nameof(HardwareVersion)];
+            FirmwareVersion = (string)json[nameof(FirmwareVersion)];
 
-        public Controller(string ip, string auth_token = null)
+            switch (Model)
+            {
+                case "NL22":
+                    DeviceType = EDeviceType.LightPanles;
+                    break;
+                case "NL29":
+                    DeviceType = EDeviceType.Canvas;
+                    break;
+            }
+
+            NumberOfPanels = (uint)json[nameof(NumberOfPanels)];
+            globalOrientation = (ushort)json[nameof(GlobalOrientation)];
+            GlobalOrientationMin = (ushort)json[nameof(GlobalOrientationMin)];
+            GlobalOrientationMax = (ushort)json[nameof(GlobalOrientationMax)];
+
+            //EffectList = (string[])json[nameof(EffectList)].Select(c=>c.)
+            SelectedEffect = (string)json[nameof(SelectedEffect)];
+            PowerOn = (bool)json[nameof(PowerOn)];
+            PowerOff = (bool)json[nameof(PowerOff)];
+
+            brightness = (ushort)json[nameof(Brightness)];
+            BrightnessMin = (ushort)json[nameof(BrightnessMin)];
+            BrightnessMax = (ushort)json[nameof(BrightnessMax)];
+            hue = (ushort)json[nameof(Hue)];
+            HueMin = (ushort)json[nameof(HueMin)];
+            HueMax = (ushort)json[nameof(HueMax)];
+            saturation = (ushort)json[nameof(Saturation)];
+            SaturationMin = (ushort)json[nameof(SaturationMin)];
+            SaturationMax = (ushort)json[nameof(SaturationMax)];
+            colorTemprature = (ushort)json[nameof(ColorTemprature)];
+            ColorTempratureMin = (ushort)json[nameof(ColorTempratureMin)];
+            ColorTempratureMax = (ushort)json[nameof(ColorTempratureMax)];
+            ColorMode = (string)json[nameof(ColorMode)];
+
+            var panels = json[nameof(Panels)];
+            foreach (var p in panels)
+                this.panels.Add(new Panel(p));
+
+            startServices();
+        }
+        public Controller(string ip, string name, string auth_token = null)
         {
             IP = ip;
+            Name = name;
             Auth_token = auth_token;
-            if (Auth_token == null)
+            if (Auth_token == null && NanoleafPlugin.AutoRequestToken)
             {
-                Task.Run(async () =>
-                {
-                    while (Auth_token == null && !this.isDisposed)
-                        try
-                        {
-                            Auth_token = await Communication.AddUser(ip, PORT);
-                        }
-                        catch (Exception e)
-                        {
-                            log.Info($"Device({ip}) is maybe not in Pairing-Mode. Please Hold the Powerbutton til you see a Visual Feedback on the Controller (5-7)s");
-                            await Task.Delay(8000);// If the Device is not in Pairing-Mode it tock 5-7s tu enable the Pairing mode by hand. We try it again abfer 8s
-                        }
-
-                    if (Auth_token != null)
-                        AuthTokenReceived.Invoke(this,EventArgs.Empty);
-                });
+                RequestToken();
             }
+            startServices();
+        }
+
+        ~Controller()
+        {
+            Dispose();
+        }
+
+        private void startServices()
+        {
             Task taskRun = new Task(() =>
             {
                 runController();
@@ -188,9 +238,34 @@ namespace Nanoleaf_Plugin.API
             threadStream.Start();
         }
 
-        ~Controller()
+        internal void RequestToken(int tryes=20)
         {
-            Dispose();
+            int count = 0;
+            Task.Run(async () =>
+            {
+                while (Auth_token == null && !this.isDisposed)
+                    try
+                    {
+                        Auth_token = await Communication.AddUser(IP, PORT);
+                    }
+                    catch (Exception e)
+                    {
+                        log.Info($"Device({IP}) is maybe not in Pairing-Mode. Please Hold the Powerbutton til you see a Visual Feedback on the Controller (5-7)s");
+                        await Task.Delay(8000);// If the Device is not in Pairing-Mode it tock 5-7s tu enable the Pairing mode by hand. We try it again abfer 8s
+                        count++;
+                        if (count >= tryes && Auth_token == null)
+                        {
+                            log.Info($"Device({IP}) not Response after {count} tryes");
+                            return;
+                        }
+                    }
+
+                if (Auth_token != null)
+                {
+                    log.Info($"Received AuthToken ({Auth_token}) from Device({IP}) after {count} tryes");
+                    AuthTokenReceived?.Invoke(this, EventArgs.Empty);
+                }
+            });
         }
 
         private async void runController()
@@ -262,6 +337,8 @@ namespace Nanoleaf_Plugin.API
             ColorTempratureMax = (ushort)allPanelInfo.State.ColorTemprature.Max;
             ColorMode = allPanelInfo.State.ColorMode;
 
+            UpdatedInfos?.Invoke(this, EventArgs.Empty);
+
             UpdatePanelLayout(allPanelInfo.PanelLayout.Layout);
         }
 
@@ -295,7 +372,7 @@ namespace Nanoleaf_Plugin.API
 
             while (!isDisposed)
             {
-                await Task.Delay(20);
+                await Task.Delay(1000 / NanoleafPlugin.RefreshRate.Limit(10, 60));
                 if (externalControlInfo != null)
                     Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(panels));
             }
