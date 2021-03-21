@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoleafTest", "NanoleafTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoleafTests", "NanoleafTests\NanoleafTests.csproj", "{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoleafGUI-Plugin", "NanoleafGUI-Plugin\NanoleafGUI-Plugin.csproj", "{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

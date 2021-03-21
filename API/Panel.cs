@@ -77,7 +77,7 @@ namespace Nanoleaf_Plugin.API
             Y = pp.Y;
             Orientation = pp.Orientation;
             Shape = pp.ShapeType;
-            SideLength = sideLength;
+            SideLength = sideLength == 0 ? 100 : sideLength; //Temporarily while the Bug isnt fixed
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
         }
 

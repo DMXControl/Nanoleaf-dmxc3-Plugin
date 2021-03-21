@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using LumosLIB.Kernel.Log;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
@@ -12,13 +13,18 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin.API
 {
     public static class Communication
     {
+        private static ILumosLog log = NanoleafPlugin.Log;
         static CancellationTokenSource tokenSource = new CancellationTokenSource();
         static CancellationToken token = tokenSource.Token;
+
+        public static IPAddress[] IPs = new IPAddress[0];
+
         private static async Task<IRestResponse> put(string address, string contentString)
         {
             RestClient restClient = new RestClient(address);
@@ -42,15 +48,11 @@ namespace Nanoleaf_Plugin.API
         private static event EventHandler<DiscoveredEventArgs> deviceDiscovered;
         public static event EventHandler<DiscoveredEventArgs> DeviceDiscovered
         {
-            add
-            {
-                deviceDiscovered += value;
-                startDiscoveryTask();
-            }
+            add { deviceDiscovered += value; }
             remove { deviceDiscovered -= value; }
         }
         private static Task discoverTask = null;
-        private static void startDiscoveryTask()
+        public static void StartDiscoveryTask()
         {
             if (discoveryThreadRunning || discoverTask != null)
                 return;
@@ -58,43 +60,72 @@ namespace Nanoleaf_Plugin.API
             discoverTask = new Task(() =>
             {
                 IPAddress SSDP_IP = new IPAddress(new byte[] { 239, 255, 255, 250 });
-                IPAddress IP = new IPAddress(new byte[] { 192, 168, 1, 13 });
                 int SSDP_PORT = 1900;
                 var client = new UdpClient();
-
-                client.Client.Bind(new IPEndPoint(IPAddress.Any, SSDP_PORT));
-                client.JoinMulticastGroup(SSDP_IP, IP);
-                client.MulticastLoopback = true;
-                while (discoveryThreadRunning)
+                try
                 {
-                    var result = client.ReceiveAsync().GetAwaiter().GetResult();
-                    string message = Encoding.Default.GetString(result.Buffer);
-                    if (message.Contains("nl-devicename"))
+                    client.Client.Bind(new IPEndPoint(IPAddress.Any, SSDP_PORT));
+                    foreach (IPAddress IP in IPs)
+                        client.JoinMulticastGroup(SSDP_IP, IP);
+                    client.MulticastLoopback = true;
+                    while (discoveryThreadRunning)
                     {
-                        if (discoveredDevices.Any(d => d.IP.Equals(result.RemoteEndPoint.Address.ToString())))
-                            return;
-                        var array = message.Replace("\r\n", "|").Split('|');
-                        EDeviceType type = EDeviceType.UNKNOWN;
-                        switch (array.FirstOrDefault(s => s.StartsWith("NT"))?.Replace("NT: ", ""))
+                        log.Info("Discover started");
+                        var result = client.ReceiveAsync().GetAwaiter().GetResult();
+                        string message = Encoding.Default.GetString(result.Buffer);
+                        if (message.Contains("nl-devicename"))
                         {
-                            case "Nanoleaf_aurora:light":
-                                type = EDeviceType.LightPanles;
-                                break;
-                            case "nanoleaf:nl29":
-                                type = EDeviceType.Canvas;
-                                break;
+                            if (discoveredDevices.Any(d => d.IP.Equals(result.RemoteEndPoint.Address.ToString())))
+                                return;
+                            var array = message.Replace("\r\n", "|").Split('|');
+                            EDeviceType type = EDeviceType.UNKNOWN;
+                            switch (array.FirstOrDefault(s => s.StartsWith("NT"))?.Replace("NT: ", ""))
+                            {
+                                case "Nanoleaf_aurora:light":
+                                    type = EDeviceType.LightPanles;
+                                    break;
+                                case "nanoleaf:nl29":
+                                    type = EDeviceType.Canvas;
+                                    break;
+                            }
+                            string name = array.FirstOrDefault(s => s.StartsWith("nl-devicename"))?.Replace("nl-devicename: ", "");
+                            var device = new DiscoveredDevice(result.RemoteEndPoint.Address.ToString(), name, type); ;
+                            discoveredDevices.Add(device);
+                            deviceDiscovered?.Invoke(null, new DiscoveredEventArgs(device));
                         }
-                        string name = array.FirstOrDefault(s => s.StartsWith("nl-devicename"))?.Replace("nl-devicename: ", "");
-                        var device = new DiscoveredDevice(result.RemoteEndPoint.Address.ToString(), name, type); ;
-                        discoveredDevices.Add(device);
-                        deviceDiscovered?.Invoke(null, new DiscoveredEventArgs(device));
-                    }
+                        log.Info("Discover passed");
 
+                    }
                 }
+                catch (Exception e)
+                {
+                    log.Warn("The Socket is already in use." + Environment.NewLine+
+                        "there Are a feaw things to fix this issue." + Environment.NewLine +
+                        "Open the CMD.exe and perform the command \"netstat -a -n -o\"" + Environment.NewLine +
+                        "Now you see all open Ports" + Environment.NewLine +
+                        "find TCP [the IP address]:[port number] .... #[target_PID]# (ditto for UDP)" + Environment.NewLine +
+                        "Open TaskManager and Klick on Processes" + Environment.NewLine +
+                        "Enable \"PID\" column by going to: View > Select Columns > Check the box for PID" + Environment.NewLine +
+                        "Find the PID of interest and \"END PROCESS\"" + Environment.NewLine + Environment.NewLine +
+                        "Common Programs are Spotify or the SSPDSRF-Service"
+                        , e);
+                }
+                log.Debug("Discover stopped");
                 client.Close();
                 discoveryThreadRunning = false;
             }, token);
             discoverTask.Start();
+        }
+        public static void StopDiscoveryTask()
+        {
+            log.Debug("Request stop for DiscoverTask");
+            discoveryThreadRunning = false;
+            while (!(discoverTask?.IsCompleted ?? true))
+            {
+                log.Debug("Await DiscoverTask stopped");
+                Task.Delay(100).GetAwaiter();
+            }
+            discoverTask = null;
         }
         #endregion
 
@@ -136,7 +167,10 @@ namespace Nanoleaf_Plugin.API
             {
                 var response = hc.GetAsync(address).GetAwaiter().GetResult();
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    result = JsonConvert.DeserializeObject<AllPanelInfo>(await response.Content.ReadAsStringAsync());
+                {
+                    string res = await response.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<AllPanelInfo>(res);
+                }
             }
             return result;
         }
@@ -403,7 +437,10 @@ namespace Nanoleaf_Plugin.API
             {
                 var response = hc.GetAsync(address).GetAwaiter().GetResult();
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    result = JsonConvert.DeserializeObject<Layout>(await response.Content.ReadAsStringAsync());
+                {
+                    string res = await response.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<Layout>(res);
+                }
             }
             return result;
         }

@@ -45,8 +45,8 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp, Version=106.11.4.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
-      <HintPath>packages\RestSharp.106.11.4\lib\net452\RestSharp.dll</HintPath>
+    <Reference Include="RestSharp, Version=106.11.7.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>packages\RestSharp.106.11.7\lib\net452\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -108,13 +108,13 @@
   <PropertyGroup>
     <PostBuildEvent>
 rem copy the plugin to build\Plugins
-//xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
-//xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\Nanoleaf-Plugin.pdb" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
-//xcopy "E:\Git-Repros\Nanoleaf-Plugin\bin\Debug\RestSharp.dll" "E:\Git-Repros\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
+//xcopy "E:\Git-Repros\Nanoleaf-dmxc3-Plugin\bin\Debug\Nanoleaf-Plugin.dll" "E:\Git-Repros\Lumos\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
+//xcopy "E:\Git-Repros\Nanoleaf-dmxc3-Plugin\bin\Debug\Nanoleaf-Plugin.pdb" "E:\Git-Repros\Lumos\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
+//xcopy "E:\Git-Repros\Nanoleaf-dmxc3-Plugin\bin\Debug\RestSharp.dll" "E:\Git-Repros\Lumos\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
 
-xcopy "$(TargetDir)$(TargetName).dll" "$(ProjectDir)\Releases\" /F /R /Y /I
-xcopy "$(TargetDir)$(TargetName).pdb" "$(ProjectDir)\Releases\" /F /R /Y /I
-xcopy "$(TargetDir)\Newtonsoft.Json.dll" "$(ProjectDir)\Releases\dependencies\" /F /R /Y /I
-xcopy "$(TargetDir)\RestSharp.dll" "$(ProjectDir)\Releases\dependencies\" /F /R /Y /I</PostBuildEvent>
+xcopy "$(TargetDir)$(TargetName).dll" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
+xcopy "$(TargetDir)$(TargetName).pdb" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\" /F /R /Y /I
+xcopy "$(TargetDir)\Newtonsoft.Json.dll" "E:\Git-Repos\Lumos\Lumos\Lumos\bin\Debug\Plugins\\dependencies\" /F /R /Y /I
+xcopy "$(TargetDir)\RestSharp.dll" "E:\Git-Repos\Lumo\Lumos\Lumos\bin\Debug\Plugins\dependencies\" /F /R /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>

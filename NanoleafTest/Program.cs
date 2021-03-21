@@ -29,7 +29,7 @@ namespace NanoleafTest
                 while (alive)
                 {
                     var rgbw = new Panel.RGBW(val, 0, 0, 0);
-                    controler.Panels.ForEach(p => p.StreamingColor = rgbw);
+                    controler.Panels.ToArray().ForEach(p => p.StreamingColor = rgbw);
                     Task.Delay(1).Wait();
                     val++;
                 }
@@ -38,7 +38,7 @@ namespace NanoleafTest
 
 
             Console.ReadLine();
-            controler.SelfDestruction();
+            controler.SelfDestruction(true);
             Console.WriteLine("User Deleted");
             alive = false;
 

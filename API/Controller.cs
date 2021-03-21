@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LumosLIB.Kernel.Log;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Nanoleaf_Plugin.API
 {
     public class Controller : IDisposable
     {
+        private static ILumosLog log = NanoleafPlugin.Log;
         public string IP { get; private set; }
         private const string PORT = "16021";
         public string Auth_token { get; private set; } = null;
@@ -143,6 +145,7 @@ namespace Nanoleaf_Plugin.API
 
         public event EventHandler NewPanelAdded;
         public event EventHandler PanelLayoutChanged;
+        public event EventHandler AuthTokenReceived;
 
         private ExternalControlConnectionInfo externalControlInfo;
 
@@ -150,20 +153,24 @@ namespace Nanoleaf_Plugin.API
         public Controller(string ip, string auth_token = null)
         {
             IP = ip;
-            if (auth_token == null)
+            Auth_token = auth_token;
+            if (Auth_token == null)
             {
                 Task.Run(async () =>
                 {
-                    while (Auth_token == null)
+                    while (Auth_token == null && !this.isDisposed)
                         try
                         {
                             Auth_token = await Communication.AddUser(ip, PORT);
                         }
                         catch (Exception e)
                         {
-                            NanoleafPlugin.Log.Info($"Device({ip}) is maybe not in Pairing-Mode. Please Hold the Powerbutton til you see a Visual Feedback on the Controller (5-7)s");
+                            log.Info($"Device({ip}) is maybe not in Pairing-Mode. Please Hold the Powerbutton til you see a Visual Feedback on the Controller (5-7)s");
                             await Task.Delay(8000);// If the Device is not in Pairing-Mode it tock 5-7s tu enable the Pairing mode by hand. We try it again abfer 8s
                         }
+
+                    if (Auth_token != null)
+                        AuthTokenReceived.Invoke(this,EventArgs.Empty);
                 });
             }
             Task taskRun = new Task(() =>
@@ -288,16 +295,19 @@ namespace Nanoleaf_Plugin.API
 
             while (!isDisposed)
             {
-                Thread.Sleep(20);
+                await Task.Delay(20);
                 if (externalControlInfo != null)
                     Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(panels));
             }
         }
 
-        public void SelfDestruction()
+        public void SelfDestruction(bool deleteUser=false)
         {
             Dispose();
-            Communication.DeleteUser(IP, PORT, Auth_token).GetAwaiter().GetResult();
+            if (deleteUser)
+                Communication.DeleteUser(IP, PORT, Auth_token).GetAwaiter().GetResult();
+
+            log.Info(string.Format("Destruct {0}", this));
         }
         public void Dispose()
         {
