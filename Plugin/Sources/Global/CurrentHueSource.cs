@@ -14,10 +14,10 @@ namespace Nanoleaf_Plugin
         {
             Communication.StaticOnStateEvent += ExternalControlEndpoint_StaticOnStateEvent;
             SerialNumber = serialNumber;
-            var controler = NanoleafPlugin.getClient(SerialNumber);
-            min = controler.HueMin;
-            max = controler.HueMax;
-            CurrentValue = controler.Hue;
+            var controller = NanoleafPlugin.getClient(SerialNumber);
+            min = controller.HueMin;
+            max = controller.HueMax;
+            CurrentValue = controller.Hue;
         }
 
         private void ExternalControlEndpoint_StaticOnStateEvent(object sender, EventArgs e)

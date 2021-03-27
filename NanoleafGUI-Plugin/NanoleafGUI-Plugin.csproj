@@ -70,6 +70,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Plugin\AddControlerForm.resx">
+      <DependentUpon>AddControlerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Plugin\NanoleafSettingsForm.resx">
       <DependentUpon>NanoleafSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -79,6 +82,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Plugin\AddControlerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Plugin\AddControlerForm.Designer.cs">
+      <DependentUpon>AddControlerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Plugin\NanoleafGUI-Plugin.cs" />
     <Compile Include="Plugin\NanoleafSettingsForm.cs">
       <SubType>Form</SubType>
@@ -86,6 +95,7 @@
     <Compile Include="Plugin\NanoleafSettingsForm.Designer.cs">
       <DependentUpon>NanoleafSettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Plugin\Tools.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -13,13 +13,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using T = LumosLIB.Tools.I18n.DummyT;
+using LumosLIB.Tools.I18n;
 
 namespace NanoleafGUI_Plugin
 {
     public partial class NanoleafSettingsForm : LumosForm
     {
-        SettingsManager sm;
+        private SettingsManager sm;
+        private AddControllerForm addControllerForm = new AddControllerForm();
         public NanoleafSettingsForm()
         {
             InitializeComponent();
@@ -51,20 +52,20 @@ namespace NanoleafGUI_Plugin
         {
             string jsonDiscoveredControllers = sm.getSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVERED_CONTROLLERS);
             string jsonControllers = sm.getSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_CONTROLLERS);
-            JArray objDiscoveredControlers = JsonConvert.DeserializeObject(jsonDiscoveredControllers) as JArray;
-            JArray objControlers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
+            JArray objDiscoveredControllers = JsonConvert.DeserializeObject(jsonDiscoveredControllers) as JArray;
+            JArray objControllers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
             tabControl1.TabPages.Clear();
-            if (objControlers != null)
-                foreach (var controller in objControlers.Children())
+            if (objControllers != null)
+                foreach (var controller in objControllers.Children())
                 {
                     string name = (string)controller["Name"];
 
                         tabControl1.TabPages.Add(new LumosTabPage(name) { Tag = controller });
                 }
-            if (objDiscoveredControlers != null)
-                foreach (var controller in objDiscoveredControlers.Children())
+            if (objDiscoveredControllers != null)
+                foreach (var controller in objDiscoveredControllers.Children())
                 {
-                    if (objControlers.Any(c => ((string)c["IP"]).Equals((string)controller["IP"])))
+                    if (objControllers.Any(c => ((string)c["IP"]).Equals((string)controller["IP"])))
                         continue;
 
                     string name = (string)controller["Name"];
@@ -164,6 +165,17 @@ namespace NanoleafGUI_Plugin
         {
             sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REQUEST_TOKEN, (string)((JToken)tabControl1.SelectedTab.Tag)["IP"]);
             Task.Delay(2000).GetAwaiter();
+        }
+
+        private void btAddController_Click(object sender, EventArgs e)
+        {
+            if(addControllerForm.ShowDialog() == DialogResult.OK)
+            {
+                JObject obj = new JObject();
+                obj.Add("IP", addControllerForm.IP);
+                obj.Add("Token", addControllerForm.Token);
+                sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_ADD_CONTROLLER, JsonConvert.SerializeObject(obj));
+            }
         }
     }
 }

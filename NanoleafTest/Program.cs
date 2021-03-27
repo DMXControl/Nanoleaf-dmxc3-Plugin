@@ -10,7 +10,7 @@ namespace NanoleafTest
     {
         const string ip = "192.168.1.123";
         const string port = "16021";
-        static Controller controler = null;
+        static Controller controller = null;
         static void Main(string[] args)
         {
             Console.WriteLine("Press Enter 5 times for Shutdown");
@@ -20,7 +20,7 @@ namespace NanoleafTest
             Communication.StaticOnGestureEvent += Communication_StaticOnGestureEvent;
             Communication.StaticOnEffectEvent += Communication_StaticOnEffectEvent;
             Communication.StaticOnStateEvent += Communication_StaticOnStateEvent;
-            controler = new Controller(ip, null);
+            controller = new Controller(ip, null);
             bool alive = true;
             Thread taskStream = new Thread(() =>
             {
@@ -28,7 +28,7 @@ namespace NanoleafTest
                 while (alive)
                 {
                     var rgbw = new Panel.RGBW(val, 0, 0, 0);
-                    foreach (var p in controler.Panels.ToArray())
+                    foreach (var p in controller.Panels.ToArray())
                         p.StreamingColor = rgbw;
                     Task.Delay(1).Wait();
                     val++;
@@ -38,7 +38,7 @@ namespace NanoleafTest
 
 
             Console.ReadLine();
-            controler.SelfDestruction(true);
+            controller.SelfDestruction(true);
             Console.WriteLine("User Deleted");
             alive = false;
 

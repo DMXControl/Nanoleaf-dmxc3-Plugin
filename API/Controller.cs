@@ -204,10 +204,9 @@ namespace Nanoleaf_Plugin.API
 
             startServices();
         }
-        public Controller(string ip, string name, string auth_token = null)
+        public Controller(string ip, string auth_token = null)
         {
             IP = ip;
-            Name = name;
             Auth_token = auth_token;
             if (Auth_token == null && NanoleafPlugin.AutoRequestToken)
             {

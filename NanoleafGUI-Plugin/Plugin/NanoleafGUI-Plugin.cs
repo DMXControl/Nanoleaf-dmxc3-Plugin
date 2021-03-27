@@ -39,6 +39,7 @@ namespace NanoleafGUI_Plugin
         internal const string NANOLEAF_CONTROLLERS = "NANOLEAF.CONTROLLERS";
 
         internal const string NANOLEAF_REQUEST_TOKEN = "NANOLEAF.REQUEST_TOKEN";
+        internal const string NANOLEAF_ADD_CONTROLLER = "NANOLEAF.ADD_CONTROLLER";
 
         private SettingsBranch settingsBranch;
         public NanoleafGUI_Plugin(): base("295c2ab8-4d2b-4741-a1bd-16de8f4da957", "NanoleafGUI-Plugin")

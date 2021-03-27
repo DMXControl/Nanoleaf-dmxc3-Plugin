@@ -51,7 +51,7 @@ namespace NanoleafGUI_Plugin
             this.lbAuthToken = new LumosControls.Controls.LumosLabel();
             this.lbFW = new LumosControls.Controls.LumosLabel();
             this.lbSN = new LumosControls.Controls.LumosLabel();
-            this.lbControlerIP = new LumosControls.Controls.LumosLabel();
+            this.lbControllerIP = new LumosControls.Controls.LumosLabel();
             this.btRequestToken = new LumosControls.Controls.LumosButton();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.cbShowInInputAssignment = new LumosControls.Controls.LumosCheckBox();
@@ -65,7 +65,7 @@ namespace NanoleafGUI_Plugin
             this.btClose = new LumosControls.Controls.LumosButton();
             this.panel2 = new System.Windows.Forms.Panel();
             this.lbDiscoveryState = new System.Windows.Forms.Label();
-            this.btAddControler = new LumosControls.Controls.LumosButton();
+            this.btAddController = new LumosControls.Controls.LumosButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -163,7 +163,7 @@ namespace NanoleafGUI_Plugin
             this.panel1.Controls.Add(this.lbAuthToken);
             this.panel1.Controls.Add(this.lbFW);
             this.panel1.Controls.Add(this.lbSN);
-            this.panel1.Controls.Add(this.lbControlerIP);
+            this.panel1.Controls.Add(this.lbControllerIP);
             this.panel1.Controls.Add(this.btRequestToken);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 35);
@@ -293,15 +293,15 @@ namespace NanoleafGUI_Plugin
             this.lbSN.TabIndex = 2;
             this.lbSN.Text = "SN:";
             // 
-            // lbControlerIP
+            // lbControllerIP
             // 
-            this.lbControlerIP.AutoSize = true;
-            this.lbControlerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.lbControlerIP.Location = new System.Drawing.Point(6, 7);
-            this.lbControlerIP.Name = "lbControlerIP";
-            this.lbControlerIP.Size = new System.Drawing.Size(20, 16);
-            this.lbControlerIP.TabIndex = 1;
-            this.lbControlerIP.Text = "IP:";
+            this.lbControllerIP.AutoSize = true;
+            this.lbControllerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.lbControllerIP.Location = new System.Drawing.Point(6, 7);
+            this.lbControllerIP.Name = "lbControllerIP";
+            this.lbControllerIP.Size = new System.Drawing.Size(20, 16);
+            this.lbControllerIP.TabIndex = 1;
+            this.lbControllerIP.Text = "IP:";
             // 
             // btRequestToken
             // 
@@ -457,7 +457,7 @@ namespace NanoleafGUI_Plugin
             // panel2
             // 
             this.panel2.Controls.Add(this.lbDiscoveryState);
-            this.panel2.Controls.Add(this.btAddControler);
+            this.panel2.Controls.Add(this.btAddController);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(3, 3);
             this.panel2.Name = "panel2";
@@ -474,16 +474,17 @@ namespace NanoleafGUI_Plugin
             this.lbDiscoveryState.TabIndex = 18;
             this.lbDiscoveryState.Text = "Discovery {0}";
             // 
-            // btAddControler
+            // btAddController
             // 
-            this.btAddControler.Dock = System.Windows.Forms.DockStyle.Left;
-            this.btAddControler.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.btAddControler.Location = new System.Drawing.Point(0, 0);
-            this.btAddControler.Name = "btAddControler";
-            this.btAddControler.Size = new System.Drawing.Size(153, 44);
-            this.btAddControler.TabIndex = 17;
-            this.btAddControler.Text = "Add Controler";
-            this.btAddControler.UseVisualStyleBackColor = true;
+            this.btAddController.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btAddController.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.btAddController.Location = new System.Drawing.Point(0, 0);
+            this.btAddController.Name = "btAddController";
+            this.btAddController.Size = new System.Drawing.Size(153, 44);
+            this.btAddController.TabIndex = 17;
+            this.btAddController.Text = "Add Controller";
+            this.btAddController.UseVisualStyleBackColor = true;
+            this.btAddController.Click += new System.EventHandler(this.btAddController_Click);
             // 
             // NanoleafSettingsForm
             // 
@@ -534,7 +535,7 @@ namespace NanoleafGUI_Plugin
         private LumosLabel lbAuthToken;
         private LumosLabel lbFW;
         private LumosLabel lbSN;
-        private LumosLabel lbControlerIP;
+        private LumosLabel lbControllerIP;
         private LumosButton btRequestToken;
         private LumosTextBox_v2 tbFW;
         private LumosTextBox_v2 tbName;
@@ -549,6 +550,6 @@ namespace NanoleafGUI_Plugin
         private LumosButton btClose;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label lbDiscoveryState;
-        private LumosButton btAddControler;
+        private LumosButton btAddController;
     }
 }

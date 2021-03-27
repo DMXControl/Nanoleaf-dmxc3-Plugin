@@ -35,6 +35,7 @@ namespace Nanoleaf_Plugin
         internal const string NANOLEAF_CONTROLLERS = "NANOLEAF.CONTROLLERS";
 
         internal const string NANOLEAF_REQUEST_TOKEN = "NANOLEAF.REQUEST_TOKEN";
+        internal const string NANOLEAF_ADD_CONTROLLER = "NANOLEAF.ADD_CONTROLLER";
 
         private bool isDisposed = false;
         private bool isStarted = false;
@@ -76,16 +77,15 @@ namespace Nanoleaf_Plugin
         {
             Log.Info($"Device Discovered: {e.DiscoveredDevice.ToString()}");
             string ip = e.DiscoveredDevice.IP;
-            string name = e.DiscoveredDevice.Name;
             string json= JsonConvert.SerializeObject(Communication.DiscoveredDevices);
             sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
-            addControllerAsync(ip, name);
+            addControllerAsync(ip);
         }
-        private async Task addControllerAsync(string ip, string name, string authToken = null, bool setSettings=true)
+        private async Task addControllerAsync(string ip, string authToken = null, bool setSettings=true)
         {
             try
             {
-                Controller controller = new Controller(ip, name, authToken);
+                Controller controller = new Controller(ip, authToken);
                 if (clients.Any(c => c.IP.Equals(controller.IP)))
                 {
                     controller.SelfDestruction();
@@ -220,9 +220,9 @@ namespace Nanoleaf_Plugin
                 if (AutoConnect)
                 {
                     string jsonControllers = sm.getSetting<string>(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS);
-                    JArray objControlers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
-                    if (objControlers != null)
-                        foreach (var c in objControlers)
+                    JArray objControllers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
+                    if (objControllers != null)
+                        foreach (var c in objControllers)
                         {
                             var controller = new Controller(c);
                             clients.Add(controller);
@@ -247,6 +247,7 @@ namespace Nanoleaf_Plugin
 
         private void SettingChanged(object sender, SettingChangedEventArgs args)
         {
+            string ip = null;
             switch (args.SettingsPath)
             {
                 case NANOLEAF_SHOW_IN_INPUTASSIGNMENT:
@@ -277,11 +278,25 @@ namespace Nanoleaf_Plugin
                     break;
 
                 case NANOLEAF_REQUEST_TOKEN:
-                    string ip= (string)args.NewValue;
+                    ip = (string)args.NewValue;
                     if (string.IsNullOrWhiteSpace(ip))
                         break;
                     var controller = clients.FirstOrDefault(c => ip.Equals(c.IP));
                     controller.RequestToken();
+                    break;
+
+                case NANOLEAF_ADD_CONTROLLER:
+                    string jsonController = (string)args.NewValue;
+                    if (string.IsNullOrWhiteSpace(jsonController))
+                        break;
+                    JObject objController = JsonConvert.DeserializeObject(jsonController) as JObject;
+                    ip = (string)objController["IP"];
+                    string token = (string)objController["Token"];
+
+                    if (objController["token"] != null)
+                        addControllerAsync(ip, token);
+                    else
+                        addControllerAsync(ip);
                     break;
             }
         }
@@ -314,6 +329,7 @@ namespace Nanoleaf_Plugin
                 sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Controllers"), NANOLEAF_CONTROLLERS, String.Empty), string.Empty);
 
                 sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Request Token"), NANOLEAF_REQUEST_TOKEN, String.Empty), string.Empty);
+                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Add Controller"), NANOLEAF_ADD_CONTROLLER, String.Empty), string.Empty);
             }
         }
     }
