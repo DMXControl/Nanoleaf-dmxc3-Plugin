@@ -191,11 +191,7 @@ namespace Nanoleaf_Plugin
         {
             sm = SettingsManager.getInstance();
             SettingsManager s = SettingsManager.getInstance();
-            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTHTOKEN, 0), String.Empty), string.Empty);
->>>>>>>>> Temporary merge branch 2
-            SettingsManager s = SettingsManager.getInstance();
-            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTHTOKEN, 0), String.Empty), string.Empty);
->>>>>>>>> Temporary merge branch 2
+            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTOCONNECT, 0), String.Empty), string.Empty);
         }
 
         protected override void shutdownPlugin()
