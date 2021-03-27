@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Drawing;
 using System.Linq;
 using static Nanoleaf_Plugin.API.PanelPosition;
@@ -69,7 +70,18 @@ namespace Nanoleaf_Plugin.API
         public event EventHandler YChanged;
         public event EventHandler OrientationChanged;
 
-        public Panel(string ip, PanelPosition pp,ushort sideLength)
+        public Panel(JToken json)
+        {
+            IP = (string)json[nameof(IP)];
+            ID = (int)json[nameof(ID)];
+            X = (int)json[nameof(X)];
+            Y = (int)json[nameof(Y)];
+            Orientation = (int)json[nameof(Orientation)];
+            Shape = (EShapeType)(int)json[nameof(Shape)];
+            SideLength = (double)json[nameof(SideLength)];
+            Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
+        }
+        public Panel(string ip, PanelPosition pp, ushort sideLength)
         {
             IP = ip;
             ID = pp.PanelId;
@@ -77,12 +89,15 @@ namespace Nanoleaf_Plugin.API
             Y = pp.Y;
             Orientation = pp.Orientation;
             Shape = pp.ShapeType;
-            SideLength = sideLength;
+            SideLength = sideLength == 0 ? 100 : sideLength; //Temporarily while the Bug isnt fixed
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
         }
 
         private void Communication_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
+            if (!IP.Equals(e.IP))
+                return;
+
             var pp = e.LayoutEvent.Layout.PanelPositions.FirstOrDefault(p => p.PanelId.Equals(ID));
             if (pp != null)
             {

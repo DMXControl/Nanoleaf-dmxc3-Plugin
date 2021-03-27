@@ -14,15 +14,17 @@ namespace Nanoleaf_Plugin
         {
             Communication.StaticOnStateEvent += ExternalControlEndpoint_StaticOnStateEvent;
             SerialNumber = serialNumber;
-            var controler = NanoleafPlugin.getClient(SerialNumber);
-            min = controler.BrightnessMin;
-            max = controler.BrightnessMax;
-            CurrentValue = controler.Brightness;
+            var controller = NanoleafPlugin.getClient(SerialNumber);
+            min = controller.BrightnessMin;
+            max = controller.BrightnessMax;
+            CurrentValue = controller.Brightness;
         }
 
-        private void ExternalControlEndpoint_StaticOnStateEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnStateEvent(object sender, StateEventArgs e)
         {
-            StateEvents events = sender as StateEvents;
+            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+                return;
+            StateEvents events = e.StateEvents;
             if (events == null)
                 return;
 

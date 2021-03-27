@@ -1,5 +1,4 @@
-﻿using LumosLIB.Tools;
-using Nanoleaf_Plugin.API;
+﻿using Nanoleaf_Plugin.API;
 using System;
 using System.Linq;
 using System.Threading;
@@ -11,17 +10,19 @@ namespace NanoleafTest
     {
         const string ip = "192.168.1.123";
         const string port = "16021";
-        static Controller controler = null;
+        const string AUTH_TOKEN = "cGwULwjNBdgdxpjnFbMlUkJIcCPUXjpH";
+        static Controller controller = null;
         static void Main(string[] args)
         {
             Console.WriteLine("Press Enter 5 times for Shutdown");
+            Communication.StartEventListener();
             Communication.DeviceDiscovered += Communication_DeviceDiscovered;
             Communication.StaticOnTouchEvent += Communication_StaticOnTouchEvent;
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
             Communication.StaticOnGestureEvent += Communication_StaticOnGestureEvent;
             Communication.StaticOnEffectEvent += Communication_StaticOnEffectEvent;
             Communication.StaticOnStateEvent += Communication_StaticOnStateEvent;
-            controler = new Controller(ip);
+            controller = new Controller(ip, AUTH_TOKEN);
             bool alive = true;
             Thread taskStream = new Thread(() =>
             {
@@ -29,7 +30,8 @@ namespace NanoleafTest
                 while (alive)
                 {
                     var rgbw = new Panel.RGBW(val, 0, 0, 0);
-                    controler.Panels.ForEach(p => p.StreamingColor = rgbw);
+                    foreach (var p in controller.Panels.ToArray())
+                        p.StreamingColor = rgbw;
                     Task.Delay(1).Wait();
                     val++;
                 }
@@ -38,7 +40,7 @@ namespace NanoleafTest
 
 
             Console.ReadLine();
-            controler.SelfDestruction();
+            controller.SelfDestruction(true);
             Console.WriteLine("User Deleted");
             alive = false;
 

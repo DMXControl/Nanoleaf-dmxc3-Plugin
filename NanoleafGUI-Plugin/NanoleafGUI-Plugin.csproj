@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NanoleafGUI_Plugin</RootNamespace>
+    <AssemblyName>NanoleafGUI-Plugin</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\dep\LumosControls.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\..\Lumos\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosGUI">
+      <HintPath>..\dep\LumosGUI.exe</HintPath>
+    </Reference>
+    <Reference Include="LumosGUI">
+      <HintPath>..\..\Lumos\Lumos\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
+    </Reference>
+    <Reference Include="LumosLIB">
+      <HintPath>..\dep\LumosLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosLIB">
+      <HintPath>..\..\Lumos\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Lumos\Lumos\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Plugin\AddControlerForm.resx">
+      <DependentUpon>AddControlerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Plugin\NanoleafSettingsForm.resx">
+      <DependentUpon>NanoleafSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Plugin\AddControlerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Plugin\AddControlerForm.Designer.cs">
+      <DependentUpon>AddControlerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Plugin\NanoleafGUI-Plugin.cs" />
+    <Compile Include="Plugin\NanoleafSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Plugin\NanoleafSettingsForm.Designer.cs">
+      <DependentUpon>NanoleafSettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Plugin\Tools.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Resources\128\Nanoleaf.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\16\Nanoleaf.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\64\Nanoleaf1.png" />
+    <None Include="Resources\128\Nanoleaf1.png" />
+    <None Include="Resources\16\Nanoleaf1.png" />
+    <Content Include="Nanoleaf.ico" />
+    <Content Include="Resources\32\Nanoleaf.png" />
+    <None Include="Resources\32\Nanoleaf1.png" />
+    <Content Include="Resources\64\Nanoleaf.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName).dll" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /C /F /R /Y /I
+xcopy "$(TargetDir)$(TargetName).pdb" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /C /F /R /Y /I</PostBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using LumosLIB.Kernel.Log;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
@@ -9,16 +10,23 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nanoleaf_Plugin.API.TouchEvent;
+using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin.API
 {
     public static class Communication
     {
+        private static ILumosLog log = NanoleafPlugin.Log;
         static CancellationTokenSource tokenSource = new CancellationTokenSource();
         static CancellationToken token = tokenSource.Token;
+
+        public static IPAddress[] IPs = new IPAddress[0];
+
         private static async Task<IRestResponse> put(string address, string contentString)
         {
             RestClient restClient = new RestClient(address);
@@ -42,59 +50,88 @@ namespace Nanoleaf_Plugin.API
         private static event EventHandler<DiscoveredEventArgs> deviceDiscovered;
         public static event EventHandler<DiscoveredEventArgs> DeviceDiscovered
         {
-            add
-            {
-                deviceDiscovered += value;
-                startDiscoveryTask();
-            }
+            add { deviceDiscovered += value; }
             remove { deviceDiscovered -= value; }
         }
         private static Task discoverTask = null;
-        private static void startDiscoveryTask()
+        public static void StartDiscoveryTask()
         {
             if (discoveryThreadRunning || discoverTask != null)
                 return;
+
             discoveryThreadRunning = true;
             discoverTask = new Task(() =>
             {
                 IPAddress SSDP_IP = new IPAddress(new byte[] { 239, 255, 255, 250 });
-                IPAddress IP = new IPAddress(new byte[] { 192, 168, 1, 13 });
                 int SSDP_PORT = 1900;
                 var client = new UdpClient();
-
-                client.Client.Bind(new IPEndPoint(IPAddress.Any, SSDP_PORT));
-                client.JoinMulticastGroup(SSDP_IP, IP);
-                client.MulticastLoopback = true;
-                while (discoveryThreadRunning)
+                try
                 {
-                    var result = client.ReceiveAsync().GetAwaiter().GetResult();
-                    string message = Encoding.Default.GetString(result.Buffer);
-                    if (message.Contains("nl-devicename"))
+                    client.Client.Bind(new IPEndPoint(IPAddress.Any, SSDP_PORT));
+                    foreach (IPAddress IP in IPs)
+                        client.JoinMulticastGroup(SSDP_IP, IP);
+                    client.MulticastLoopback = true;
+                    while (discoveryThreadRunning)
                     {
-                        if (discoveredDevices.Any(d => d.IP.Equals(result.RemoteEndPoint.Address.ToString())))
-                            return;
-                        var array = message.Replace("\r\n", "|").Split('|');
-                        EDeviceType type = EDeviceType.UNKNOWN;
-                        switch (array.FirstOrDefault(s => s.StartsWith("NT"))?.Replace("NT: ", ""))
+                        log.Debug("Discover started");
+                        NanoleafPlugin.DiscoverState = "Started";
+                        var result = client.ReceiveAsync().GetAwaiter().GetResult();
+                        NanoleafPlugin.DiscoverState = "Result Received";
+                        string message = Encoding.Default.GetString(result.Buffer);
+                        if (message.Contains("nl-devicename"))
                         {
-                            case "Nanoleaf_aurora:light":
-                                type = EDeviceType.LightPanles;
-                                break;
-                            case "nanoleaf:nl29":
-                                type = EDeviceType.Canvas;
-                                break;
+                            if (discoveredDevices.Any(d => d.IP.Equals(result.RemoteEndPoint.Address.ToString())))
+                                return;
+                            var array = message.Replace("\r\n", "|").Split('|');
+                            EDeviceType type = EDeviceType.UNKNOWN;
+                            switch (array.FirstOrDefault(s => s.StartsWith("NT"))?.Replace("NT: ", ""))
+                            {
+                                case "Nanoleaf_aurora:light":
+                                    type = EDeviceType.LightPanles;
+                                    break;
+                                case "nanoleaf:nl29":
+                                    type = EDeviceType.Canvas;
+                                    break;
+                            }
+                            string name = array.FirstOrDefault(s => s.StartsWith("nl-devicename"))?.Replace("nl-devicename: ", "");
+                            var device = new DiscoveredDevice(result.RemoteEndPoint.Address.ToString(), name, type); ;
+                            discoveredDevices.Add(device);
+                            deviceDiscovered?.Invoke(null, new DiscoveredEventArgs(device));
                         }
-                        string name = array.FirstOrDefault(s => s.StartsWith("nl-devicename"))?.Replace("nl-devicename: ", "");
-                        var device = new DiscoveredDevice(result.RemoteEndPoint.Address.ToString(), name, type); ;
-                        discoveredDevices.Add(device);
-                        deviceDiscovered?.Invoke(null, new DiscoveredEventArgs(device));
+                        log.Debug("Discover passed");
+                        NanoleafPlugin.DiscoverState = "Passed";
                     }
-
                 }
+                catch (Exception e)
+                {
+                    log.Warn("The Socket is already in use." + Environment.NewLine+
+                        "there Are a feaw things to fix this issue." + Environment.NewLine +
+                        "Open the CMD.exe and perform the command \"netstat -a -n -o\"" + Environment.NewLine +
+                        "Now you see all open Ports" + Environment.NewLine +
+                        "find TCP [the IP address]:[port number] .... #[target_PID]# (ditto for UDP)" + Environment.NewLine +
+                        "Open TaskManager and Klick on Processes" + Environment.NewLine +
+                        "Enable \"PID\" column by going to: View > Select Columns > Check the box for PID" + Environment.NewLine +
+                        "Find the PID of interest and \"END PROCESS\"" + Environment.NewLine + Environment.NewLine +
+                        "Common Programs are Spotify or the SSPDSRF-Service"
+                        , e);
+                }
+                log.Debug("Discover stopped");
+                NanoleafPlugin.DiscoverState = "Stopped";
                 client.Close();
                 discoveryThreadRunning = false;
             }, token);
             discoverTask.Start();
+        }
+        public static void StopDiscoveryTask()
+        {
+            log.Debug("Request stop for DiscoverTask");
+            discoveryThreadRunning = false;
+            while (!(discoverTask?.IsCompleted ?? true))
+            {
+                log.Debug("Await DiscoverTask stopped");
+                Task.Delay(100).GetAwaiter();
+            }
+            discoverTask = null;
         }
         #endregion
 
@@ -136,7 +173,10 @@ namespace Nanoleaf_Plugin.API
             {
                 var response = hc.GetAsync(address).GetAwaiter().GetResult();
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    result = JsonConvert.DeserializeObject<AllPanelInfo>(await response.Content.ReadAsStringAsync());
+                {
+                    string res = await response.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<AllPanelInfo>(res);
+                }
             }
             return result;
         }
@@ -403,7 +443,10 @@ namespace Nanoleaf_Plugin.API
             {
                 var response = hc.GetAsync(address).GetAwaiter().GetResult();
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    result = JsonConvert.DeserializeObject<Layout>(await response.Content.ReadAsStringAsync());
+                {
+                    string res = await response.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<Layout>(res);
+                }
             }
             return result;
         }
@@ -495,33 +538,105 @@ namespace Nanoleaf_Plugin.API
 
         private const int _touchEventsPort = 60223;
         private static Thread eventListenerThread = null;
-        public static async Task RegisterEventListener(string ip, string port, string auth_token)
+        private static Dictionary<string, TouchEvent> lastTouchEvent = new Dictionary<string, TouchEvent>();
+        private static Thread eventCleanLoop = null;
+        private static bool eventListenerThreadRunning = false;
+        private static bool eventCleanLoopThreadRunning = false;
+
+        public static void StartEventListener()
         {
+            if (eventCleanLoop == null)
+            {
+                eventCleanLoop = new Thread(() => {
+                    eventCleanLoopThreadRunning = true;
+                    while (eventCleanLoopThreadRunning)
+                    {
+                        Dictionary<string, TouchEvent> outgoingEvents = new Dictionary<string, TouchEvent>();
+                        Thread.Sleep(100);
+                        lock (lastTouchEvent)
+                        {
+                            foreach (var last in lastTouchEvent)
+                            {
+                                var hovering = last.Value.TouchPanelEvents.Where(p => p.Type == ETouch.Hover).ToArray();
+                                if (hovering.Length > 0)
+                                {
+                                    long timestamp = DateTime.Now.Ticks;
+                                    if (timestamp - last.Value.Timestamp >= 5000000)
+                                    {
+                                        outgoingEvents[last.Key] = new TouchEvent(last.Value.TouchedPanelsNumber - hovering.Length, hovering.Select(h => new TouchPanelEvent(h.PanelId, ETouch.Up)).ToArray());
+                                    }
+                                }
+                            }
+                        }
+                        foreach (var _event in outgoingEvents)
+                        {
+                            lastTouchEvent[_event.Key] = _event.Value;
+                            StaticOnTouchEvent?.Invoke(null, new TouchEventArgs(_event.Key, _event.Value));
+                        }
+                    }
+                });
+                eventCleanLoop.Name = "Nanoleaf Event-Cleaner";
+                eventCleanLoop.Priority = ThreadPriority.Lowest;
+                eventCleanLoop.IsBackground = true;
+                eventCleanLoop.Start();
+            }
+
             if (eventListenerThread != null)
                 return;
 
-            string address = $"http://{ip}:{port}/api/v1/{auth_token}/events?id=1,2,3,4";
             eventListenerThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(async (o) =>
             {
+                eventListenerThreadRunning = true;
                 try
                 {
-                    ReaderAsync(ip, _touchEventsPort);
-                    bool restart = false;
-                    do
+                    using (var client = new UdpClient(_touchEventsPort))
                     {
-                        restart = await startEventListener(ip, address);
+                        do
+                        {
+                            try
+                            {
+
+                                UdpReceiveResult result = await client.ReceiveAsync();
+                                string ip = result.RemoteEndPoint.Address.ToString();
+                                byte[] datagram = result.Buffer;
+                                var touchEvent = TouchEvent.FromArray(datagram);
+                                lock (lastTouchEvent)
+                                {
+                                    lastTouchEvent[ip] = touchEvent;
+                                    StaticOnTouchEvent?.Invoke(null, new TouchEventArgs(ip, touchEvent));
+                                }
+                            }
+                            catch (Exception e)
+                            {
+
+                            }
+                        } while (eventListenerThreadRunning);
                     }
-                    while (restart);
                 }
                 catch (Exception e)
                 {
 
                 }
             }));
+            eventListenerThread.Name = $"Nanoleaf EventListener";
+            eventListenerThread.Priority = ThreadPriority.BelowNormal;
+            eventListenerThread.IsBackground = true;
             eventListenerThread.Start();
         }
-        private static async Task<bool> startEventListener(string ip, string address)
+        public static void StopEventListener()
         {
+            eventCleanLoopThreadRunning = eventListenerThreadRunning = false;
+
+            eventListenerThread?.Abort();
+            eventListenerThread = null;
+
+            eventCleanLoop?.Abort();
+            eventCleanLoop = null;
+        }
+       
+        public static async Task<bool> StartEventListener(string ip, string port, string auth_token)
+        {
+            string address = $"http://{ip}:{port}/api/v1/{auth_token}/events?id=1,2,3,4";
             WebClient wc = new WebClient();
             wc.Headers.Add("TouchEventsPort", _touchEventsPort.ToString());
             wc.OpenReadAsync(new Uri(address));
@@ -543,11 +658,15 @@ namespace Nanoleaf_Plugin.API
                             {
                                 args.Result.Read(buffer, 0, buffer.Length);
                             }
-                            catch (Exception e) when( e is IOException|| e is WebException)//Timeout! Restart Listener without Logging
+                            catch (Exception e) when (e is IOException || e is WebException)//Timeout! Restart Listener without Logging
                             {
                                 restart = true;
                                 isListening = false;
                                 return;
+                            }
+                            catch (Exception e) when (e is TargetInvocationException)
+                            {
+                                NanoleafPlugin.Log.Info("Connection Refused");
                             }
                             catch (Exception e)
                             {
@@ -566,27 +685,7 @@ namespace Nanoleaf_Plugin.API
                 await Task.Delay(10);
             return restart;
         }
-        private static async Task ReaderAsync(string ip, int port)
-        {
-            using (var client = new UdpClient(port))
-            {
 
-                bool completed = false;
-                do
-                {
-                    try
-                    {
-                        UdpReceiveResult result = await client.ReceiveAsync();
-                        byte[] datagram = result.Buffer;
-                        StaticOnTouchEvent?.Invoke(null, new TouchEventArgs(ip, TouchEvent.FromArray(datagram)));
-                    }
-                    catch (Exception e)
-                    {
-
-                    }
-                } while (!completed);
-            }
-        }
         private static async Task FireEvent(string ip, string eventData)
         {
             eventData = eventData.Remove(0, 4);
@@ -633,6 +732,9 @@ namespace Nanoleaf_Plugin.API
 
             eventListenerThread?.Abort();
             eventListenerThread = null;
+
+            eventCleanLoop?.Abort();
+            eventCleanLoop = null;
 
             tokenSource = new CancellationTokenSource();
             token = tokenSource.Token;

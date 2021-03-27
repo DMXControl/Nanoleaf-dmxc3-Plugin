@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 
 namespace Nanoleaf_Plugin.API
 {
@@ -15,16 +17,22 @@ namespace Nanoleaf_Plugin.API
     }
     public class TouchEvent
     {
+        public readonly long Timestamp;
         public int TouchedPanelsNumber { get; private set; }
-        private List<TouchPanelEvent> touchPanelEvents = new List<TouchPanelEvent>();
+        private List<TouchPanelEvent> _touchPanelEvents = new List<TouchPanelEvent>();
         public ReadOnlyCollection<TouchPanelEvent> TouchPanelEvents
         {
             get
             {
-                return touchPanelEvents.AsReadOnly();
+                return _touchPanelEvents.AsReadOnly();
             }
         }
 
+        internal TouchEvent(int touchedPanelsNumber, params TouchPanelEvent[] touchPanelEvents)
+        {
+            this.TouchedPanelsNumber = touchedPanelsNumber;
+            this._touchPanelEvents.AddRange(touchPanelEvents);
+        }
         private TouchEvent(byte[] array)
         {
             this.TouchedPanelsNumber = System.BitConverter.ToInt16(new[] { array[1], array[0] }, 0);
@@ -37,9 +45,12 @@ namespace Nanoleaf_Plugin.API
                 {
                     buffer = new byte[5];
                     ms.Read(buffer, 0, buffer.Length);
-                    this.touchPanelEvents.Add(TouchPanelEvent.FromArray(buffer));
+                    this._touchPanelEvents.Add(TouchPanelEvent.FromArray(buffer));
                 }
             }
+            this.TouchedPanelsNumber-=this._touchPanelEvents.Count(p => p.Type == ETouch.Up || p.Type == ETouch.UNKNOWN);
+
+            this.Timestamp = DateTime.Now.Ticks;
         }
         public static TouchEvent FromArray(byte[] array)
         {
@@ -51,6 +62,14 @@ namespace Nanoleaf_Plugin.API
             public int? PanelIdSwipedFrom { get; private set; } = null;
             public ETouch Type { get; private set; }
             public double Strength { get; private set; }
+            
+            internal TouchPanelEvent(int panelId, ETouch type, double strength=0, int? panelIdSwipedFrom=null)
+            {
+                this.PanelId = panelId;
+                this.Type = type;
+                this.Strength = strength;
+                this.PanelIdSwipedFrom = panelIdSwipedFrom;
+            }
             private TouchPanelEvent(byte[] array)
             {
                 this.PanelId = System.BitConverter.ToUInt16(new[] { array[1], array[0] }, 0);
@@ -79,6 +98,11 @@ namespace Nanoleaf_Plugin.API
             {
                 return (b & (1 << bitNumber - 1)) != 0;
             }
+        }
+
+        public static explicit operator TouchEvent(System.EventArgs v)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

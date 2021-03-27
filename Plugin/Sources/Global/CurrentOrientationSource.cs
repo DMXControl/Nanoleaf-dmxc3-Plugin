@@ -14,15 +14,18 @@ namespace Nanoleaf_Plugin
         {
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
-            var controler = NanoleafPlugin.getClient(SerialNumber);
-            min = controler.GlobalOrientationMin;
-            max = controler.GlobalOrientationMax;
-            CurrentValue = controler.GlobalOrientation;
+            var controller = NanoleafPlugin.getClient(SerialNumber);
+            min = controller.GlobalOrientationMin;
+            max = controller.GlobalOrientationMax;
+            CurrentValue = controller.GlobalOrientation;
         }
 
-        private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
-            LayoutEvent events = sender as LayoutEvent;
+            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+                return;
+
+            LayoutEvent events = e.LayoutEvent;
             if (events == null)
                 return;
 

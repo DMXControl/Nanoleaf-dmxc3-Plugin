@@ -17,12 +17,14 @@ namespace Nanoleaf_Plugin
             max = ushort.MaxValue;
         }
 
-        private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)
         {
-            TouchEvent events = sender as TouchEvent;
-            if (events == null)
+            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
                 return;
 
+            TouchEvent events = e.TouchEvent;
+            if (events == null)
+                return;
             CurrentValue = events.TouchedPanelsNumber;
         }
 

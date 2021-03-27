@@ -33,11 +33,18 @@ pipeline {
 				//  Fetch all needed artifacts
 				script{
 					try {
-						println('Copy artefacts from Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
+						println('Copy Kernel artefacts from Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
 						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'Lumos/bin/Release/*', target: 'dep');
 					} catch (hudson.AbortException e) {
 						println('Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
 						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'Lumos/bin/Release/*', target: 'dep');
+					}
+					try {
+						println('Copy GUI artefacts from Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
+						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
+					} catch (hudson.AbortException e) {
+						println('Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
+						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
 					}
 				}
 			}
@@ -55,20 +62,27 @@ pipeline {
 				
 				//  Then add the current build number in the version number and build the branch
 				changeAsmVer versionPattern: '$BUILD_NUMBER', regexPattern: '(Assembly(.*)Version\\("(.+)\\.(.+)\\.(.+)\\.(.+)")', replacementPattern: 'Assembly\$2Version("\$3.\$4.\$5.%s"'
-				bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Debug /t:Clean;Rebuild /p:Platform=\"Any CPU\" "
+				bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Debug /t:Clean;Rebuild /p:Platform=\"Any CPU\";PreBuildEvent=;PostBuildEvent= "
 			}
 		}
 		stage('Build Release Configuration'){
 			steps {
 				script {
 					//  Build the release configuration of the project
-					bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Release /t:Clean;Rebuild /p:Platform=\"Any CPU\" "
+					bat "\"${MSBuild}\" Nanoleaf-Plugin.sln /p:Configuration=Release /t:Clean;Rebuild /p:Platform=\"Any CPU\";PreBuildEvent=;PostBuildEvent= "
 				}
 			}
 		}
 		stage('Archive Artifacts'){
 			steps {
-				archiveArtifacts artifacts: 'Releases/Nanoleaf-Plugin.dll, Releases/Nanoleaf-Plugin.pdb, Releases/dependencies/RestSharp.dll, Releases/dependencies/Newtonsoft.Json.dll'
+				bat "xcopy \"$WORKSPACE\\bin\\release\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\bin\\release\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\bin\\release\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\bin\\release\\RestSharp.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\release\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\release\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				
+				archiveArtifacts artifacts: 'Releases/Nanoleaf-Plugin.dll, Releases/Nanoleaf-Plugin.pdb, Releases/NanoleafGUI-Plugin.dll, Releases/NanoleafGUI-Plugin.pdb, Releases/dependencies/RestSharp.dll, Releases/dependencies/Newtonsoft.Json.dll'
 			}			
 		}
 	}

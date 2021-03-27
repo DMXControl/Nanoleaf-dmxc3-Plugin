@@ -35,9 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LumosLIB, Version=3.2.0.1, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dep\LumosLIB.dll</HintPath>
+    <Reference Include="LumosLIB">
+      <HintPath>C:\Program Files (x86)\DMXControl3\Kernel\LumosLIB.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
