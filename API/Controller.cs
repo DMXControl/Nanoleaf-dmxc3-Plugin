@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nanoleaf_Plugin.API.Panel;
 
 namespace Nanoleaf_Plugin.API
 {
@@ -141,6 +142,7 @@ namespace Nanoleaf_Plugin.API
         }
         public string ColorMode { get; private set; }
         private List<Panel> panels = new List<Panel>();
+        private List<Panel> changedPanels = new List<Panel>();
         public ReadOnlyCollection<Panel> Panels
         {
             get { return panels.AsReadOnly(); }
@@ -364,17 +366,61 @@ namespace Nanoleaf_Plugin.API
             PanelLayoutChanged?.Invoke(null, EventArgs.Empty);
         }
 
-        private async void streamController()
+        private void streamController()
         {
             while (!isDisposed && Auth_token == null)
-                await Task.Delay(1000);
+                Thread.Sleep(1000);
 
+            long lastTimestamp = 0;
+            long nowTimestamp = 0;
             while (!isDisposed)
             {
-                await Task.Delay(1000 / NanoleafPlugin.RefreshRate.Limit(10, 60));
-                if (externalControlInfo != null)
-                    Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(panels));
+                nowTimestamp = DateTime.Now.Ticks;
+                double milliSinceLast = ((double)(nowTimestamp - lastTimestamp)) / TimeSpan.TicksPerMillisecond;
+                double frameDuration = (1000 / NanoleafPlugin.RefreshRate.Limit(10, 60));
+                if (milliSinceLast < frameDuration)
+                {
+                    if (milliSinceLast > frameDuration*2)
+                        log.Warn($"Streaming-Thread last send {milliSinceLast}ms");
+                    Thread.SpinWait(10);
+                }
+                else
+                {
+                    if (externalControlInfo != null)
+                    {
+                        Panel[] _panels = new Panel[0];
+                        lock (changedPanels)
+                        {
+                            if (!changedPanels.Empty())
+                            {
+                                _panels = changedPanels.ToArray();
+                                changedPanels.Clear();
+                            }
+                        }
+                        if (_panels.Length > 0)
+                            Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(_panels));
+                    }
+
+                    lastTimestamp = DateTime.Now.Ticks;
+                }
             }
+        }
+
+
+        public bool SetPanelColor(int panelID, RGBW color)
+        {
+            var panel = this.panels.FirstOrDefault(p => p.ID.Equals(panelID));
+            if (panel != null)
+            {
+                panel.StreamingColor = color;
+                lock (changedPanels)
+                {
+                    if (!changedPanels.Contains(panel))
+                        changedPanels.Add(panel);
+                }
+                return true;
+            }
+            return false;
         }
 
         public void SelfDestruction(bool deleteUser=false)
