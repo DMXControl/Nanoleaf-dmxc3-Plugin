@@ -17,9 +17,12 @@ namespace Nanoleaf_Plugin
             CurrentValue = NanoleafPlugin.getClient(SerialNumber).SelectedEffect;
         }
 
-        private void ExternalControlEndpoint_StaticOnEffectEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnEffectEvent(object sender, EffectEventArgs e)
         {
-            EffectEvents events = sender as EffectEvents;
+            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+                return;
+
+            EffectEvents events = e.EffectEvents;
             if (events == null)
                 return;
 

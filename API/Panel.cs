@@ -95,6 +95,9 @@ namespace Nanoleaf_Plugin.API
 
         private void Communication_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
+            if (!IP.Equals(e.IP))
+                return;
+
             var pp = e.LayoutEvent.Layout.PanelPositions.FirstOrDefault(p => p.PanelId.Equals(ID));
             if (pp != null)
             {

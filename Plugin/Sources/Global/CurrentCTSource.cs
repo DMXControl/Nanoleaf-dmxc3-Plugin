@@ -20,9 +20,11 @@ namespace Nanoleaf_Plugin
             CurrentValue = controller.ColorTemprature;
         }
 
-        private void ExternalControlEndpoint_StaticOnStateEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnStateEvent(object sender, StateEventArgs e)
         {
-            StateEvents events = sender as StateEvents;
+            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+                return;
+            StateEvents events = e.StateEvents;
             if (events == null)
                 return;
 

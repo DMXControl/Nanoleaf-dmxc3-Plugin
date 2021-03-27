@@ -46,9 +46,12 @@ namespace Nanoleaf_Plugin
             return new CanvasGestureSource(serialNumber, EGesture.SwipeRight);
         }
 
-        private void ExternalControlEndpoint_StaticOnGestureEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnGestureEvent(object sender, GestureEventArgs e)
         {
-            GestureEvents events = sender as GestureEvents;
+            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+                return;
+
+            GestureEvents events = e.GestureEvents;
             if (events == null)
                 return;
             var val = events.Events.FirstOrDefault(g => g.Gesture == GestureType);

@@ -42,9 +42,9 @@ namespace Nanoleaf_Plugin
             return new CanvasTouchSource(serialNumber, panelID, ETouch.Swipe);
         }
 
-        private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)
         {
-            TouchEvent events = sender as TouchEvent;
+            TouchEvent events = e.TouchEvent;
             if (events == null)
                 return;
 

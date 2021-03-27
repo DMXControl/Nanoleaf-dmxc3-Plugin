@@ -80,5 +80,10 @@ namespace Nanoleaf_Plugin.API
                 return (b & (1 << bitNumber - 1)) != 0;
             }
         }
+
+        public static explicit operator TouchEvent(System.EventArgs v)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

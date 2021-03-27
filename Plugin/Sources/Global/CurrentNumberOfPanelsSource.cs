@@ -20,9 +20,12 @@ namespace Nanoleaf_Plugin
             CurrentValue = numberOfPanels;
         }
 
-        private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
-            LayoutEvent events = sender as LayoutEvent;
+            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+                return;
+
+            LayoutEvent events = e.LayoutEvent;
             if (events == null)
                 return;
 

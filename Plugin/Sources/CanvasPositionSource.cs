@@ -50,9 +50,9 @@ namespace Nanoleaf_Plugin
             return new CanvasPositionSource(serialNumber, panelID, EPositionPart.Orientation);
         }
 
-        private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, EventArgs e)
+        private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
-            LayoutEvent events = sender as LayoutEvent;
+            LayoutEvent events = e.LayoutEvent;
             if (events == null)
                 return;
 

@@ -10,6 +10,7 @@ namespace NanoleafTest
     {
         const string ip = "192.168.1.123";
         const string port = "16021";
+        const string AUTH_TOKEN = "cGwULwjNBdgdxpjnFbMlUkJIcCPUXjpH";
         static Controller controller = null;
         static void Main(string[] args)
         {
@@ -20,7 +21,7 @@ namespace NanoleafTest
             Communication.StaticOnGestureEvent += Communication_StaticOnGestureEvent;
             Communication.StaticOnEffectEvent += Communication_StaticOnEffectEvent;
             Communication.StaticOnStateEvent += Communication_StaticOnStateEvent;
-            controller = new Controller(ip, null);
+            controller = new Controller(ip, AUTH_TOKEN);
             bool alive = true;
             Thread taskStream = new Thread(() =>
             {
@@ -38,7 +39,7 @@ namespace NanoleafTest
 
 
             Console.ReadLine();
-            controller.SelfDestruction(true);
+            //controller.SelfDestruction(true);
             Console.WriteLine("User Deleted");
             alive = false;
 

@@ -14,7 +14,7 @@ namespace NanoleafTests
     {
         const string IP = "192.168.1.123";
         const string PORT = "16021";
-        const string AUTH_TOKEN = "0vCE2ldRESYBiUaPmvJJPUTJzgkeMqev";
+        const string AUTH_TOKEN = "cGwULwjNBdgdxpjnFbMlUkJIcCPUXjpH";
         [TestMethod]
         public async Task TestAddUserAndDeleteUserAsync()
         {
