@@ -190,8 +190,6 @@ namespace Nanoleaf_Plugin
         protected override void initializePlugin()
         {
             sm = SettingsManager.getInstance();
-            SettingsManager s = SettingsManager.getInstance();
-            s.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), string.Format(NANOLEAF_AUTOCONNECT, 0), String.Empty), string.Empty);
         }
 
         protected override void shutdownPlugin()
