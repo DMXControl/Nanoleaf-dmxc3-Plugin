@@ -634,13 +634,12 @@ namespace Nanoleaf_Plugin.API
             eventCleanLoop = null;
         }
        
-        public static async Task<bool> StartEventListener(string ip, string port, string auth_token)
+        public static async Task StartEventListener(string ip, string port, string auth_token)
         {
             string address = $"http://{ip}:{port}/api/v1/{auth_token}/events?id=1,2,3,4";
             WebClient wc = new WebClient();
             wc.Headers.Add("TouchEventsPort", _touchEventsPort.ToString());
             wc.OpenReadAsync(new Uri(address));
-            bool restart = false;
             bool isListening = true;
             wc.OpenReadCompleted += (sender, args) =>
             {
@@ -660,9 +659,7 @@ namespace Nanoleaf_Plugin.API
                             }
                             catch (Exception e) when (e is IOException || e is WebException)//Timeout! Restart Listener without Logging
                             {
-                                restart = true;
-                                isListening = false;
-                                return;
+                                NanoleafPlugin.Log.Debug("Restarting EventListener because of:" + Environment.NewLine, e);
                             }
                             catch (Exception e) when (e is TargetInvocationException)
                             {
@@ -683,7 +680,6 @@ namespace Nanoleaf_Plugin.API
             };
             while (isListening)
                 await Task.Delay(10);
-            return restart;
         }
 
         private static async Task FireEvent(string ip, string eventData)
