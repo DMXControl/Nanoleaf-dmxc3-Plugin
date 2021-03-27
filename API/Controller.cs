@@ -275,7 +275,7 @@ namespace Nanoleaf_Plugin.API
             UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
             externalControlInfo = await Communication.SetExternalControlStreaming(IP, PORT, Auth_token, DeviceType);
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
-            Communication.RegisterEventListener(IP, PORT, Auth_token);
+            Communication.StartEventListener(IP, PORT, Auth_token);
             while (!isDisposed)
             {
                 try

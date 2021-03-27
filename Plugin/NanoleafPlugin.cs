@@ -195,6 +195,7 @@ namespace Nanoleaf_Plugin
         protected override void shutdownPlugin()
         {
             Communication.StopDiscoveryTask();
+            Communication.StopEventListener();
             clients.ForEach(c => c.SelfDestruction());
             clients.Clear();
             Log.Info("Shutdown");
@@ -237,6 +238,8 @@ namespace Nanoleaf_Plugin
                     Communication.StartDiscoveryTask();
                 if (ShowInInputAssignment)
                     bindInputAssignment().GetAwaiter();
+
+                Communication.StartEventListener();
             }
             catch (Exception e)
             {

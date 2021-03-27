@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nanoleaf_Plugin.API.TouchEvent;
 using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin.API
@@ -57,6 +58,7 @@ namespace Nanoleaf_Plugin.API
         {
             if (discoveryThreadRunning || discoverTask != null)
                 return;
+
             discoveryThreadRunning = true;
             discoverTask = new Task(() =>
             {
@@ -536,33 +538,105 @@ namespace Nanoleaf_Plugin.API
 
         private const int _touchEventsPort = 60223;
         private static Thread eventListenerThread = null;
-        public static async Task RegisterEventListener(string ip, string port, string auth_token)
+        private static Dictionary<string, TouchEvent> lastTouchEvent = new Dictionary<string, TouchEvent>();
+        private static Thread eventCleanLoop = null;
+        private static bool eventListenerThreadRunning = false;
+        private static bool eventCleanLoopThreadRunning = false;
+
+        public static void StartEventListener()
         {
+            if (eventCleanLoop == null)
+            {
+                eventCleanLoop = new Thread(() => {
+                    eventCleanLoopThreadRunning = true;
+                    while (eventCleanLoopThreadRunning)
+                    {
+                        Dictionary<string, TouchEvent> outgoingEvents = new Dictionary<string, TouchEvent>();
+                        Thread.Sleep(100);
+                        lock (lastTouchEvent)
+                        {
+                            foreach (var last in lastTouchEvent)
+                            {
+                                var hovering = last.Value.TouchPanelEvents.Where(p => p.Type == ETouch.Hover).ToArray();
+                                if (hovering.Length > 0)
+                                {
+                                    long timestamp = DateTime.Now.Ticks;
+                                    if (timestamp - last.Value.Timestamp >= 5000000)
+                                    {
+                                        outgoingEvents[last.Key] = new TouchEvent(last.Value.TouchedPanelsNumber - hovering.Length, hovering.Select(h => new TouchPanelEvent(h.PanelId, ETouch.Up)).ToArray());
+                                    }
+                                }
+                            }
+                        }
+                        foreach (var _event in outgoingEvents)
+                        {
+                            lastTouchEvent[_event.Key] = _event.Value;
+                            StaticOnTouchEvent?.Invoke(null, new TouchEventArgs(_event.Key, _event.Value));
+                        }
+                    }
+                });
+                eventCleanLoop.Name = "Nanoleaf Event-Cleaner";
+                eventCleanLoop.Priority = ThreadPriority.Lowest;
+                eventCleanLoop.IsBackground = true;
+                eventCleanLoop.Start();
+            }
+
             if (eventListenerThread != null)
                 return;
 
-            string address = $"http://{ip}:{port}/api/v1/{auth_token}/events?id=1,2,3,4";
             eventListenerThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(async (o) =>
             {
+                eventListenerThreadRunning = true;
                 try
                 {
-                    ReaderAsync(ip, _touchEventsPort);
-                    bool restart = false;
-                    do
+                    using (var client = new UdpClient(_touchEventsPort))
                     {
-                        restart = await startEventListener(ip, address);
+                        do
+                        {
+                            try
+                            {
+
+                                UdpReceiveResult result = await client.ReceiveAsync();
+                                string ip = result.RemoteEndPoint.Address.ToString();
+                                byte[] datagram = result.Buffer;
+                                var touchEvent = TouchEvent.FromArray(datagram);
+                                lock (lastTouchEvent)
+                                {
+                                    lastTouchEvent[ip] = touchEvent;
+                                    StaticOnTouchEvent?.Invoke(null, new TouchEventArgs(ip, touchEvent));
+                                }
+                            }
+                            catch (Exception e)
+                            {
+
+                            }
+                        } while (eventListenerThreadRunning);
                     }
-                    while (restart);
                 }
                 catch (Exception e)
                 {
 
                 }
             }));
+            eventListenerThread.Name = $"Nanoleaf EventListener";
+            eventListenerThread.Priority = ThreadPriority.BelowNormal;
+            eventListenerThread.IsBackground = true;
             eventListenerThread.Start();
         }
-        private static async Task<bool> startEventListener(string ip, string address)
+        public static void StopEventListener()
         {
+            eventCleanLoopThreadRunning = eventListenerThreadRunning = false;
+
+            eventListenerThread?.Abort();
+            eventListenerThread = null;
+
+            eventCleanLoop?.Abort();
+            eventCleanLoop = null;
+        }
+       
+        public static async Task<bool> StartEventListener(string ip, string port, string auth_token)
+        {
+            string address = $"http://{ip}:{port}/api/v1/{auth_token}/events?id=1,2,3,4";
             WebClient wc = new WebClient();
             wc.Headers.Add("TouchEventsPort", _touchEventsPort.ToString());
             wc.OpenReadAsync(new Uri(address));
@@ -611,27 +685,7 @@ namespace Nanoleaf_Plugin.API
                 await Task.Delay(10);
             return restart;
         }
-        private static async Task ReaderAsync(string ip, int port)
-        {
-            using (var client = new UdpClient(port))
-            {
 
-                bool completed = false;
-                do
-                {
-                    try
-                    {
-                        UdpReceiveResult result = await client.ReceiveAsync();
-                        byte[] datagram = result.Buffer;
-                        StaticOnTouchEvent?.Invoke(null, new TouchEventArgs(ip, TouchEvent.FromArray(datagram)));
-                    }
-                    catch (Exception e)
-                    {
-
-                    }
-                } while (!completed);
-            }
-        }
         private static async Task FireEvent(string ip, string eventData)
         {
             eventData = eventData.Remove(0, 4);
@@ -678,6 +732,9 @@ namespace Nanoleaf_Plugin.API
 
             eventListenerThread?.Abort();
             eventListenerThread = null;
+
+            eventCleanLoop?.Abort();
+            eventCleanLoop = null;
 
             tokenSource = new CancellationTokenSource();
             token = tokenSource.Token;

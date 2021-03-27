@@ -15,6 +15,7 @@ namespace NanoleafTest
         static void Main(string[] args)
         {
             Console.WriteLine("Press Enter 5 times for Shutdown");
+            Communication.StartEventListener();
             Communication.DeviceDiscovered += Communication_DeviceDiscovered;
             Communication.StaticOnTouchEvent += Communication_StaticOnTouchEvent;
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
@@ -39,7 +40,7 @@ namespace NanoleafTest
 
 
             Console.ReadLine();
-            //controller.SelfDestruction(true);
+            controller.SelfDestruction(true);
             Console.WriteLine("User Deleted");
             alive = false;
 

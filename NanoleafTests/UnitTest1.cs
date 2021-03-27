@@ -195,7 +195,7 @@ namespace NanoleafTests
         {
             StateEventArgs args = null;
             Communication.StaticOnStateEvent += (o, e) => { args = e; };
-            await Communication.RegisterEventListener(IP, PORT, AUTH_TOKEN);
+            Communication.StartEventListener(IP, PORT, AUTH_TOKEN);
             await Task.Delay(5000);
             Assert.IsTrue(await Communication.SetStateOnOff(IP, PORT, AUTH_TOKEN, false));
             Assert.AreEqual(false, await Communication.GetStateOnOff(IP, PORT, AUTH_TOKEN));
@@ -223,7 +223,7 @@ namespace NanoleafTests
             LayoutEventArgs args = null;
             await Task.Delay(500);
             Communication.StaticOnLayoutEvent += (o, e) => { args = e; };
-            await Communication.RegisterEventListener(IP, PORT, AUTH_TOKEN);
+            Communication.StartEventListener(IP, PORT, AUTH_TOKEN);
             var backupGlobalOrientation = await Communication.GetPanelLayoutGlobalOrientation(IP, PORT, AUTH_TOKEN);
 
             Assert.IsTrue(await Communication.SetPanelLayoutGlobalOrientation(IP, PORT, AUTH_TOKEN, 120));
