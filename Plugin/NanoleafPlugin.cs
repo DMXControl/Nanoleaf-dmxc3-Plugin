@@ -2,9 +2,11 @@
 using Nanoleaf_Plugin.API;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using org.dmxc.lumos.Kernel.HAL.Handler;
 using org.dmxc.lumos.Kernel.Input.v2;
 using org.dmxc.lumos.Kernel.Net;
 using org.dmxc.lumos.Kernel.Plugin;
+using org.dmxc.lumos.Kernel.Project;
 using org.dmxc.lumos.Kernel.Settings;
 using System;
 using System.Collections.Generic;
@@ -61,15 +63,27 @@ namespace Nanoleaf_Plugin
                 return null;
             return clients?.FirstOrDefault(c => serialNumber.Equals(c.SerialNumber));
         }
+
+        internal static IReadOnlyCollection<Panel> getAllPanels()
+        {
+            List<Panel> panels = new List<Panel>();
+            foreach (var controller in clients)
+                panels.AddRange(controller.Panels);
+            return panels.AsReadOnly();
+        }
+        internal static Controller getControllerFromPanel(int id)
+        {
+            return clients?.FirstOrDefault(c => c.Panels.Any(p => p.ID.Equals(id)));
+        }
         public NanoleafPlugin() : base("{25a96576-fda7-4297-bc59-6c4f2256ab6e}", "Nanoleaf-Plugin")
         {
-#if DEBUG
-            while (!Debugger.IsAttached)
-            {
-                Thread.Sleep(100);
-            }
-            Log.Info("Debugger attaced!");
-#endif
+//#if DEBUG
+//            while (!Debugger.IsAttached)
+//            {
+//                Thread.Sleep(100);
+//            }
+//            Log.Info("Debugger attaced!");
+//#endif
             Communication.DeviceDiscovered += Communication_DeviceDiscovered;
         }
 
@@ -190,6 +204,8 @@ namespace Nanoleaf_Plugin
         protected override void initializePlugin()
         {
             sm = SettingsManager.getInstance();
+            HandlerFactory.getInstance().registerHandlerNode<NanoleafHandlerNode>("nanoleaf");
+            DeviceManager.getInstance().registerDeviceFactory(new NanoleafDeviceFactory());
         }
 
         protected override void shutdownPlugin()

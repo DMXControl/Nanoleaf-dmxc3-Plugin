@@ -87,6 +87,9 @@
     <Compile Include="API\JSON-Objects\States.cs" />
     <Compile Include="API\JSON-Objects\StateInfo.cs" />
     <Compile Include="API\Controller.cs" />
+    <Compile Include="Plugin\Device\NanoleafDevice.cs" />
+    <Compile Include="Plugin\Device\NanoleafDeviceFactory.cs" />
+    <Compile Include="Plugin\Device\NanoleafHandlerNode.cs" />
     <Compile Include="Plugin\Sources\Global\CanvasGestureSource.cs" />
     <Compile Include="Plugin\Sources\CanvasTouchSource.cs" />
     <Compile Include="Plugin\Sources\CanvasPositionSource.cs" />
