@@ -174,6 +174,9 @@ namespace Nanoleaf_Plugin.API
                 case "NL29":
                     DeviceType = EDeviceType.Canvas;
                     break;
+                case "NL42":
+                    DeviceType = EDeviceType.Shapes;
+                    break;
             }
 
             NumberOfPanels = (uint)json[nameof(NumberOfPanels)];
@@ -311,6 +314,9 @@ namespace Nanoleaf_Plugin.API
                     break;
                 case "NL29":
                     DeviceType = EDeviceType.Canvas;
+                    break;
+                case "NL42":
+                    DeviceType = EDeviceType.Shapes;
                     break;
             }
 

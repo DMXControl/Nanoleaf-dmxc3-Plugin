@@ -4,6 +4,7 @@
     {
         LightPanles = 0,
         Canvas = 1,
+        Shapes = 2,
         UNKNOWN = 99
     }
 }
