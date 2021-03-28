@@ -214,6 +214,8 @@ namespace Nanoleaf_Plugin
 
         protected override void DisposeHook()
         {
+            NanoleafPlugin.getControllers().ForEach(c => c.NewPanelAdded -= NewPanelAdded);
+            NanoleafPlugin.ControllerAdded -= NanoleafPlugin_ControllerAdded;
             base.DisposeHook();
         }
 
