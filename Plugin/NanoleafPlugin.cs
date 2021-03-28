@@ -7,10 +7,14 @@ using org.dmxc.lumos.Kernel.Input.v2;
 using org.dmxc.lumos.Kernel.Net;
 using org.dmxc.lumos.Kernel.Plugin;
 using org.dmxc.lumos.Kernel.Project;
+using org.dmxc.lumos.Kernel.Resource;
 using org.dmxc.lumos.Kernel.Settings;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -19,7 +23,7 @@ using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin
 {
-    public class NanoleafPlugin : KernelPluginBase
+    public class NanoleafPlugin : KernelPluginBase, IResourceProvider
     {
         internal static readonly ILumosLog Log = LumosLogger.getInstance(typeof(NanoleafPlugin));
         private static List<Controller> clients = new List<Controller>();
@@ -64,10 +68,10 @@ namespace Nanoleaf_Plugin
             return clients?.FirstOrDefault(c => serialNumber.Equals(c.SerialNumber));
         }
 
-        internal static IReadOnlyCollection<Panel> getAllPanels()
+        internal static IReadOnlyCollection<Panel> getAllPanels(EDeviceType deviceType)
         {
             List<Panel> panels = new List<Panel>();
-            foreach (var controller in clients)
+            foreach (var controller in clients.Where(c => c.DeviceType == deviceType))
                 panels.AddRange(controller.Panels);
             return panels.AsReadOnly();
         }
@@ -204,6 +208,7 @@ namespace Nanoleaf_Plugin
         protected override void initializePlugin()
         {
             sm = SettingsManager.getInstance();
+            ResourceManager.getInstance().registerResourceProvider(this);
             HandlerFactory.getInstance().registerHandlerNode<NanoleafHandlerNode>("nanoleaf");
             DeviceManager.getInstance().registerDeviceFactory(new NanoleafDeviceFactory());
         }
@@ -350,6 +355,64 @@ namespace Nanoleaf_Plugin
                 sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Request Token"), NANOLEAF_REQUEST_TOKEN, String.Empty), string.Empty);
                 sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Add Controller"), NANOLEAF_ADD_CONTROLLER, String.Empty), string.Empty);
             }
+        }
+
+
+        public bool existsResource(EResourceDataType type, string name)
+        {
+            if (type == EResourceDataType.DEVICE_IMAGE)
+            {
+                if (name.Equals(EDeviceType.Canvas.ToString())
+                    || name.Equals(EDeviceType.LightPanles.ToString())
+                    || name.Equals(EDeviceType.Shapes.ToString()))
+                    return true;
+            }
+            return false;
+        }
+        public ReadOnlyCollection<LumosDataMetadata> allResources(EResourceDataType type)
+        {
+            if (type == EResourceDataType.DEVICE_IMAGE)
+            {
+                List<LumosDataMetadata> ret = new List<LumosDataMetadata>()
+                {
+                    new LumosDataMetadata(EDeviceType.Canvas.ToString()),
+                    new LumosDataMetadata(EDeviceType.LightPanles.ToString()),
+                    new LumosDataMetadata(EDeviceType.Shapes.ToString()),
+                };
+                return ret.AsReadOnly();
+            }
+
+            return null;
+        }
+        public byte[] loadResource(EResourceDataType type, string name)
+        {
+            if (type == EResourceDataType.DEVICE_IMAGE)
+            {
+                if (name.Equals(EDeviceType.Canvas.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafCanvas);
+
+                else if (name.Equals(EDeviceType.LightPanles.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafLightPanles);
+
+                else if (name.Equals(EDeviceType.Shapes.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafShapes);
+            }
+
+            return null;
+        }
+        private byte[] toByteArray(Bitmap i)
+        {
+            using (var m = new System.IO.MemoryStream())
+            {
+                if (i != null)
+                {
+
+                    i.Save(m, ImageFormat.Png);
+                    byte[] b = m.ToArray();
+                    return b;
+                }
+            }
+            return null;
         }
     }
 }

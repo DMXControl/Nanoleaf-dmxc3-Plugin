@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosLIB.Kernel.Devices;
 using LumosLIB.Tools;
+using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.Devices.Factory;
 using org.dmxc.lumos.Kernel.Exceptions;
@@ -20,10 +21,13 @@ namespace Nanoleaf_Plugin
         {
             get
             {
-                return new List<DeviceMetadata>()
+                var list = new List<DeviceMetadata>();
+                foreach (var modell in Enum.GetValues(typeof(EDeviceType)))
                 {
-                    new DeviceMetadata("Nanoleaf", "Nanoleaf", LumosConstants.PROGRAM_COMPANY, NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME, "")
-                }.AsReadOnly();
+                    if (!modell.Equals(EDeviceType.UNKNOWN))
+                        list.Add(new DeviceMetadata("Nanoleaf", modell.ToString(), LumosConstants.PROGRAM_COMPANY, NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME, ""));
+                }
+                return list.AsReadOnly();
             }
         }
         public NanoleafDeviceFactory() : base(NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME)
@@ -37,11 +41,12 @@ namespace Nanoleaf_Plugin
             {
                 NanoleafDevice d = new NanoleafDevice(Guid.NewGuid().ToString());
                 d.Name = "new Nanoleaf Panel";
+                d.DeviceType = (EDeviceType)Enum.Parse(typeof(EDeviceType), m.Model);
 
                 //Find the next ID if possible
                 var lamps = org.dmxc.lumos.Kernel.Project.DeviceManager.getInstance()
-                    .Devices.OfType<NanoleafDevice>().Select(c => c.PanelID);
-                var firstid = NanoleafPlugin.getAllPanels().Select(p=>p.ID)
+                    .Devices.OfType<NanoleafDevice>().Where(c=>c.DeviceType.Equals(d.DeviceType)).Select(c => c.PanelID);
+                var firstid = NanoleafPlugin.getAllPanels(d.DeviceType).Select(p=>p.ID)
                     .Except(lamps)
                     .FirstOrDefault();
 
@@ -64,7 +69,7 @@ namespace Nanoleaf_Plugin
 
             string id = item.getValue<string>("ID");
             if (String.IsNullOrEmpty(id))
-                throw ItemLoadException.UnableToLoad("ID", "ColorBridgeDevice");
+                throw ItemLoadException.UnableToLoad("ID", "NanoleafDevice");
 
             IDevice d = new NanoleafDevice(id);
 

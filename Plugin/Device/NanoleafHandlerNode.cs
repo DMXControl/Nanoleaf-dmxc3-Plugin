@@ -76,7 +76,8 @@ namespace Nanoleaf_Plugin
                     base.ParentBeam = value;
                     ((NanoleafDevice)value.ParentDevice).PanelIDChanged += new EventHandler(NanoleafHandlerNode_PanelIDChanged);
                     var id = ((NanoleafDevice)value.ParentDevice).PanelID;
-                    this._instance = NanoleafPlugin.getAllPanels().FirstOrDefault(p=>p.ID.Equals(id));
+                    var deviceType = ((NanoleafDevice)value.ParentDevice).DeviceType;
+                    this._instance = NanoleafPlugin.getAllPanels(deviceType).FirstOrDefault(p=>p.ID.Equals(id));
                 }
                 else
                     throw new ArgumentException("This Type of Handler needs to be assigned to a " + NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME);
@@ -167,8 +168,8 @@ namespace Nanoleaf_Plugin
         private void NanoleafHandlerNode_PanelIDChanged(object sender, EventArgs e)
         {
             var d = sender as NanoleafDevice;
-            if (d != null) 
-                this._instance = NanoleafPlugin.getAllPanels().First(p => p.ID.Equals(d.PanelID));
+            if (d != null)
+                this._instance = NanoleafPlugin.getAllPanels(d.DeviceType).First(p => p.ID.Equals(d.PanelID));
         }
 
         protected override void initializeHandler()
