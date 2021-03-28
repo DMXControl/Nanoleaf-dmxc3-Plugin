@@ -364,10 +364,11 @@ namespace Nanoleaf_Plugin.API
                 if (!panels.Any(p => p.ID.Equals(id)))
                 {
                     var pp = layout.PanelPositions.Single(p => p.PanelId.Equals(id));
-                    panels.Add(new Panel(IP, pp, (ushort)layout.SideLength));
+                    panels.Add(new Panel(IP, pp));
                     NewPanelAdded?.Invoke(null, EventArgs.Empty);
                 }
             }
+            panels.RemoveAll(p => !ids.Any(id => id.Equals(p.ID)));
 
             PanelLayoutChanged?.Invoke(null, EventArgs.Empty);
         }

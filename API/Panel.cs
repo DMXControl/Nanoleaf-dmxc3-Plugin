@@ -81,7 +81,7 @@ namespace Nanoleaf_Plugin.API
             SideLength = (double)json[nameof(SideLength)];
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
         }
-        public Panel(string ip, PanelPosition pp, ushort sideLength)
+        public Panel(string ip, PanelPosition pp)
         {
             IP = ip;
             ID = pp.PanelId;
@@ -89,7 +89,7 @@ namespace Nanoleaf_Plugin.API
             Y = pp.Y;
             Orientation = pp.Orientation;
             Shape = pp.ShapeType;
-            SideLength = sideLength == 0 ? 100 : sideLength; //Temporarily while the Bug isnt fixed
+            SideLength = pp.SideLength;
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
         }
 

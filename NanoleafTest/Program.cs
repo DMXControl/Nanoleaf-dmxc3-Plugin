@@ -78,7 +78,7 @@ namespace NanoleafTest
         {
             Console.WriteLine();
             Console.WriteLine();
-            Console.WriteLine($"{e.IP}: Layout Changed: GlobalOrientation: {e.LayoutEvent.GlobalOrientation} NumberOfPanels: {e.LayoutEvent.Layout.NumberOfPanels} SideLength: {e.LayoutEvent.Layout.SideLength}");
+            Console.WriteLine($"{e.IP}: Layout Changed: GlobalOrientation: {e.LayoutEvent.GlobalOrientation} NumberOfPanels: {e.LayoutEvent.Layout.NumberOfPanels}");
             foreach (var pp in e.LayoutEvent.Layout.PanelPositions)
                 Console.WriteLine(pp.ToString());
         }

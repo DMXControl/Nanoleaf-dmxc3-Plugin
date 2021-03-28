@@ -118,6 +118,7 @@ namespace Nanoleaf_Plugin
                 }
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
+                controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 clients.Add(controller);
                 ControllerAdded?.Invoke(this, EventArgs.Empty);
                 if (setSettings)
@@ -134,6 +135,12 @@ namespace Nanoleaf_Plugin
             {
                 Log.Warn(string.Empty, e);
             }
+        }
+
+        private void Controller_PanelLayoutChanged(object sender, EventArgs e)
+        {
+            string json = JsonConvert.SerializeObject(clients);
+            sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
         }
 
         private void Controller_UpdatedInfos(object sender, EventArgs e)
@@ -257,6 +264,7 @@ namespace Nanoleaf_Plugin
                             clients.Add(controller);
                             controller.AuthTokenReceived += Controller_AuthTokenReceived;
                             controller.UpdatedInfos += Controller_UpdatedInfos;
+                            controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
                             ControllerAdded?.Invoke(this, EventArgs.Empty);
                         }
                 }
@@ -339,6 +347,7 @@ namespace Nanoleaf_Plugin
             {
                 c.AuthTokenReceived -= Controller_AuthTokenReceived;
                 c.UpdatedInfos -= Controller_UpdatedInfos;
+                c.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 c.SelfDestruction();
             });
             debindInputAssignment();

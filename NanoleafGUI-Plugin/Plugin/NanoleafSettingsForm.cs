@@ -89,6 +89,7 @@ namespace NanoleafGUI_Plugin
                 this.tbNS.Text = (string)controller["SerialNumber"];
                 this.tbHW.Text = (string)controller["HardwareVersion"];
                 this.tbFW.Text = (string)controller["FirmwareVersion"];
+                this.pictureBox1.BackgroundImage = this.renderLayout(controller);
             }
         }
 
@@ -176,6 +177,71 @@ namespace NanoleafGUI_Plugin
                 obj.Add("Token", addControllerForm.Token);
                 sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_ADD_CONTROLLER, JsonConvert.SerializeObject(obj));
             }
+        }
+
+        private Bitmap renderLayout(JToken controller)
+        {
+            var panels = controller["Panels"];
+            int maxX = panels.Select(p => (int)p["X"]).Max();
+            int maxY = panels.Select(p => (int)p["Y"]).Max();
+            int minX = panels.Select(p => (int)p["X"]).Min();
+            int minY = panels.Select(p => (int)p["Y"]).Min();
+            int maxSize = panels.Select(p => (int)p["SideLength"]).Max();
+
+            int penSize = 2;
+            int width = maxX - minX;
+            int height = maxY - minY;
+            width += maxSize+ penSize;
+            height += maxSize+ penSize;
+            Bitmap bmp = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                Pen pen = new Pen(this.ForeColor, penSize);
+                Brush brush = new SolidBrush(this.ForeColor);
+                Font font = this.Font;
+                StringFormat stringFormat = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                int i = 0;
+                foreach (var panel in panels)
+                {
+                    i++;
+
+                    int id = (int)panel["ID"];
+                    int x = (int)panel["X"];
+                    int y = (int)panel["Y"];
+                    y = maxY - y;
+                    x += penSize / 2;
+                    y += penSize / 2;
+                    int size = (int)panel["SideLength"];
+                    int orientation = (int)panel["Orientation"];
+
+                    string str = $"ID: {id}" + Environment.NewLine + $"Index: {i}" + Environment.NewLine + $"{orientation}°";
+
+                    var shape = (int)panel["Shape"];
+                    switch (shape)
+                    {
+                        //Square
+                        case 2:
+                        case 3:
+                        case 4:
+                            var rect = new RectangleF(x, y, size, size);
+                            g.DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
+                            g.DrawString(str, font, brush, rect, stringFormat);
+                            if (shape ==3 || shape == 4)
+                            {
+                                int xOffset = size / 2;
+                                int buttonSize = size / 16;
+                                int buttonOffset = size / 12;
+                                for (int j = 0; j < 6; j++)
+                                {
+                                    g.FillRectangle(brush, rect.X + xOffset, rect.Bottom- (buttonSize+ penSize), buttonSize, buttonSize);
+                                    xOffset += buttonOffset;
+                                }
+                            }
+                            break;
+                    }
+                }                
+            }
+            return bmp;
         }
     }
 }
