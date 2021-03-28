@@ -71,7 +71,7 @@ namespace Nanoleaf_Plugin
         internal static IReadOnlyCollection<Panel> getAllPanels(EDeviceType deviceType)
         {
             List<Panel> panels = new List<Panel>();
-            foreach (var controller in clients.Where(c => c.DeviceType == deviceType))
+            foreach (var controller in clients.Where(c => c.DeviceType == deviceType|| deviceType== EDeviceType.UNKNOWN))
                 panels.AddRange(controller.Panels);
             return panels.AsReadOnly();
         }
