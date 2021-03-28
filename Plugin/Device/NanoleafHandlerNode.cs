@@ -15,6 +15,8 @@ namespace Nanoleaf_Plugin
 {
     sealed class NanoleafHandlerNode : AbstractHandlerNode
     {
+        private int panelId = 0;
+        private EDeviceType deviceType = EDeviceType.UNKNOWN;
         private Panel _instance = null;
         private System.Drawing.Color colorValue;
         public System.Drawing.Color ColorValue
@@ -75,9 +77,9 @@ namespace Nanoleaf_Plugin
                     //Setting base.ParentBeam throws an Exception when Beam has already been set.
                     base.ParentBeam = value;
                     ((NanoleafDevice)value.ParentDevice).PanelIDChanged += new EventHandler(NanoleafHandlerNode_PanelIDChanged);
-                    var id = ((NanoleafDevice)value.ParentDevice).PanelID;
-                    var deviceType = ((NanoleafDevice)value.ParentDevice).DeviceType;
-                    this._instance = NanoleafPlugin.getAllPanels(deviceType).FirstOrDefault(p=>p.ID.Equals(id));
+                    panelId = ((NanoleafDevice)value.ParentDevice).PanelID;
+                    deviceType = ((NanoleafDevice)value.ParentDevice).DeviceType;
+                    this._instance = NanoleafPlugin.getAllPanels(deviceType).FirstOrDefault(p=>p.ID.Equals(panelId));
                 }
                 else
                     throw new ArgumentException("This Type of Handler needs to be assigned to a " + NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME);
@@ -90,7 +92,17 @@ namespace Nanoleaf_Plugin
         private NanoleafHandlerNode()
             : base()
         {
+            NanoleafPlugin.ControllerAdded += NanoleafPlugin_ControllerAdded;
         }
+
+        private void NanoleafPlugin_ControllerAdded(object sender, EventArgs e)
+        {
+            if (this._instance == null && panelId != 0)
+            {
+                this.setInstance();
+            }
+        }
+
         protected override PropertyHandlerWorker getPropertyWorker(IDeviceProperty prop)
         {
             if (prop is ColorProperty)
@@ -169,7 +181,25 @@ namespace Nanoleaf_Plugin
         {
             var d = sender as NanoleafDevice;
             if (d != null)
-                this._instance = NanoleafPlugin.getAllPanels(d.DeviceType).First(p => p.ID.Equals(d.PanelID));
+            {
+                this.deviceType = d.DeviceType;
+                this.panelId = d.PanelID;
+                this.setInstance();
+            }
+        }
+        private void setInstance()
+        {
+            this._instance = NanoleafPlugin.getAllPanels(this.deviceType).FirstOrDefault(p => p.ID.Equals(this.panelId));
+
+            NanoleafPlugin.getControllers().ForEach(c => c.NewPanelAdded -= NewPanelAdded);
+            if (this._instance == null)
+                NanoleafPlugin.getControllers().ForEach(c => c.NewPanelAdded += NewPanelAdded);
+        }
+
+        private void NewPanelAdded(object sender, EventArgs e)
+        {
+            if (this._instance == null)
+                setInstance();
         }
 
         protected override void initializeHandler()

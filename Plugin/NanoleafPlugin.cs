@@ -46,6 +46,8 @@ namespace Nanoleaf_Plugin
         private bool isDisposed = false;
         private bool isStarted = false;
 
+        public static event EventHandler ControllerAdded;
+
         internal static bool ShowInInputAssignment = true, Discover = true, AutoConnect = true, AutoRequestToken = true;
         internal static int RefreshRate = 44;
 
@@ -78,6 +80,10 @@ namespace Nanoleaf_Plugin
         internal static Controller getControllerFromPanel(int id)
         {
             return clients?.FirstOrDefault(c => c.Panels.Any(p => p.ID.Equals(id)));
+        }
+        internal static IReadOnlyCollection<Controller> getControllers()
+        {
+            return clients.AsReadOnly();
         }
         public NanoleafPlugin() : base("{25a96576-fda7-4297-bc59-6c4f2256ab6e}", "Nanoleaf-Plugin")
         {
@@ -113,6 +119,7 @@ namespace Nanoleaf_Plugin
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
                 clients.Add(controller);
+                ControllerAdded?.Invoke(this, EventArgs.Empty);
                 if (setSettings)
                 {
                     string json = JsonConvert.SerializeObject(clients);
@@ -250,6 +257,7 @@ namespace Nanoleaf_Plugin
                             clients.Add(controller);
                             controller.AuthTokenReceived += Controller_AuthTokenReceived;
                             controller.UpdatedInfos += Controller_UpdatedInfos;
+                            ControllerAdded?.Invoke(this, EventArgs.Empty);
                         }
                 }
 
