@@ -390,11 +390,13 @@ namespace Nanoleaf_Plugin.API
 
             long lastTimestamp = 0;
             long nowTimestamp = 0;
+            int frameCounter = 0;
             while (!isDisposed)
             {
                 nowTimestamp = DateTime.Now.Ticks;
+                int refreshRate = NanoleafPlugin.RefreshRate.Limit(10, 60);
                 double milliSinceLast = ((double)(nowTimestamp - lastTimestamp)) / TimeSpan.TicksPerMillisecond;
-                double frameDuration = (1000 / NanoleafPlugin.RefreshRate.Limit(10, 60));
+                double frameDuration = (1000 / refreshRate);
                 if (milliSinceLast < frameDuration)
                 {
                     if (milliSinceLast > frameDuration*2)
@@ -403,7 +405,18 @@ namespace Nanoleaf_Plugin.API
                 }
                 else
                 {
-                    if (externalControlInfo != null)
+                    lastTimestamp = DateTime.Now.Ticks;
+                    if (frameCounter >= refreshRate)//KeyFrame every 1s
+                    {
+                        lock (changedPanels)
+                        {
+                            changedPanels.Clear();
+                            frameCounter = 0;
+                            if (panels.NotEmpty())
+                                Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(panels));
+                        }
+                    }
+                    else if (externalControlInfo != null)//DeltaFrame
                     {
                         Panel[] _panels = new Panel[0];
                         lock (changedPanels)
@@ -417,8 +430,7 @@ namespace Nanoleaf_Plugin.API
                         if (_panels.Length > 0)
                             Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(_panels));
                     }
-
-                    lastTimestamp = DateTime.Now.Ticks;
+                    frameCounter++;
                 }
             }
         }
