@@ -111,12 +111,8 @@
     <None Include="Resources\16\Nanoleaf.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\64\Nanoleaf1.png" />
-    <None Include="Resources\128\Nanoleaf1.png" />
-    <None Include="Resources\16\Nanoleaf1.png" />
     <Content Include="Nanoleaf.ico" />
     <Content Include="Resources\32\Nanoleaf.png" />
-    <None Include="Resources\32\Nanoleaf1.png" />
     <Content Include="Resources\64\Nanoleaf.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
