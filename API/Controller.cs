@@ -148,7 +148,8 @@ namespace Nanoleaf_Plugin.API
             get { return panels.AsReadOnly(); }
         }
 
-        public event EventHandler NewPanelAdded;
+        public event EventHandler PanelAdded;
+        public event EventHandler PanelRemoved;
         public event EventHandler PanelLayoutChanged;
         public event EventHandler AuthTokenReceived;
         public event EventHandler UpdatedInfos;
@@ -365,10 +366,19 @@ namespace Nanoleaf_Plugin.API
                 {
                     var pp = layout.PanelPositions.Single(p => p.PanelId.Equals(id));
                     panels.Add(new Panel(IP, pp));
-                    NewPanelAdded?.Invoke(null, EventArgs.Empty);
+                    PanelAdded?.Invoke(null, EventArgs.Empty);
                 }
             }
-            panels.RemoveAll(p => !ids.Any(id => id.Equals(p.ID)));
+            bool panelRemoved = false;
+            panels.RemoveAll((p) => 
+            { 
+                bool remove = !ids.Any(id => id.Equals(p.ID));
+                if (remove)
+                    panelRemoved = true;
+                return remove;
+            });
+            if(panelRemoved)
+                PanelRemoved?.Invoke(null, EventArgs.Empty);
 
             PanelLayoutChanged?.Invoke(null, EventArgs.Empty);
         }

@@ -155,7 +155,7 @@ namespace Nanoleaf_Plugin
         private void sendValueToPanel()
         {
             if (this._instance != null)
-                NanoleafPlugin.getControllerFromPanel(this._instance.ID).SetPanelColor(this._instance.ID, new Panel.RGBW((byte)(this.colorValue.R * this.DimmerValue), (byte)(this.colorValue.G * this.DimmerValue), (byte)(this.colorValue.B * this.DimmerValue)));
+                NanoleafPlugin.getControllerFromPanel(this._instance.ID)?.SetPanelColor(this._instance.ID, new Panel.RGBW((byte)(this.colorValue.R * this.DimmerValue), (byte)(this.colorValue.G * this.DimmerValue), (byte)(this.colorValue.B * this.DimmerValue)));
         }
         protected override IPropertyType getPropTypeInstance(IDeviceProperty prop)
         {
@@ -191,14 +191,24 @@ namespace Nanoleaf_Plugin
         {
             this._instance = NanoleafPlugin.getAllPanels(this.deviceType).FirstOrDefault(p => p.ID.Equals(this.panelId));
 
-            NanoleafPlugin.getControllers().ForEach(c => c.NewPanelAdded -= NewPanelAdded);
+            NanoleafPlugin.getControllers().ForEach(c => c.PanelAdded -= PanelAdded);
+            NanoleafPlugin.getControllers().ForEach(c => c.PanelRemoved -= PanelRemoved);
+
             if (this._instance == null)
-                NanoleafPlugin.getControllers().ForEach(c => c.NewPanelAdded += NewPanelAdded);
+                NanoleafPlugin.getControllers().ForEach(c => c.PanelAdded += PanelAdded);
+            else
+                NanoleafPlugin.getControllers().ForEach(c => c.PanelRemoved += PanelRemoved);
+
         }
 
-        private void NewPanelAdded(object sender, EventArgs e)
+        private void PanelAdded(object sender, EventArgs e)
         {
             if (this._instance == null)
+                setInstance();
+        }
+        private void PanelRemoved(object sender, EventArgs e)
+        {
+            if (this._instance != null)
                 setInstance();
         }
 
@@ -214,7 +224,8 @@ namespace Nanoleaf_Plugin
 
         protected override void DisposeHook()
         {
-            NanoleafPlugin.getControllers().ForEach(c => c.NewPanelAdded -= NewPanelAdded);
+            NanoleafPlugin.getControllers().ForEach(c => c.PanelAdded -= PanelAdded);
+            NanoleafPlugin.getControllers().ForEach(c => c.PanelRemoved -= PanelRemoved);
             NanoleafPlugin.ControllerAdded -= NanoleafPlugin_ControllerAdded;
             base.DisposeHook();
         }
