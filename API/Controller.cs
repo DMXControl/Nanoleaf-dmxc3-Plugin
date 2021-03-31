@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nanoleaf_Plugin.API.Panel;
 
 namespace Nanoleaf_Plugin.API
 {
@@ -141,12 +142,14 @@ namespace Nanoleaf_Plugin.API
         }
         public string ColorMode { get; private set; }
         private List<Panel> panels = new List<Panel>();
+        private List<Panel> changedPanels = new List<Panel>();
         public ReadOnlyCollection<Panel> Panels
         {
             get { return panels.AsReadOnly(); }
         }
 
-        public event EventHandler NewPanelAdded;
+        public event EventHandler PanelAdded;
+        public event EventHandler PanelRemoved;
         public event EventHandler PanelLayoutChanged;
         public event EventHandler AuthTokenReceived;
         public event EventHandler UpdatedInfos;
@@ -171,6 +174,9 @@ namespace Nanoleaf_Plugin.API
                     break;
                 case "NL29":
                     DeviceType = EDeviceType.Canvas;
+                    break;
+                case "NL42":
+                    DeviceType = EDeviceType.Shapes;
                     break;
             }
 
@@ -310,6 +316,9 @@ namespace Nanoleaf_Plugin.API
                 case "NL29":
                     DeviceType = EDeviceType.Canvas;
                     break;
+                case "NL42":
+                    DeviceType = EDeviceType.Shapes;
+                    break;
             }
 
             NumberOfPanels = allPanelInfo.PanelLayout.Layout.NumberOfPanels;
@@ -356,25 +365,91 @@ namespace Nanoleaf_Plugin.API
                 if (!panels.Any(p => p.ID.Equals(id)))
                 {
                     var pp = layout.PanelPositions.Single(p => p.PanelId.Equals(id));
-                    panels.Add(new Panel(IP, pp, (ushort)layout.SideLength));
-                    NewPanelAdded?.Invoke(null, EventArgs.Empty);
+                    panels.Add(new Panel(IP, pp));
+                    PanelAdded?.Invoke(null, EventArgs.Empty);
                 }
             }
+            bool panelRemoved = false;
+            panels.RemoveAll((p) => 
+            { 
+                bool remove = !ids.Any(id => id.Equals(p.ID));
+                if (remove)
+                    panelRemoved = true;
+                return remove;
+            });
+            if(panelRemoved)
+                PanelRemoved?.Invoke(null, EventArgs.Empty);
 
             PanelLayoutChanged?.Invoke(null, EventArgs.Empty);
         }
 
-        private async void streamController()
+        private void streamController()
         {
             while (!isDisposed && Auth_token == null)
-                await Task.Delay(1000);
+                Thread.Sleep(1000);
 
+            long lastTimestamp = 0;
+            long nowTimestamp = 0;
+            int frameCounter = 0;
             while (!isDisposed)
             {
-                await Task.Delay(1000 / NanoleafPlugin.RefreshRate.Limit(10, 60));
-                if (externalControlInfo != null)
-                    Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(panels));
+                nowTimestamp = DateTime.Now.Ticks;
+                int refreshRate = NanoleafPlugin.RefreshRate.Limit(10, 60);
+                double milliSinceLast = ((double)(nowTimestamp - lastTimestamp)) / TimeSpan.TicksPerMillisecond;
+                double frameDuration = (1000 / refreshRate);
+                if (milliSinceLast < frameDuration)
+                {
+                    if (milliSinceLast > frameDuration*2)
+                        log.Warn($"Streaming-Thread last send {milliSinceLast}ms");
+                    Thread.SpinWait(10);
+                }
+                else
+                {
+                    lastTimestamp = DateTime.Now.Ticks;
+                    if (frameCounter >= refreshRate)//KeyFrame every 1s
+                    {
+                        lock (changedPanels)
+                        {
+                            changedPanels.Clear();
+                            frameCounter = 0;
+                            if (panels.NotEmpty())
+                                Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(panels));
+                        }
+                    }
+                    else if (externalControlInfo != null)//DeltaFrame
+                    {
+                        Panel[] _panels = new Panel[0];
+                        lock (changedPanels)
+                        {
+                            if (!changedPanels.Empty())
+                            {
+                                _panels = changedPanels.ToArray();
+                                changedPanels.Clear();
+                            }
+                        }
+                        if (_panels.Length > 0)
+                            Communication.SendUDPCommand(externalControlInfo, Communication.CreateStreamingData(_panels));
+                    }
+                    frameCounter++;
+                }
             }
+        }
+
+
+        public bool SetPanelColor(int panelID, RGBW color)
+        {
+            var panel = this.panels.FirstOrDefault(p => p.ID.Equals(panelID));
+            if (panel != null)
+            {
+                panel.StreamingColor = color;
+                lock (changedPanels)
+                {
+                    if (!changedPanels.Contains(panel))
+                        changedPanels.Add(panel);
+                }
+                return true;
+            }
+            return false;
         }
 
         public void SelfDestruction(bool deleteUser=false)

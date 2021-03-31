@@ -2,13 +2,19 @@
 using Nanoleaf_Plugin.API;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using org.dmxc.lumos.Kernel.HAL.Handler;
 using org.dmxc.lumos.Kernel.Input.v2;
 using org.dmxc.lumos.Kernel.Net;
 using org.dmxc.lumos.Kernel.Plugin;
+using org.dmxc.lumos.Kernel.Project;
+using org.dmxc.lumos.Kernel.Resource;
 using org.dmxc.lumos.Kernel.Settings;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -17,7 +23,7 @@ using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin
 {
-    public class NanoleafPlugin : KernelPluginBase
+    public class NanoleafPlugin : KernelPluginBase, IResourceProvider
     {
         internal static readonly ILumosLog Log = LumosLogger.getInstance(typeof(NanoleafPlugin));
         private static List<Controller> clients = new List<Controller>();
@@ -40,6 +46,8 @@ namespace Nanoleaf_Plugin
         private bool isDisposed = false;
         private bool isStarted = false;
 
+        public static event EventHandler ControllerAdded;
+
         internal static bool ShowInInputAssignment = true, Discover = true, AutoConnect = true, AutoRequestToken = true;
         internal static int RefreshRate = 44;
 
@@ -61,15 +69,31 @@ namespace Nanoleaf_Plugin
                 return null;
             return clients?.FirstOrDefault(c => serialNumber.Equals(c.SerialNumber));
         }
+
+        internal static IReadOnlyCollection<Panel> getAllPanels(EDeviceType deviceType)
+        {
+            List<Panel> panels = new List<Panel>();
+            foreach (var controller in clients.Where(c => c.DeviceType == deviceType|| deviceType== EDeviceType.UNKNOWN))
+                panels.AddRange(controller.Panels);
+            return panels.AsReadOnly();
+        }
+        internal static Controller getControllerFromPanel(int id)
+        {
+            return clients?.FirstOrDefault(c => c.Panels.Any(p => p.ID.Equals(id)));
+        }
+        internal static IReadOnlyCollection<Controller> getControllers()
+        {
+            return clients.AsReadOnly();
+        }
         public NanoleafPlugin() : base("{25a96576-fda7-4297-bc59-6c4f2256ab6e}", "Nanoleaf-Plugin")
         {
-#if DEBUG
-            while (!Debugger.IsAttached)
-            {
-                Thread.Sleep(100);
-            }
-            Log.Info("Debugger attaced!");
-#endif
+//#if DEBUG
+//            while (!Debugger.IsAttached)
+//            {
+//                Thread.Sleep(100);
+//            }
+//            Log.Info("Debugger attaced!");
+//#endif
             Communication.DeviceDiscovered += Communication_DeviceDiscovered;
         }
 
@@ -94,7 +118,9 @@ namespace Nanoleaf_Plugin
                 }
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
+                controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 clients.Add(controller);
+                ControllerAdded?.Invoke(this, EventArgs.Empty);
                 if (setSettings)
                 {
                     string json = JsonConvert.SerializeObject(clients);
@@ -109,6 +135,12 @@ namespace Nanoleaf_Plugin
             {
                 Log.Warn(string.Empty, e);
             }
+        }
+
+        private void Controller_PanelLayoutChanged(object sender, EventArgs e)
+        {
+            string json = JsonConvert.SerializeObject(clients);
+            sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
         }
 
         private void Controller_UpdatedInfos(object sender, EventArgs e)
@@ -190,6 +222,9 @@ namespace Nanoleaf_Plugin
         protected override void initializePlugin()
         {
             sm = SettingsManager.getInstance();
+            ResourceManager.getInstance().registerResourceProvider(this);
+            HandlerFactory.getInstance().registerHandlerNode<NanoleafHandlerNode>("nanoleaf");
+            DeviceManager.getInstance().registerDeviceFactory(new NanoleafDeviceFactory());
         }
 
         protected override void shutdownPlugin()
@@ -229,6 +264,8 @@ namespace Nanoleaf_Plugin
                             clients.Add(controller);
                             controller.AuthTokenReceived += Controller_AuthTokenReceived;
                             controller.UpdatedInfos += Controller_UpdatedInfos;
+                            controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
+                            ControllerAdded?.Invoke(this, EventArgs.Empty);
                         }
                 }
 
@@ -310,6 +347,7 @@ namespace Nanoleaf_Plugin
             {
                 c.AuthTokenReceived -= Controller_AuthTokenReceived;
                 c.UpdatedInfos -= Controller_UpdatedInfos;
+                c.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 c.SelfDestruction();
             });
             debindInputAssignment();
@@ -334,6 +372,64 @@ namespace Nanoleaf_Plugin
                 sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Request Token"), NANOLEAF_REQUEST_TOKEN, String.Empty), string.Empty);
                 sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Add Controller"), NANOLEAF_ADD_CONTROLLER, String.Empty), string.Empty);
             }
+        }
+
+
+        public bool existsResource(EResourceDataType type, string name)
+        {
+            if (type == EResourceDataType.DEVICE_IMAGE)
+            {
+                if (name.Equals(EDeviceType.Canvas.ToString())
+                    || name.Equals(EDeviceType.LightPanles.ToString())
+                    || name.Equals(EDeviceType.Shapes.ToString()))
+                    return true;
+            }
+            return false;
+        }
+        public ReadOnlyCollection<LumosDataMetadata> allResources(EResourceDataType type)
+        {
+            if (type == EResourceDataType.DEVICE_IMAGE)
+            {
+                List<LumosDataMetadata> ret = new List<LumosDataMetadata>()
+                {
+                    new LumosDataMetadata(EDeviceType.Canvas.ToString()),
+                    new LumosDataMetadata(EDeviceType.LightPanles.ToString()),
+                    new LumosDataMetadata(EDeviceType.Shapes.ToString()),
+                };
+                return ret.AsReadOnly();
+            }
+
+            return null;
+        }
+        public byte[] loadResource(EResourceDataType type, string name)
+        {
+            if (type == EResourceDataType.DEVICE_IMAGE)
+            {
+                if (name.Equals(EDeviceType.Canvas.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafCanvas);
+
+                else if (name.Equals(EDeviceType.LightPanles.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafLightPanles);
+
+                else if (name.Equals(EDeviceType.Shapes.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafShapes);
+            }
+
+            return null;
+        }
+        private byte[] toByteArray(Bitmap i)
+        {
+            using (var m = new System.IO.MemoryStream())
+            {
+                if (i != null)
+                {
+
+                    i.Save(m, ImageFormat.Png);
+                    byte[] b = m.ToArray();
+                    return b;
+                }
+            }
+            return null;
         }
     }
 }

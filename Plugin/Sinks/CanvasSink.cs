@@ -75,12 +75,8 @@ namespace Nanoleaf_Plugin
             else return false;
             try
             {
-                var panel = NanoleafPlugin.getClient(SerialNumber).Panels.FirstOrDefault(p => p.ID.Equals(Panel.ID));
-                if (panel != null)
-                {
-                    panel.StreamingColor = rgbw;
-                    return true;
-                }
+                var Controler = NanoleafPlugin.getClient(SerialNumber);                
+                return Controler.SetPanelColor(Panel.ID, rgbw);
             }
             catch (Exception e)
             {

@@ -92,6 +92,9 @@ namespace Nanoleaf_Plugin.API
                                 case "nanoleaf:nl29":
                                     type = EDeviceType.Canvas;
                                     break;
+                                case "nanoleaf:nl42":
+                                    type = EDeviceType.Shapes;
+                                    break;
                             }
                             string name = array.FirstOrDefault(s => s.StartsWith("nl-devicename"))?.Replace("nl-devicename: ", "");
                             var device = new DiscoveredDevice(result.RemoteEndPoint.Address.ToString(), name, type); ;
@@ -480,6 +483,7 @@ namespace Nanoleaf_Plugin.API
                     result = JsonConvert.DeserializeObject<ExternalControlConnectionInfo>(response.Content);
                     break;
 
+                case EDeviceType.Shapes:
                 case EDeviceType.Canvas:
                     result = new ExternalControlConnectionInfo() { StreamIPAddress = ip, StreamPort = 60222, StreamProtocol = "udp" };
                     break;

@@ -54,7 +54,7 @@ namespace NanoleafTests
             foreach (int id in ids)
             {
                 var pp = info.PanelPositions.Single(p => p.PanelId.Equals(id));
-                panels.Add(new Panel(IP, pp, (ushort)info.SideLength));
+                panels.Add(new Panel(IP, pp));
             }
 
             var rgbw = new Panel.RGBW(0, 0, 0, 0);
