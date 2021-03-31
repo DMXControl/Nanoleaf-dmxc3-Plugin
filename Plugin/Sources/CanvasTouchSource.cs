@@ -1,4 +1,6 @@
 ﻿using LumosLIB.Kernel;
+using LumosProtobuf;
+using LumosProtobuf.Input;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
@@ -13,7 +15,7 @@ namespace Nanoleaf_Plugin
         public ETouch TouchType { get; private set; }
         private long beatValue = 0;
         private CanvasTouchSource(string serialNumber, int panelID, ETouch touchType) :
-            base(getID(serialNumber, panelID, touchType), getDisplayName(touchType), new ParameterCategory("Nanoleaf", getCategory(serialNumber, panelID)))
+            base(getID(serialNumber, panelID, touchType), getDisplayName(touchType), getCategory(serialNumber, panelID))
         {
             Communication.StaticOnTouchEvent += ExternalControlEndpoint_StaticOnTouchEvent;
             SerialNumber = serialNumber;
@@ -81,7 +83,7 @@ namespace Nanoleaf_Plugin
         }
         private static ParameterCategory getCategory(string serialNumber, int panelID)
         {
-            return new ParameterCategory(serialNumber, new ParameterCategory($"Canvas {panelID}"));
+            return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber, $"Canvas {panelID}");
         }
         public override EWellKnownInputType AutoGraphIOType
         {
@@ -91,9 +93,9 @@ namespace Nanoleaf_Plugin
                 {
                     case ETouch.Hold:
                     case ETouch.Hover:
-                        return EWellKnownInputType.BOOL;
+                        return EWellKnownInputType.Bool;
                     default:
-                        return EWellKnownInputType.BEAT;
+                        return EWellKnownInputType.Beat;
                 }
             }
         }

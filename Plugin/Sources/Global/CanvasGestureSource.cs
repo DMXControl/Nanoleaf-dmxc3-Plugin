@@ -1,4 +1,6 @@
 ﻿using LumosLIB.Kernel;
+using LumosProtobuf;
+using LumosProtobuf.Input;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
@@ -13,7 +15,7 @@ namespace Nanoleaf_Plugin
         public EGesture GestureType { get; private set; }
         private long beatValue = 0;
         private CanvasGestureSource(string serialNumber, EGesture gestureType) :
-            base(getID(serialNumber, gestureType), getDisplayName(gestureType), new ParameterCategory("Nanoleaf", getCategory(serialNumber)))
+            base(getID(serialNumber, gestureType), getDisplayName(gestureType), getCategory(serialNumber))
         {
             Communication.StaticOnGestureEvent += ExternalControlEndpoint_StaticOnGestureEvent;
             SerialNumber = serialNumber;
@@ -72,13 +74,13 @@ namespace Nanoleaf_Plugin
         }
         private static ParameterCategory getCategory(string serialNumber)
         {
-            return new ParameterCategory(serialNumber);
+            return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber);
         }
         public override EWellKnownInputType AutoGraphIOType
         {
             get
             {
-                return EWellKnownInputType.BEAT;
+                return EWellKnownInputType.Beat;
             }
         }
 

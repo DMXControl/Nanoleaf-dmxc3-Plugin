@@ -1,4 +1,6 @@
 ﻿using LumosLIB.Kernel;
+using LumosProtobuf;
+using LumosProtobuf.Input;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
@@ -10,7 +12,7 @@ namespace Nanoleaf_Plugin
     {
         public string SerialNumber { get; private set; }
         public CurrentNumberOfPanelsSource(string serialNumber) :
-            base(getID(serialNumber), getDisplayName(), new ParameterCategory("Nanoleaf", getCategory(serialNumber)))
+            base(getID(serialNumber), getDisplayName(), getCategory(serialNumber))
         {
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
@@ -45,11 +47,11 @@ namespace Nanoleaf_Plugin
         }
         private static ParameterCategory getCategory(string serialNumber)
         {
-            return new ParameterCategory(serialNumber);
+            return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber);
         }
         public override EWellKnownInputType AutoGraphIOType
         {
-            get { return EWellKnownInputType.NUMERIC; }
+            get { return EWellKnownInputType.Numeric; }
         }
         private object min;
         private object max;

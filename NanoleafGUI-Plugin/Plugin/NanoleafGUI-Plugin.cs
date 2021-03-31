@@ -4,8 +4,9 @@ using Lumos.GUI.Resource;
 using Lumos.GUI.Settings;
 using Lumos.GUI.Settings.PE;
 using Lumos.GUI.Windows;
-using LumosLIB.GUI.Windows.ProjectExplorer;
+using Lumos.GUI.Windows.ProjectExplorer;
 using LumosLIB.Kernel.Log;
+using LumosProtobuf.Resource;
 using org.dmxc.lumos.Kernel.Input.v2;
 using org.dmxc.lumos.Kernel.Net;
 using org.dmxc.lumos.Kernel.Plugin;
@@ -17,10 +18,12 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using T = LumosLIB.Tools.I18n.DummyT;
+using LumosLIB.Tools;
 
 namespace NanoleafGUI_Plugin
 {
@@ -77,7 +80,7 @@ namespace NanoleafGUI_Plugin
 
         public bool existsResource(EResourceDataType type, string name)
         {
-            if (type == EResourceDataType.SYMBOL)
+            if (type == EResourceDataType.Symbol)
             {
                 if (name.Equals("Nanoleaf")
                     || name.Equals("Nanoleaf_16")
@@ -90,7 +93,7 @@ namespace NanoleafGUI_Plugin
         }
         public ReadOnlyCollection<LumosDataMetadata> allResources(EResourceDataType type)
         {
-            if (type == EResourceDataType.SYMBOL)
+            if (type == EResourceDataType.Symbol)
             {
                 List<LumosDataMetadata> ret = new List<LumosDataMetadata>()
                 {
@@ -105,9 +108,9 @@ namespace NanoleafGUI_Plugin
 
             return null;
         }
-        public byte[] loadResource(EResourceDataType type, string name)
+        public Stream loadResource(EResourceDataType type, string name)
         {
-            if (type == EResourceDataType.SYMBOL)
+            if (type == EResourceDataType.Symbol)
             {
                 switch (name)
                 {
@@ -128,17 +131,14 @@ namespace NanoleafGUI_Plugin
 
             return null;
         }
-        private byte[] toByteArray(Bitmap i)
+        private Stream toByteArray(Bitmap i)
         {
-            using (var m = new System.IO.MemoryStream())
+            var m = new System.IO.MemoryStream();
+            if (i != null)
             {
-                if (i != null)
-                {
 
-                    i.Save(m, ImageFormat.Png);
-                    byte[] b = m.ToArray();
-                    return b;
-                }
+                i.Save(m, ImageFormat.Png);
+                return m;
             }
             return null;
         }

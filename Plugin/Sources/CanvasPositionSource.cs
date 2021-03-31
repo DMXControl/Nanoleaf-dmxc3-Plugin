@@ -1,4 +1,6 @@
 ﻿using LumosLIB.Kernel;
+using LumosProtobuf;
+using LumosProtobuf.Input;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
@@ -16,7 +18,7 @@ namespace Nanoleaf_Plugin
         public int PanelID { get; private set; }
         public EPositionPart Part { get; private set; }
         private CanvasPositionSource(string serialNumber, int panelID, EPositionPart part) :
-            base(getID(serialNumber, panelID, part), getDisplayName(part), new ParameterCategory("Nanoleaf", getCategory(serialNumber, panelID)))
+            base(getID(serialNumber, panelID, part), getDisplayName(part),getCategory(serialNumber, panelID))
         {
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
@@ -83,11 +85,11 @@ namespace Nanoleaf_Plugin
         }
         private static ParameterCategory getCategory(string serialNumber, int panelID)
         {
-            return new ParameterCategory(serialNumber, new ParameterCategory($"Canvas {panelID}"));
+            return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber, $"Canvas {panelID}");
         }
         public override EWellKnownInputType AutoGraphIOType
         {
-            get { return EWellKnownInputType.NUMERIC; }
+            get { return EWellKnownInputType.Numeric; }
         }
 
         public override object Min

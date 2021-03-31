@@ -1,4 +1,6 @@
 ﻿using LumosLIB.Kernel;
+using LumosProtobuf;
+using LumosProtobuf.Input;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using org.dmxc.lumos.Kernel.PropertyType;
@@ -14,7 +16,7 @@ namespace Nanoleaf_Plugin
         public readonly string SerialNumber;
 
         public CanvasSink(string serialNumber, Panel panel, bool usePanelID = false) :
-            base(getID(serialNumber, panel, usePanelID), getDisplayName(panel, usePanelID), new ParameterCategory("Nanoleaf", getCategory(serialNumber, panel, usePanelID)))
+            base(getID(serialNumber, panel, usePanelID), getDisplayName(panel, usePanelID), getCategory(serialNumber, panel, usePanelID))
 
         {
             SerialNumber = serialNumber;
@@ -42,13 +44,13 @@ namespace Nanoleaf_Plugin
         private static ParameterCategory getCategory(string serialNumber, Panel panel, bool usePanelID)
         {
             if (usePanelID)
-                return new ParameterCategory(serialNumber, new ParameterCategory("PanelIDs"));
+                return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber, "PanelIDs");
             else
-                return new ParameterCategory(serialNumber, new ParameterCategory("Coordinates"));
+                return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber, "Coordinates");
         }
         public override EWellKnownInputType AutoGraphIOType
         {
-            get { return EWellKnownInputType.COLOR; }
+            get { return EWellKnownInputType.Color; }
         }
 
         public override object Min => Color.White;

@@ -1,4 +1,5 @@
 ﻿using LumosLIB.Kernel.Log;
+using LumosProtobuf.Resource;
 using Nanoleaf_Plugin.API;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -208,8 +210,8 @@ namespace Nanoleaf_Plugin
             try
             {
                 var im = InputManager.getInstance();
-                var sinks = im.RegisteredSinks.Where(s => s.Category.Name.Equals("Nanoleaf"));
-                var sources = im.RegisteredSources.Where(s => s.Category.Name.Equals("Nanoleaf"));
+                var sinks = im.Sinks.Where(s => s.Category.Name.Equals("Nanoleaf"));
+                var sources = im.Sources.Where(s => s.Category.Name.Equals("Nanoleaf"));
                 im.UnregisterSinks(sinks);
                 im.UnregisterSources(sources);
                 Log.Info("Unregisterd {0} Sinks and {1} Sources", sinks.Count(), sources.Count());
@@ -270,7 +272,7 @@ namespace Nanoleaf_Plugin
                 }
 
 
-                Communication.IPs = KernelNetManager.getInstance().IPAddresses.Select(s=> IPAddress.Parse(s)).ToArray();
+                Communication.IPs = new IPAddress[] { IPAddress.Any };// KernelNetManager.getInstance().IPAddresses.Select(s=> IPAddress.Parse(s)).ToArray();
                 if(Discover)
                     Communication.StartDiscoveryTask();
                 if (ShowInInputAssignment)
@@ -377,7 +379,7 @@ namespace Nanoleaf_Plugin
 
         public bool existsResource(EResourceDataType type, string name)
         {
-            if (type == EResourceDataType.DEVICE_IMAGE)
+            if (type == EResourceDataType.DeviceImage)
             {
                 if (name.Equals(EDeviceType.Canvas.ToString())
                     || name.Equals(EDeviceType.LightPanles.ToString())
@@ -388,7 +390,7 @@ namespace Nanoleaf_Plugin
         }
         public ReadOnlyCollection<LumosDataMetadata> allResources(EResourceDataType type)
         {
-            if (type == EResourceDataType.DEVICE_IMAGE)
+            if (type == EResourceDataType.DeviceImage)
             {
                 List<LumosDataMetadata> ret = new List<LumosDataMetadata>()
                 {
@@ -401,9 +403,9 @@ namespace Nanoleaf_Plugin
 
             return null;
         }
-        public byte[] loadResource(EResourceDataType type, string name)
+        public Stream loadResource(EResourceDataType type, string name)
         {
-            if (type == EResourceDataType.DEVICE_IMAGE)
+            if (type == EResourceDataType.DeviceImage)
             {
                 if (name.Equals(EDeviceType.Canvas.ToString()))
                     return toByteArray(Properties.Resources.NanoleafCanvas);
@@ -417,17 +419,13 @@ namespace Nanoleaf_Plugin
 
             return null;
         }
-        private byte[] toByteArray(Bitmap i)
+        private Stream toByteArray(Bitmap i)
         {
-            using (var m = new System.IO.MemoryStream())
+            var m = new System.IO.MemoryStream();
+            if (i != null)
             {
-                if (i != null)
-                {
-
-                    i.Save(m, ImageFormat.Png);
-                    byte[] b = m.ToArray();
-                    return b;
-                }
+                i.Save(m, ImageFormat.Png);
+                return m;
             }
             return null;
         }

@@ -24,7 +24,7 @@ namespace Nanoleaf_Plugin
         public event EventHandler PanelIDChanged;
 
         public NanoleafDevice(string id)
-           : base(id, null)
+           : base(id, null, false, NANOLEAF_DEVICE_TYPE_NAME)
         {
             XmlDocument d = new XmlDocument();
             XmlNode node = d.CreateElement("root");
@@ -39,10 +39,6 @@ namespace Nanoleaf_Plugin
             DeviceBeam b = new DeviceBeam(this, 1, ctx);
             this.addBeam(b);
         }
-
-        public override string Type => NANOLEAF_DEVICE_TYPE_NAME;
-
-        public override bool IsWrappingDevice => true;
 
         public int PanelID
         {
@@ -70,17 +66,17 @@ namespace Nanoleaf_Plugin
                 else this.Image = null;
             }
         } 
-        protected override IEnumerable<DeviceParameter> ParametersInternal
+        protected override IEnumerable<GenericParameter> ParametersInternal
         {
             get
             {
-                yield return new DeviceParameter(DEVICE_TYPE_PARAMETER, typeof(string), EGenericParameterOptions.HIDDEN);
-                yield return new DeviceParameter(PANEL_ID_PARAMETER, typeof(string),
+                yield return new GenericParameter(DEVICE_TYPE_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.HIDDEN);
+                yield return new GenericParameter(PANEL_ID_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string),
                     EGenericParameterOptions.PERSISTANT, NanoleafPlugin.getAllPanels(this.DeviceType).Select(p => (object)p.ID.ToString()).ToArray());
             }
         }
 
-        protected override object getParameterInternal(DeviceParameter parameter)
+        protected override object getParameterInternal(GenericParameter parameter)
         {
             if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
                 return this.DeviceType.ToString();
@@ -89,7 +85,7 @@ namespace Nanoleaf_Plugin
             return base.getParameterInternal(parameter);
         }
 
-        protected override bool setParameterInternal(DeviceParameter parameter, object value, out object valueToSend)
+        protected override bool setParameterInternal(GenericParameter parameter, object value, out object valueToSend)
         {
             valueToSend = null;
             if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
@@ -123,7 +119,7 @@ namespace Nanoleaf_Plugin
             return base.setParameterInternal(parameter, value, out valueToSend);
         }
 
-        protected override bool testParameterInternal(DeviceParameter parameter, object value)
+        protected override bool testParameterInternal(GenericParameter parameter, object value)
         {
             if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
             {

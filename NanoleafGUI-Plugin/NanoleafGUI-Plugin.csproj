@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>NanoleafGUI_Plugin</RootNamespace>
     <AssemblyName>NanoleafGUI-Plugin</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -41,23 +41,20 @@
     <ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>..\dep\LumosControls.dll</HintPath>
-    </Reference>
-    <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="LumosControls">
       <HintPath>..\..\Lumos\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
-    </Reference>
-    <Reference Include="LumosGUI">
-      <HintPath>..\dep\LumosGUI.exe</HintPath>
     </Reference>
     <Reference Include="LumosGUI">
       <HintPath>..\..\Lumos\Lumos\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
     </Reference>
     <Reference Include="LumosLIB">
-      <HintPath>..\dep\LumosLIB.dll</HintPath>
-    </Reference>
-    <Reference Include="LumosLIB">
       <HintPath>..\..\Lumos\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosToolsLIB">
+      <HintPath>..\..\Lumos\Lumos\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosProtobuf">
+      <HintPath>..\..\Lumos\Lumos\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\Lumos\Lumos\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
