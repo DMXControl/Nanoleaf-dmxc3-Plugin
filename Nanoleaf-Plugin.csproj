@@ -51,6 +51,21 @@
     <Reference Include="LumosProtobuf">
       <HintPath>..\Lumos\Lumos\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>dep\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Lumos">
+      <HintPath>dep\Lumos.exe</HintPath>
+    </Reference>
+    <Reference Include="LumosLIB">
+      <HintPath>dep\LumosLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosToolsLIB">
+      <HintPath>dep\LumosToolsLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosProtobuf">
+      <HintPath>dep\LumosProtobuf.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
