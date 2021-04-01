@@ -138,6 +138,7 @@ namespace NanoleafGUI_Plugin
             {
 
                 i.Save(m, ImageFormat.Png);
+                m.Position = 0;
                 return m;
             }
             return null;

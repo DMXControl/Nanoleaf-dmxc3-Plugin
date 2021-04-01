@@ -1,4 +1,6 @@
-﻿using LumosLIB.Kernel.Log;
+﻿using LumosLIB.Kernel;
+using LumosLIB.Kernel.Log;
+using LumosProtobuf;
 using LumosProtobuf.Resource;
 using Nanoleaf_Plugin.API;
 using Newtonsoft.Json;
@@ -425,6 +427,7 @@ namespace Nanoleaf_Plugin
             if (i != null)
             {
                 i.Save(m, ImageFormat.Png);
+                m.Position = 0;
                 return m;
             }
             return null;

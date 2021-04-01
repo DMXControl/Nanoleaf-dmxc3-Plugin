@@ -44,9 +44,9 @@ namespace Nanoleaf_Plugin
         private static ParameterCategory getCategory(string serialNumber, Panel panel, bool usePanelID)
         {
             if (usePanelID)
-                return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber, "PanelIDs");
+                return ParameterCategoryTools.FromNames("Nanoleaf", serialNumber, "PanelIDs");
             else
-                return KnownCategories.GetWrapperCategory("Nanoleaf", serialNumber, "Coordinates");
+                return ParameterCategoryTools.FromNames("Nanoleaf", serialNumber, "Coordinates");
         }
         public override EWellKnownInputType AutoGraphIOType
         {
