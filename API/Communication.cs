@@ -645,6 +645,7 @@ namespace Nanoleaf_Plugin.API
             wc.Headers.Add("TouchEventsPort", _touchEventsPort.ToString());
             wc.OpenReadAsync(new Uri(address));
             bool isListening = true;
+            bool restart = false;
             wc.OpenReadCompleted += (sender, args) =>
             {
                 while (!shutdown)
@@ -664,6 +665,9 @@ namespace Nanoleaf_Plugin.API
                             catch (Exception e) when (e is IOException || e is WebException)//Timeout! Restart Listener without Logging
                             {
                                 NanoleafPlugin.Log.Debug("Restarting EventListener because of:" + Environment.NewLine, e);
+                                restart = true;
+                                isListening = false;
+                                goto DISPOSE;
                             }
                             catch (Exception e) when (e is TargetInvocationException)
                             {
@@ -680,10 +684,14 @@ namespace Nanoleaf_Plugin.API
                     }
                     FireEvent(ip, res);
                 }
+                DISPOSE:
                 wc.Dispose();
             };
             while (isListening)
                 await Task.Delay(10);
+
+            if (restart)
+                StartEventListener(ip, port, auth_token);
         }
 
         private static async Task FireEvent(string ip, string eventData)
