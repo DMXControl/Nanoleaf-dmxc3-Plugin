@@ -35,15 +35,17 @@
   <PropertyGroup>
     <ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>dep\log4net.dll</HintPath>
+  <ItemGroup><Reference Include="Lumos">
+      <HintPath>dep\Lumos.exe</HintPath>
     </Reference>
     <Reference Include="Lumos">
-      <HintPath>dep\Lumos.exe</HintPath>
+      <HintPath>..\Lumos\Lumos\Lumos\bin\Debug\Lumos.exe</HintPath>
     </Reference>
     <Reference Include="LumosLIB">
       <HintPath>dep\LumosLIB.dll</HintPath>
+    </Reference>
+    <Reference Include="LumosLIB">
+      <HintPath>..\Lumos\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
