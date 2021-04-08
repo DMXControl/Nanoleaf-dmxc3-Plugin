@@ -664,7 +664,7 @@ namespace Nanoleaf_Plugin.API
                             }
                             catch (Exception e) when (e is IOException || e is WebException)//Timeout! Restart Listener without Logging
                             {
-                                NanoleafPlugin.Log.Debug("Restarting EventListener because of:" + Environment.NewLine, e);
+                                NanoleafPlugin.Log.Debug("Restarting EventListener because of:" + Environment.NewLine, e.Message);
                                 restart = true;
                                 isListening = false;
                                 goto DISPOSE;
