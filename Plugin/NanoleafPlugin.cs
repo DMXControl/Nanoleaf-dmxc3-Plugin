@@ -29,7 +29,7 @@ namespace Nanoleaf_Plugin
 {
     public class NanoleafPlugin : KernelPluginBase, IResourceProvider
     {
-        internal static readonly ILumosLog Log = LumosLogger.getInstance(typeof(NanoleafPlugin));
+        internal static readonly ILumosLog Log = LumosLogger.getInstance(nameof(NanoleafPlugin));
         private static List<Controller> clients = new List<Controller>();
         private static List<Controller> clientsBindedToInputAssignment = new List<Controller>();
         private const string SETTINGS_CATEGORY_ID = "Settings:Nanoleaf";

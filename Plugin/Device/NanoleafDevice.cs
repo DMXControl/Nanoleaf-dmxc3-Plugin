@@ -18,7 +18,7 @@ namespace Nanoleaf_Plugin
         public static readonly string NANOLEAF_DEVICE_TYPE_NAME = "NanoleafDevice";
         public static readonly string PANEL_ID_PARAMETER = "Panel ID";
         public static readonly string DEVICE_TYPE_PARAMETER = "DeviceType";
-        private static readonly ILumosLog log = LumosLogger.getInstance(typeof(NanoleafDevice));
+        private static readonly ILumosLog log = LumosLogger.getInstance(nameof(NanoleafDevice));
 
         private int _panleId;
         public event EventHandler PanelIDChanged;
