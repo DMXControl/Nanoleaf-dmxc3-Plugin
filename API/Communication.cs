@@ -129,8 +129,13 @@ namespace Nanoleaf_Plugin.API
         {
             log.Debug("Request stop for DiscoverTask");
             discoveryThreadRunning = false;
-            while (!(discoverTask?.IsCompleted ?? true))
+            for (int i=0;i<10;i++)
             {
+                if (discoverTask?.IsCompleted ?? true)
+                {
+                    log.Debug("DiscoverTask stopped");
+                    return;
+                }
                 log.Debug("Await DiscoverTask stopped");
                 Task.Delay(100).GetAwaiter();
             }
