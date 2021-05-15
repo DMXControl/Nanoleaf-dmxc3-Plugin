@@ -55,7 +55,7 @@
       <HintPath>dep\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Lumos">
-      <HintPath>..\Lumos\Lumos\Lumos\bin\Debug\Lumos.exe</HintPath>
+      <HintPath>dep\Lumos.exe</HintPath>
     </Reference>
     <Reference Include="LumosLIB">
       <HintPath>dep\LumosLIB.dll</HintPath>

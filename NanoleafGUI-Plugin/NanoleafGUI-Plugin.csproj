@@ -56,6 +56,9 @@
     <Reference Include="LumosProtobuf">
       <HintPath>..\..\Lumos\Lumos\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
     </Reference>
+	<Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Lumos\Lumos\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="LumosControls">
       <HintPath>..\dep\LumosControls.dll</HintPath>
     </Reference>
@@ -72,7 +75,7 @@
       <HintPath>..\dep\LumosProtobuf.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\Lumos\Lumos\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\dep\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
