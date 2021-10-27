@@ -9,11 +9,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Nanoleaf_Plugin</RootNamespace>
     <AssemblyName>Nanoleaf-Plugin</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,7 +36,8 @@
   <PropertyGroup>
     <ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
   </PropertyGroup>
-  <ItemGroup><Reference Include="Lumos">
+  <ItemGroup>
+    <Reference Include="Lumos">
       <HintPath>dep\Lumos.exe</HintPath>
     </Reference>
     <Reference Include="Lumos">
