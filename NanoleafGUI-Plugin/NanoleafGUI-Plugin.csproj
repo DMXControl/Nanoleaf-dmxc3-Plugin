@@ -41,10 +41,10 @@
     <ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="LumosControls, Version=3.2.3.0, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\dep\LumosControls.dll</HintPath>
     </Reference>
-    <Reference Include="LumosControls, Version=3.2.2.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="LumosControls, Version=3.2.3.0, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\..\Lumos\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
     </Reference>
     <Reference Include="LumosGUI">
