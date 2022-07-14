@@ -86,6 +86,7 @@ namespace Nanoleaf_Plugin.API
                             EDeviceType type = EDeviceType.UNKNOWN;
                             switch (array.FirstOrDefault(s => s.StartsWith("NT"))?.Replace("NT: ", ""))
                             {
+                                case "nanoleaf:nl22":
                                 case "Nanoleaf_aurora:light":
                                     type = EDeviceType.LightPanles;
                                     break;
@@ -94,6 +95,15 @@ namespace Nanoleaf_Plugin.API
                                     break;
                                 case "nanoleaf:nl42":
                                     type = EDeviceType.Shapes;
+                                    break;
+                                case "nanoleaf:nl45":
+                                    type = EDeviceType.Essentials;
+                                    break;
+                                case "nanoleaf:nl52":
+                                    type = EDeviceType.Elements;
+                                    break;
+                                case "nanoleaf:nl59":
+                                    type = EDeviceType.Lines;
                                     break;
                             }
                             string name = array.FirstOrDefault(s => s.StartsWith("nl-devicename"))?.Replace("nl-devicename: ", "");
@@ -490,6 +500,10 @@ namespace Nanoleaf_Plugin.API
 
                 case EDeviceType.Shapes:
                 case EDeviceType.Canvas:
+                case EDeviceType.Elements:
+                case EDeviceType.Lines:
+                case EDeviceType.Essentials:
+                default:
                     result = new ExternalControlConnectionInfo() { StreamIPAddress = ip, StreamPort = 60222, StreamProtocol = "udp" };
                     break;
             }

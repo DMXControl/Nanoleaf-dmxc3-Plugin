@@ -138,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Nanoleaf.ico" />
+    <None Include="Resources\NanoleafElements.png" />
+    <None Include="Resources\NanoleafLines.png" />
+    <None Include="Resources\NanoleafEssentials.png" />
     <None Include="Resources\NanoleafCanvas.png" />
     <None Include="Resources\NanoleafShapes.png" />
     <None Include="Resources\NanoleafLightPanles.png" />

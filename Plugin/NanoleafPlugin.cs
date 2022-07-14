@@ -385,7 +385,10 @@ namespace Nanoleaf_Plugin
             {
                 if (name.Equals(EDeviceType.Canvas.ToString())
                     || name.Equals(EDeviceType.LightPanles.ToString())
-                    || name.Equals(EDeviceType.Shapes.ToString()))
+                    || name.Equals(EDeviceType.Shapes.ToString())
+                    || name.Equals(EDeviceType.Elements.ToString())
+                    || name.Equals(EDeviceType.Lines.ToString())
+                    || name.Equals(EDeviceType.Essentials.ToString()))
                     return true;
             }
             return false;
@@ -399,6 +402,9 @@ namespace Nanoleaf_Plugin
                     new LumosDataMetadata(EDeviceType.Canvas.ToString()),
                     new LumosDataMetadata(EDeviceType.LightPanles.ToString()),
                     new LumosDataMetadata(EDeviceType.Shapes.ToString()),
+                    new LumosDataMetadata(EDeviceType.Elements.ToString()),
+                    new LumosDataMetadata(EDeviceType.Lines.ToString()),
+                    new LumosDataMetadata(EDeviceType.Essentials.ToString()),
                 };
                 return ret.AsReadOnly();
             }
@@ -417,6 +423,15 @@ namespace Nanoleaf_Plugin
 
                 else if (name.Equals(EDeviceType.Shapes.ToString()))
                     return toByteArray(Properties.Resources.NanoleafShapes);
+
+                else if (name.Equals(EDeviceType.Elements.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafElements);
+
+                else if (name.Equals(EDeviceType.Lines.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafLines);
+
+                else if (name.Equals(EDeviceType.Essentials.ToString()))
+                    return toByteArray(Properties.Resources.NanoleafEssentials);
             }
 
             return null;

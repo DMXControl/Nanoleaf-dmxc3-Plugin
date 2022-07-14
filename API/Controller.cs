@@ -178,6 +178,15 @@ namespace Nanoleaf_Plugin.API
                 case "NL42":
                     DeviceType = EDeviceType.Shapes;
                     break;
+                case "NL45":
+                    DeviceType = EDeviceType.Essentials;
+                    break;
+                case "NL52":
+                    DeviceType = EDeviceType.Elements;
+                    break;
+                case "NL59":
+                    DeviceType = EDeviceType.Lines;
+                    break;
             }
 
             NumberOfPanels = (uint)json[nameof(NumberOfPanels)];
@@ -318,6 +327,15 @@ namespace Nanoleaf_Plugin.API
                     break;
                 case "NL42":
                     DeviceType = EDeviceType.Shapes;
+                    break;
+                case "NL45":
+                    DeviceType = EDeviceType.Essentials;
+                    break;
+                case "NL52":
+                    DeviceType = EDeviceType.Elements;
+                    break;
+                case "NL59":
+                    DeviceType = EDeviceType.Lines;
                     break;
             }
 
