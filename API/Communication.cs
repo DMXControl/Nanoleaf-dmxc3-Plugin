@@ -27,10 +27,10 @@ namespace Nanoleaf_Plugin.API
 
         public static IPAddress[] IPs = new IPAddress[0];
 
-        private static async Task<IRestResponse> put(string address, string contentString)
+        private static async Task<RestResponse> put(string address, string contentString)
         {
             RestClient restClient = new RestClient(address);
-            var request = new RestRequest(Method.PUT)
+            var request = new RestRequest((String)null, Method.Put)
             {
                 Timeout = 1000
             };

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>NanoleafGUI_Plugin</RootNamespace>
     <AssemblyName>NanoleafGUI-Plugin</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -45,7 +45,7 @@
       <HintPath>..\..\Lumos\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
     </Reference>
     <Reference Include="LumosGUI">
-      <HintPath>..\..\Lumos\Lumos\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
+      <HintPath>..\..\Lumos\master\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
     </Reference>
     <Reference Include="LumosLIB">
       <HintPath>..\..\Lumos\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
@@ -55,9 +55,6 @@
     </Reference>
     <Reference Include="LumosProtobuf">
       <HintPath>..\..\Lumos\Lumos\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
-    </Reference>
-	<Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\Lumos\Lumos\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="LumosControls">
       <HintPath>..\dep\LumosControls.dll</HintPath>
@@ -133,7 +130,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName).dll" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /C /F /R /Y /I
-xcopy "$(TargetDir)$(TargetName).pdb" "E:\Git-Repos\Lumos\Lumos\LumosGUI\bin\Debug\Plugins\" /C /F /R /Y /I</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName).dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+
+xcopy "$(TargetDir)$(TargetName).pdb" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)Newtonsoft.Json.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

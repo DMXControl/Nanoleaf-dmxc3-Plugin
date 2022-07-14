@@ -1,5 +1,4 @@
-﻿using Lumos.GUI;
-using Lumos.GUI.Plugin;
+﻿using Lumos.GUI.Plugin;
 using Lumos.GUI.Resource;
 using Lumos.GUI.Settings;
 using Lumos.GUI.Settings.PE;
@@ -7,28 +6,18 @@ using Lumos.GUI.Windows;
 using Lumos.GUI.Windows.ProjectExplorer;
 using LumosLIB.Kernel.Log;
 using LumosProtobuf.Resource;
-using org.dmxc.lumos.Kernel.Input.v2;
-using org.dmxc.lumos.Kernel.Net;
-using org.dmxc.lumos.Kernel.Plugin;
 using org.dmxc.lumos.Kernel.Resource;
-using org.dmxc.lumos.Kernel.Settings;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using T = LumosLIB.Tools.I18n.DummyT;
-using LumosLIB.Tools;
 
 namespace NanoleafGUI_Plugin
 {
     public class NanoleafGUI_Plugin : GuiPluginBase, IResourceProvider
-    { 
+    {
+        internal static readonly ILumosLog Log = LumosLogger.getInstance(nameof(NanoleafGUI_Plugin));
         private const string SETTINGS_CATEGORY_ID = "Settings:Nanoleaf";
 
         internal const string NANOLEAF_SHOW_IN_INPUTASSIGNMENT = "NANOLEAF.SHOW_IN_INPUTASSIGNMENT";
@@ -54,13 +43,20 @@ namespace NanoleafGUI_Plugin
         }
         protected override void initializePlugin()
         {
-            ResourceManager.getInstance().registerResourceProvider(this);
-            this.settingsBranch = (SettingsBranch)PEManager.getInstance().GetBranchByID("Settings");
+            try
+            {
+                ResourceManager.getInstance().registerResourceProvider(this);
+                this.settingsBranch = (SettingsBranch)PEManager.getInstance().GetBranchByID("Settings");
 
-            var nanoleafNode = new FormSettingsNode(SETTINGS_CATEGORY_ID, T._("Nanoleaf"), "Nanoleaf");
-            nanoleafNode.DisplayWhere = EDisplayCategory.APPLICATION_SETTINGS;
-            nanoleafNode.PropertiesForm = typeof(NanoleafSettingsForm);
-            settingsBranch.AddRecursive(settingsBranch.ID, nanoleafNode);
+                var nanoleafNode = new FormSettingsNode(SETTINGS_CATEGORY_ID, "Nanoleaf", "Nanoleaf");
+                nanoleafNode.DisplayWhere = EDisplayCategory.APPLICATION_SETTINGS;
+                nanoleafNode.PropertiesForm = typeof(NanoleafSettingsForm);
+                settingsBranch.AddRecursive(settingsBranch.ID, nanoleafNode);
+            }
+            catch(Exception e)
+            {
+                Log.Error(e);
+            }
         }
         protected override void shutdownPlugin()
         {
@@ -91,7 +87,7 @@ namespace NanoleafGUI_Plugin
             }
             return false;
         }
-        public ReadOnlyCollection<LumosDataMetadata> allResources(EResourceDataType type)
+        IReadOnlyList<LumosDataMetadata> IResourceProvider.allResources(EResourceDataType type)
         {
             if (type == EResourceDataType.Symbol)
             {

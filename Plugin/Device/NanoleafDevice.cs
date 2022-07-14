@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
-using LumosLIB.Kernel;
+﻿using LumosLIB.Kernel;
 using LumosLIB.Kernel.Log;
 using LumosLIB.Tools;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.HAL;
-using org.dmxc.lumos.Kernel.Project;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
 
 namespace Nanoleaf_Plugin
 {

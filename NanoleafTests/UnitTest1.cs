@@ -12,9 +12,9 @@ namespace NanoleafTests
     [TestClass]
     public class UnitTest1
     {
-        const string IP = "192.168.1.123";
+        const string IP = "192.168.10.152";
         const string PORT = "16021";
-        const string AUTH_TOKEN = "cGwULwjNBdgdxpjnFbMlUkJIcCPUXjpH";
+        const string AUTH_TOKEN = "xaH0B8bvK4IGeSrwn1tOHJr1MAD2PWBh";
         [TestMethod]
         public async Task TestAddUserAndDeleteUserAsync()
         {

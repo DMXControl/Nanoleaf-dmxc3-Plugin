@@ -23,20 +23,27 @@ namespace NanoleafGUI_Plugin
         private AddControllerForm addControllerForm = new AddControllerForm();
         public NanoleafSettingsForm()
         {
-            InitializeComponent();
-            this.tabControl1.TabPages.Clear();
-            sm = SettingsManager.getInstance();
+            try
+            {
+                InitializeComponent();
+                this.tabControl1.TabPages.Clear();
+                sm = SettingsManager.getInstance();
 
-            this.cbShowInInputAssignment.Checked = sm.getSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_SHOW_IN_INPUTASSIGNMENT);
-            this.cbDiscover.Checked = sm.getSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVER);
-            this.cbAutoRequestToken.Checked = sm.getSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOREQUEST_TOKEN);
-            this.cbAutoConnect.Checked = sm.getSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOCONNECT);
-            this.nudRefreshRate.Value = sm.getSetting<int>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REFRESH_RATE);
+                this.cbShowInInputAssignment.Checked = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_SHOW_IN_INPUTASSIGNMENT);
+                this.cbDiscover.Checked = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVER);
+                this.cbAutoRequestToken.Checked = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOREQUEST_TOKEN);
+                this.cbAutoConnect.Checked = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOCONNECT);
+                this.nudRefreshRate.Value = sm.GetKernelSetting<int>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REFRESH_RATE);
 
-            this.lbDiscoveryState.Text = string.Format(T._("Discover: {0}"), sm.getSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVER_STATE));
-            updateControllerTabPages();
+                this.lbDiscoveryState.Text = string.Format(T._("Discover: {0}"), sm.GetKernelSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVER_STATE));
+                updateControllerTabPages();
 
-            sm.SettingChanged += SettingsManager_SettingChanged;
+                sm.SettingChanged += SettingsManager_SettingChanged;
+            }
+            catch (Exception e)
+            {
+                NanoleafGUI_Plugin.Log.Error(e);
+            }
         }
         ~NanoleafSettingsForm()
         {
@@ -50,111 +57,133 @@ namespace NanoleafGUI_Plugin
 
         private void updateControllerTabPages()
         {
-            string jsonDiscoveredControllers = sm.getSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVERED_CONTROLLERS);
-            string jsonControllers = sm.getSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_CONTROLLERS);
-            JArray objDiscoveredControllers = JsonConvert.DeserializeObject(jsonDiscoveredControllers) as JArray;
-            JArray objControllers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
-            tabControl1.TabPages.Clear();
-            if (objControllers != null)
-                foreach (var controller in objControllers.Children())
-                {
-                    string name = (string)controller["Name"];
+            try
+            {
+                string jsonDiscoveredControllers = sm.GetKernelSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVERED_CONTROLLERS);
+                string jsonControllers = sm.GetKernelSetting<string>(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_CONTROLLERS);
+                JArray objDiscoveredControllers = JsonConvert.DeserializeObject(jsonDiscoveredControllers) as JArray;
+                JArray objControllers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
+                tabControl1.TabPages.Clear();
+                if (objControllers != null)
+                    foreach (var controller in objControllers.Children())
+                    {
+                        string name = (string)controller["Name"];
 
                         tabControl1.TabPages.Add(new LumosTabPage(name) { Tag = controller });
-                }
-            if (objDiscoveredControllers != null)
-                foreach (var controller in objDiscoveredControllers.Children())
-                {
-                    if (objControllers.Any(c => ((string)c["IP"]).Equals((string)controller["IP"])))
-                        continue;
+                    }
+                if (objDiscoveredControllers != null)
+                    foreach (var controller in objDiscoveredControllers.Children())
+                    {
+                        if (objControllers.Any(c => ((string)c["IP"]).Equals((string)controller["IP"])))
+                            continue;
 
-                    string name = (string)controller["Name"];
-                    if (0 == (from System.Windows.Forms.TabPage tab in tabControl1.TabPages
-                                                                        where tab.Name.Equals(name)
-                              select tab).Count())
-                        tabControl1.TabPages.Add(new LumosTabPage(name) { Tag = controller });
-                }
+                        string name = (string)controller["Name"];
+                        if (0 == (from System.Windows.Forms.TabPage tab in tabControl1.TabPages
+                                  where tab.Name.Equals(name)
+                                  select tab).Count())
+                            tabControl1.TabPages.Add(new LumosTabPage(name) { Tag = controller });
+                    }
 
-            updateControllerPanel((LumosTabPage)tabControl1.SelectedTab);
+                updateControllerPanel((LumosTabPage)tabControl1.SelectedTab);
+
+            }
+            catch (Exception e)
+            {
+                NanoleafGUI_Plugin.Log.Error(e);
+            }
         }
         private void updateControllerPanel(LumosTabPage tabPage)
         {
-            if (tabPage?.Tag is JToken controller)
+            try
             {
-                this.tbIP.Text = (string)controller["IP"];
-                this.tbName.Text = (string)controller["Name"];
+                if (tabPage?.Tag is JToken controller)
+                {
+                    this.tbIP.Text = (string)controller["IP"];
+                    this.tbName.Text = (string)controller["Name"];
 
-                this.tbAuthToken.Text = (string)controller["Auth_token"];
-                this.tbModel.Text = (string)controller["Model"];
-                this.tbNS.Text = (string)controller["SerialNumber"];
-                this.tbHW.Text = (string)controller["HardwareVersion"];
-                this.tbFW.Text = (string)controller["FirmwareVersion"];
-                this.pictureBox1.BackgroundImage = this.renderLayout(controller);
+                    this.tbAuthToken.Text = (string)controller["Auth_token"];
+                    this.tbModel.Text = (string)controller["Model"];
+                    this.tbNS.Text = (string)controller["SerialNumber"];
+                    this.tbHW.Text = (string)controller["HardwareVersion"];
+                    this.tbFW.Text = (string)controller["FirmwareVersion"];
+                    this.pictureBox1.BackgroundImage = this.renderLayout(controller);
+                }
+            }
+            catch (Exception e)
+            {
+                NanoleafGUI_Plugin.Log.Error(e);
             }
         }
 
         private void SettingsManager_SettingChanged(object sender, SettingChangedEventArgs args)
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => SettingsManager_SettingChanged(sender, args)));
-                return;
-            }
-            sm.SettingChanged -= SettingsManager_SettingChanged;
             try
             {
-                switch (args.SettingsPath)
+                if (this.InvokeRequired)
                 {
-                    case NanoleafGUI_Plugin.NANOLEAF_SHOW_IN_INPUTASSIGNMENT:
-                        this.cbShowInInputAssignment.Checked = (bool)args.NewValue;
-                        break;
-                    case NanoleafGUI_Plugin.NANOLEAF_DISCOVER:
-                        this.cbDiscover.Checked = (bool)args.NewValue;
-                        break;
-                    case NanoleafGUI_Plugin.NANOLEAF_AUTOREQUEST_TOKEN:
-                        this.cbAutoRequestToken.Checked = (bool)args.NewValue;
-                        break;
-                    case NanoleafGUI_Plugin.NANOLEAF_AUTOCONNECT:
-                        this.cbAutoConnect.Checked = (bool)args.NewValue;
-                        break;
-                    case NanoleafGUI_Plugin.NANOLEAF_REFRESH_RATE:
-                        this.nudRefreshRate.Value = (int)args.NewValue;
-                        break;
-                    case NanoleafGUI_Plugin.NANOLEAF_DISCOVER_STATE:
-                        this.lbDiscoveryState.Text = string.Format(T._("Discover: {0}"), (string)args.NewValue);
-                        break;
-                    case NanoleafGUI_Plugin.NANOLEAF_DISCOVERED_CONTROLLERS:
-                    case NanoleafGUI_Plugin.NANOLEAF_CONTROLLERS:
-                        this.updateControllerTabPages();
-                        break;
+                    this.Invoke(new Action(() => SettingsManager_SettingChanged(sender, args)));
+                    return;
                 }
+                sm.SettingChanged -= SettingsManager_SettingChanged;
+                try
+                {
+                    switch (args.SettingsPath)
+                    {
+                        case NanoleafGUI_Plugin.NANOLEAF_SHOW_IN_INPUTASSIGNMENT:
+                            this.cbShowInInputAssignment.Checked = (bool)args.NewValue;
+                            break;
+                        case NanoleafGUI_Plugin.NANOLEAF_DISCOVER:
+                            this.cbDiscover.Checked = (bool)args.NewValue;
+                            break;
+                        case NanoleafGUI_Plugin.NANOLEAF_AUTOREQUEST_TOKEN:
+                            this.cbAutoRequestToken.Checked = (bool)args.NewValue;
+                            break;
+                        case NanoleafGUI_Plugin.NANOLEAF_AUTOCONNECT:
+                            this.cbAutoConnect.Checked = (bool)args.NewValue;
+                            break;
+                        case NanoleafGUI_Plugin.NANOLEAF_REFRESH_RATE:
+                            this.nudRefreshRate.Value = (int)args.NewValue;
+                            break;
+                        case NanoleafGUI_Plugin.NANOLEAF_DISCOVER_STATE:
+                            this.lbDiscoveryState.Text = string.Format(T._("Discover: {0}"), (string)args.NewValue);
+                            break;
+                        case NanoleafGUI_Plugin.NANOLEAF_DISCOVERED_CONTROLLERS:
+                        case NanoleafGUI_Plugin.NANOLEAF_CONTROLLERS:
+                            this.updateControllerTabPages();
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    log.ErrorOrDebug(string.Empty, e);
+                }
+                sm.SettingChanged += SettingsManager_SettingChanged;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                log.ErrorOrDebug(string.Empty, e);
+                NanoleafGUI_Plugin.Log.Error(e);
             }
-            sm.SettingChanged += SettingsManager_SettingChanged;
         }
 
         private void cbShowInInputAssignment_CheckedChanged(object sender, EventArgs e)
         {
-            sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_SHOW_IN_INPUTASSIGNMENT, this.cbShowInInputAssignment.Checked);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_SHOW_IN_INPUTASSIGNMENT, this.cbShowInInputAssignment.Checked);
         }
         private void cbDiscover_CheckedChanged(object sender, EventArgs e)
         {
-            sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVER, this.cbDiscover.Checked);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_DISCOVER, this.cbDiscover.Checked);
         }
         private void cbAutoRequestToken_CheckedChanged(object sender, EventArgs e)
         {
-            sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOREQUEST_TOKEN, this.cbAutoRequestToken.Checked);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOREQUEST_TOKEN, this.cbAutoRequestToken.Checked);
         }
         private void cbAutoConnect_CheckedChanged(object sender, EventArgs e)
         {
-            sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOCONNECT, this.cbAutoConnect.Checked);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_AUTOCONNECT, this.cbAutoConnect.Checked);
         }
         private void nudRefreshRate_ValueChanged(object sender, EventArgs e)
         {
-            sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REFRESH_RATE, (int)this.nudRefreshRate.Value);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REFRESH_RATE, (int)this.nudRefreshRate.Value);
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -164,84 +193,108 @@ namespace NanoleafGUI_Plugin
 
         private void btRequestToken_Click(object sender, EventArgs e)
         {
-            sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REQUEST_TOKEN, (string)((JToken)tabControl1.SelectedTab.Tag)["IP"]);
-            Task.Delay(2000).GetAwaiter();
+            try
+            {
+                if (tabControl1.SelectedTab?.Tag == null)
+                    return;
+                sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REQUEST_TOKEN, (string)((JToken)tabControl1.SelectedTab?.Tag)["IP"]);
+                Task.Delay(2000).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                NanoleafGUI_Plugin.Log.Error(ex);
+            }
         }
 
         private void btAddController_Click(object sender, EventArgs e)
         {
-            if(addControllerForm.ShowDialog() == DialogResult.OK)
+            try
             {
-                JObject obj = new JObject();
-                obj.Add("IP", addControllerForm.IP);
-                obj.Add("Token", addControllerForm.Token);
-                sm.setSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_ADD_CONTROLLER, JsonConvert.SerializeObject(obj));
+                if (addControllerForm.ShowDialog() == DialogResult.OK)
+                {
+                    JObject obj = new JObject();
+                    obj.Add("IP", addControllerForm.IP);
+                    obj.Add("Token", addControllerForm.Token);
+                    sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_ADD_CONTROLLER, JsonConvert.SerializeObject(obj));
+                }
+            }
+            catch (Exception ex)
+            {
+                NanoleafGUI_Plugin.Log.Error(ex);
             }
         }
 
         private Bitmap renderLayout(JToken controller)
         {
-            var panels = controller["Panels"];
-            int maxX = panels.Select(p => (int)p["X"]).Max();
-            int maxY = panels.Select(p => (int)p["Y"]).Max();
-            int minX = panels.Select(p => (int)p["X"]).Min();
-            int minY = panels.Select(p => (int)p["Y"]).Min();
-            int maxSize = panels.Select(p => (int)p["SideLength"]).Max();
-
-            int penSize = 2;
-            int width = maxX - minX;
-            int height = maxY - minY;
-            width += maxSize+ penSize;
-            height += maxSize+ penSize;
-            Bitmap bmp = new Bitmap(width, height);
-            using (Graphics g = Graphics.FromImage(bmp))
+            try
             {
-                Pen pen = new Pen(this.ForeColor, penSize);
-                Brush brush = new SolidBrush(this.ForeColor);
-                Font font = this.Font;
-                StringFormat stringFormat = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                int i = 0;
-                foreach (var panel in panels)
+                var panels = controller["Panels"];
+                int maxX = panels.Select(p => (int)p["X"]).Max();
+                int maxY = panels.Select(p => (int)p["Y"]).Max();
+                int minX = panels.Select(p => (int)p["X"]).Min();
+                int minY = panels.Select(p => (int)p["Y"]).Min();
+                int maxSize = panels.Select(p => (int)p["SideLength"]).Max();
+
+                int penSize = 2;
+                int width = maxX - minX;
+                int height = maxY - minY;
+                width += maxSize + penSize;
+                height += maxSize + penSize;
+                Bitmap bmp = new Bitmap(width, height);
+                using (Graphics g = Graphics.FromImage(bmp))
                 {
-                    i++;
-
-                    int id = (int)panel["ID"];
-                    int x = (int)panel["X"];
-                    int y = (int)panel["Y"];
-                    y = maxY - y;
-                    x += penSize / 2;
-                    y += penSize / 2;
-                    int size = (int)panel["SideLength"];
-                    int orientation = (int)panel["Orientation"];
-
-                    string str = $"ID: {id}" + Environment.NewLine + $"Index: {i}" + Environment.NewLine + $"{orientation}°";
-
-                    var shape = (int)panel["Shape"];
-                    switch (shape)
+                    Pen pen = new Pen(this.ForeColor, penSize);
+                    Brush brush = new SolidBrush(this.ForeColor);
+                    Font font = this.Font;
+                    StringFormat stringFormat = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    int i = 0;
+                    foreach (var panel in panels)
                     {
-                        //Square
-                        case 2:
-                        case 3:
-                        case 4:
-                            var rect = new RectangleF(x, y, size, size);
-                            g.DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
-                            g.DrawString(str, font, brush, rect, stringFormat);
-                            if (shape ==3 || shape == 4)
-                            {
-                                int xOffset = size / 2;
-                                int buttonSize = size / 16;
-                                int buttonOffset = size / 12;
-                                for (int j = 0; j < 6; j++)
+                        i++;
+
+                        int id = (int)panel["ID"];
+                        int x = (int)panel["X"];
+                        int y = (int)panel["Y"];
+                        y = maxY - y;
+                        x += penSize / 2;
+                        y += penSize / 2;
+                        int size = (int)panel["SideLength"];
+                        int orientation = (int)panel["Orientation"];
+
+                        string str = $"ID: {id}" + Environment.NewLine + $"Index: {i}" + Environment.NewLine + $"{orientation}°";
+
+                        var shape = (int)panel["Shape"];
+                        switch (shape)
+                        {
+                            //Square
+                            case 2:
+                            case 3:
+                            case 4:
+                                var rect = new RectangleF(x, y, size, size);
+                                g.DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
+                                g.DrawString(str, font, brush, rect, stringFormat);
+                                if (shape == 3 || shape == 4)
                                 {
-                                    g.FillRectangle(brush, rect.X + xOffset, rect.Bottom- (buttonSize+ penSize), buttonSize, buttonSize);
-                                    xOffset += buttonOffset;
+                                    int xOffset = size / 2;
+                                    int buttonSize = size / 16;
+                                    int buttonOffset = size / 12;
+                                    for (int j = 0; j < 6; j++)
+                                    {
+                                        g.FillRectangle(brush, rect.X + xOffset, rect.Bottom - (buttonSize + penSize), buttonSize, buttonSize);
+                                        xOffset += buttonOffset;
+                                    }
                                 }
-                            }
-                            break;
+                                break;
+                        }
                     }
-                }                
+                }
+                return bmp;
             }
-            return bmp;
+            catch (Exception e)
+            {
+                NanoleafGUI_Plugin.Log.Error(e);
+            }
+            return null;
         }
     }
 }

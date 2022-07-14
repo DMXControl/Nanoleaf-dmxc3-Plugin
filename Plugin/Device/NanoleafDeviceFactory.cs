@@ -1,6 +1,4 @@
-﻿using LumosLIB.Kernel;
-using LumosLIB.Kernel.Devices;
-using LumosLIB.Tools;
+﻿using LumosLIB.Kernel.Devices;
 using Nanoleaf_Plugin.API;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.Devices.Factory;
@@ -10,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nanoleaf_Plugin
 {
@@ -25,7 +21,7 @@ namespace Nanoleaf_Plugin
                 foreach (var modell in Enum.GetValues(typeof(EDeviceType)))
                 {
                     if (!modell.Equals(EDeviceType.UNKNOWN))
-                        list.Add(new DeviceMetadata("Nanoleaf", modell.ToString(), LumosConstants.PROGRAM_COMPANY, NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME, ""));
+                        list.Add(new DeviceMetadata("Nanoleaf", modell.ToString(), "DMXControl-Projects e.V.", NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME, ""));
                 }
                 return list.AsReadOnly();
             }

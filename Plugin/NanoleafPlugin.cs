@@ -1,29 +1,23 @@
-﻿using LumosLIB.Kernel;
-using LumosLIB.Kernel.Log;
-using LumosProtobuf;
+﻿using LumosLIB.Kernel.Log;
 using LumosProtobuf.Resource;
 using Nanoleaf_Plugin.API;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using org.dmxc.lumos.Kernel.HAL.Handler;
 using org.dmxc.lumos.Kernel.Input.v2;
-using org.dmxc.lumos.Kernel.Net;
 using org.dmxc.lumos.Kernel.Plugin;
 using org.dmxc.lumos.Kernel.Project;
 using org.dmxc.lumos.Kernel.Resource;
 using org.dmxc.lumos.Kernel.Settings;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
-using T = LumosLIB.Tools.I18n.DummyT;
+using T = LumosLIB.Tools.I18n.Translatable;
 
 namespace Nanoleaf_Plugin
 {
@@ -62,7 +56,7 @@ namespace Nanoleaf_Plugin
             internal set
             {
                 discoverState = value;
-                sm?.setSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVER_STATE, value);
+                sm?.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVER_STATE, value);
             }
         }
 
@@ -106,7 +100,7 @@ namespace Nanoleaf_Plugin
             Log.Info($"Device Discovered: {e.DiscoveredDevice.ToString()}");
             string ip = e.DiscoveredDevice.IP;
             string json= JsonConvert.SerializeObject(Communication.DiscoveredDevices);
-            sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
             addControllerAsync(ip);
         }
         private async Task addControllerAsync(string ip, string authToken = null, bool setSettings=true)
@@ -128,7 +122,7 @@ namespace Nanoleaf_Plugin
                 if (setSettings)
                 {
                     string json = JsonConvert.SerializeObject(clients);
-                    sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+                    sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
                 }
                 await Task.Delay(100);
                 Log.Info($"Controller Added: {controller.ToString()}");
@@ -144,19 +138,19 @@ namespace Nanoleaf_Plugin
         private void Controller_PanelLayoutChanged(object sender, EventArgs e)
         {
             string json = JsonConvert.SerializeObject(clients);
-            sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
         }
 
         private void Controller_UpdatedInfos(object sender, EventArgs e)
         {
             string json = JsonConvert.SerializeObject(clients);
-            sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
         }
 
         private void Controller_AuthTokenReceived(object sender, EventArgs e)
         {
             string json = JsonConvert.SerializeObject(clients);
-            sm.setSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
         }
 
         private async Task bindInputAssignment()
@@ -251,15 +245,15 @@ namespace Nanoleaf_Plugin
                 sm.SettingChanged += SettingChanged;
 
 
-                ShowInInputAssignment = sm.getSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_SHOW_IN_INPUTASSIGNMENT);
-                Discover = sm.getSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_DISCOVER);
-                AutoRequestToken = sm.getSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_AUTOREQUEST_TOKEN);
-                AutoConnect = sm.getSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_AUTOCONNECT);
-                RefreshRate = sm.getSetting<int>(ESettingsType.APPLICATION, NANOLEAF_REFRESH_RATE);
+                ShowInInputAssignment = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_SHOW_IN_INPUTASSIGNMENT);
+                Discover = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_DISCOVER);
+                AutoRequestToken = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_AUTOREQUEST_TOKEN);
+                AutoConnect = sm.GetKernelSetting<bool>(ESettingsType.APPLICATION, NANOLEAF_AUTOCONNECT);
+                RefreshRate = sm.GetKernelSetting<int>(ESettingsType.APPLICATION, NANOLEAF_REFRESH_RATE);
 
                 if (AutoConnect)
                 {
-                    string jsonControllers = sm.getSetting<string>(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS);
+                    string jsonControllers = sm.GetKernelSetting<string>(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS);
                     JArray objControllers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
                     if (objControllers != null)
                         foreach (var c in objControllers)
@@ -361,20 +355,20 @@ namespace Nanoleaf_Plugin
 
         private void registerSettings()
         {
-            if (!sm.RegisteredSettings.Any(s => s.Path.Equals(NANOLEAF_SHOW_IN_INPUTASSIGNMENT)))
+            if (!sm.RegisteredKernelSettings.Any(s => s.Path.Equals(NANOLEAF_SHOW_IN_INPUTASSIGNMENT)))
             {
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), NANOLEAF_SHOW_IN_INPUTASSIGNMENT, String.Empty), ShowInInputAssignment);
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Discover"), NANOLEAF_DISCOVER, String.Empty), Discover);
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Autorequest Token"), NANOLEAF_AUTOREQUEST_TOKEN, String.Empty), AutoRequestToken);
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Autoconnect"), NANOLEAF_AUTOCONNECT, String.Empty), AutoConnect);
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Refresh Rate"), NANOLEAF_REFRESH_RATE, String.Empty), RefreshRate);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Show in InputAssignment"), NANOLEAF_SHOW_IN_INPUTASSIGNMENT, String.Empty), ShowInInputAssignment);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Discover"), NANOLEAF_DISCOVER, String.Empty), Discover);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Autorequest Token"), NANOLEAF_AUTOREQUEST_TOKEN, String.Empty), AutoRequestToken);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Autoconnect"), NANOLEAF_AUTOCONNECT, String.Empty), AutoConnect);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Refresh Rate"), NANOLEAF_REFRESH_RATE, String.Empty), RefreshRate);
 
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Discover State"), NANOLEAF_DISCOVER_STATE, String.Empty), DiscoverState);
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Discovered Controllers"), NANOLEAF_DISCOVERED_CONTROLLERS, String.Empty), string.Empty);
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Controllers"), NANOLEAF_CONTROLLERS, String.Empty), string.Empty);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Discover State"), NANOLEAF_DISCOVER_STATE, String.Empty), DiscoverState);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Discovered Controllers"), NANOLEAF_DISCOVERED_CONTROLLERS, String.Empty), string.Empty);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Controllers"), NANOLEAF_CONTROLLERS, String.Empty), string.Empty);
 
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Request Token"), NANOLEAF_REQUEST_TOKEN, String.Empty), string.Empty);
-                sm.registerSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Add Controller"), NANOLEAF_ADD_CONTROLLER, String.Empty), string.Empty);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Request Token"), NANOLEAF_REQUEST_TOKEN, String.Empty), string.Empty);
+                sm.RegisterKernelSetting(new SettingsMetadata(ESettingsRegisterType.APPLICATION, SETTINGS_CATEGORY_ID, T._("Add Controller"), NANOLEAF_ADD_CONTROLLER, String.Empty), string.Empty);
             }
         }
 
@@ -393,7 +387,8 @@ namespace Nanoleaf_Plugin
             }
             return false;
         }
-        public ReadOnlyCollection<LumosDataMetadata> allResources(EResourceDataType type)
+
+        IReadOnlyList<LumosDataMetadata> IResourceProvider.allResources(EResourceDataType type)
         {
             if (type == EResourceDataType.DeviceImage)
             {

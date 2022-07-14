@@ -8,9 +8,9 @@ namespace NanoleafTest
 {
     class Program
     {
-        const string ip = "192.168.1.123";
+        const string ip = "192.168.10.152";
         const string port = "16021";
-        const string AUTH_TOKEN = "cGwULwjNBdgdxpjnFbMlUkJIcCPUXjpH";
+        const string AUTH_TOKEN = "xaH0B8bvK4IGeSrwn1tOHJr1MAD2PWBh";
         static Controller controller = null;
         static void Main(string[] args)
         {
