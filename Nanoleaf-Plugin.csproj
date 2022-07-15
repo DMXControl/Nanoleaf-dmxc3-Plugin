@@ -107,7 +107,4 @@ xcopy "$(TargetDir)System.Text.Encodings.Web.dll" "D:\Git-Repos\Lumos\master\Lum
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="RD /S /Q &quot;$(SolutionDir)obj\&quot;&#xD;&#xA;RD /S /Q &quot;$(SolutionDir)bin\&quot;" />
-  </Target>
 </Project>
