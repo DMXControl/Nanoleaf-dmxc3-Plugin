@@ -69,7 +69,7 @@
   <ItemGroup>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)NanoleafGUI-Plugin.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+    <PostBuildEvent>xcopy "$(TargetDir)NanoleafGUI-Plugin.*" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
 xcopy "$(TargetDir)Newtonsoft.Json.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
 xcopy "$(TargetDir)System.ComponentModel.Annotations.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
 

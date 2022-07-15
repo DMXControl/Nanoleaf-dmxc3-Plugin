@@ -63,55 +63,78 @@ namespace Nanoleaf_Plugin
                     this.Image = value.ToString();
                 else this.Image = null;
             }
-        } 
+        }
         protected override IEnumerable<GenericParameter> ParametersInternal
         {
             get
             {
-                yield return new GenericParameter(DEVICE_TYPE_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.HIDDEN);
-                yield return new GenericParameter(PANEL_ID_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string),
-                    EGenericParameterOptions.PERSISTANT, NanoleafPlugin.getAllPanels(this.DeviceType).Select(p => (object)p.ID.ToString()).ToArray());
+                List<GenericParameter> ret = new List<GenericParameter>();
+                try
+                {
+                    var panels = NanoleafPlugin.getAllPanels(this.DeviceType).Select(p => (object)p.ID.ToString()).ToEnumerable();
+                    ret.Add(new GenericParameter(DEVICE_TYPE_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.HIDDEN));
+                    ret.Add(new GenericParameter(PANEL_ID_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.PERSISTANT, panels));
+                }
+                catch (Exception e)
+                {
+                    log.Error(e);
+                }
+                return ret.AsEnumerable();
             }
         }
 
         protected override object getParameterInternal(GenericParameter parameter)
         {
-            if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
-                return this.DeviceType.ToString();
-            if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
-                return this.PanelID;
+            try
+            {
+                if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
+                    return this.DeviceType.ToString();
+                if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
+                    return this.PanelID;
+            }
+            catch (Exception e)
+            {
+                log.Error(e);
+            }
             return base.getParameterInternal(parameter);
         }
 
         protected override bool setParameterInternal(GenericParameter parameter, object value, out object valueToSend)
         {
-            valueToSend = null;
-            if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
+            try
             {
-                if (value is EDeviceType dt)
-                    this.DeviceType = dt;
-                else if (value is string str)
-                    this.DeviceType = (EDeviceType)Enum.Parse(typeof(EDeviceType), str);
-                else if (value is int i)
-                    this.DeviceType = (EDeviceType)i;
-            }
-            if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
-            {
-                //int for backward compatibility as DesklampID previous was an Integer
-                if (value is int id)
+                valueToSend = null;
+                if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
                 {
-                    valueToSend = this.PanelID = id;
-                    return true;
+                    if (value is EDeviceType dt)
+                        this.DeviceType = dt;
+                    else if (value is string str)
+                        this.DeviceType = (EDeviceType)Enum.Parse(typeof(EDeviceType), str);
+                    else if (value is int i)
+                        this.DeviceType = (EDeviceType)i;
                 }
-                else
+                if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
                 {
-                    var val = LumosTools.TryConvertToInt32(value);
-                    if (val.HasValue)
+                    //int for backward compatibility as DesklampID previous was an Integer
+                    if (value is int id)
                     {
-                        this.PanelID = val.Value;
+                        valueToSend = this.PanelID = id;
                         return true;
                     }
+                    else
+                    {
+                        var val = LumosTools.TryConvertToInt32(value);
+                        if (val.HasValue)
+                        {
+                            this.PanelID = val.Value;
+                            return true;
+                        }
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                log.Error(e);
             }
 
             return base.setParameterInternal(parameter, value, out valueToSend);
@@ -119,20 +142,27 @@ namespace Nanoleaf_Plugin
 
         protected override bool testParameterInternal(GenericParameter parameter, object value)
         {
-            if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
+            try
             {
-                if (value is EDeviceType dt) return true;
-                else if (value is string str) return true;
-                else if (value is int i) return true;
-            }
-            if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
-            {
-                try
+                if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
                 {
-                    var val = LumosTools.TryConvertToInt32(value);
-                    return val.HasValue;
+                    if (value is EDeviceType dt) return true;
+                    else if (value is string str) return true;
+                    else if (value is int i) return true;
                 }
-                catch { return false; }
+                if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
+                {
+                    try
+                    {
+                        var val = LumosTools.TryConvertToInt32(value);
+                        return val.HasValue;
+                    }
+                    catch { return false; }
+                }
+            }
+            catch (Exception e)
+            {
+                log.Error(e);
             }
             return base.testParameterInternal(parameter, value);
         }

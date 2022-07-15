@@ -18,10 +18,10 @@
       <HintPath>..\Lumos\master\Lumos\bin\Debug\Lumos.exe</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="LumosLIB">
-      <HintPath>..\Lumos\master\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+	  <Reference Include="LumosLIB">
+		  <HintPath>..\Lumos\master\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
+		  <Private>True</Private>
+	  </Reference>
     <Reference Include="LumosToolsLIB">
       <HintPath>..\Lumos\Lumos\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
       <Private>True</Private>
@@ -35,16 +35,19 @@
     </Reference>
     <Reference Include="Lumos">
       <HintPath>dep\Lumos.exe</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="LumosLIB">
-      <HintPath>dep\LumosLIB.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+	  <Reference Include="LumosLIB">
+		  <HintPath>dep\LumosLIB.dll</HintPath>
+		  <Private>False</Private>
+	  </Reference>
     <Reference Include="LumosToolsLIB">
       <HintPath>dep\LumosToolsLIB.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="LumosProtobuf">
       <HintPath>dep\LumosProtobuf.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Web" />
   </ItemGroup>
@@ -90,7 +93,7 @@
     <EmbeddedResource Remove="NanoleafGUI-Plugin\Properties\Resources.resx" />
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)Nanoleaf-Plugin.dll" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+    <PostBuildEvent>xcopy "$(TargetDir)Nanoleaf-Plugin.*" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
 
 xcopy "$(TargetDir)Newtonsoft.Json.dll" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
 
