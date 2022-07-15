@@ -523,7 +523,6 @@ namespace NanoleafGUI_Plugin
             this.ClientSize = new System.Drawing.Size(1021, 874);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "NanoleafSettingsForm";
             this.Text = "Nanoleaf Settings";
             this.tableLayoutPanel1.ResumeLayout(false);
