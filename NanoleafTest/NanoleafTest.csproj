@@ -14,4 +14,7 @@
     <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="RD /S /Q &quot;$(SolutionDir)$(TargetName)\obj\&quot;&#xD;&#xA;RD /S /Q &quot;$(SolutionDir)$(TargetName)\bin\&quot;" />
+  </Target>
 </Project>

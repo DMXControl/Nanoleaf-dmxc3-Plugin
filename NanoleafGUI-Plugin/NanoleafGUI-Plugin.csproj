@@ -76,4 +76,7 @@ xcopy "$(TargetDir)System.ComponentModel.Annotations.dll" "D:\Git-Repos\Lumos\ma
 </PostBuildEvent>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="RD /S /Q &quot;$(SolutionDir)$(TargetName)\obj\&quot;&#xD;&#xA;RD /S /Q &quot;$(SolutionDir)$(TargetName)\bin\&quot;" />
+  </Target>
 </Project>
