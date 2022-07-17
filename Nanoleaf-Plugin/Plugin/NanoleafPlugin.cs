@@ -107,13 +107,12 @@ namespace Nanoleaf_Plugin
         {
             try
             {
-                Controller controller = new Controller(ip, authToken);
-                if (clients.Any(c => c.IP.Equals(controller.IP)))
+                if (clients.Any(c => c.IP.Equals(ip)))
                 {
-                    controller.SelfDestruction();
-                    Log.Info(string.Format("Client already Connected!" + Environment.NewLine + "{0}", controller));
+                    Log.Info(string.Format("Controller already Connected!" + Environment.NewLine + "{0}", ip));
                     return;
                 }
+                Controller controller = new Controller(ip, authToken);
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
                 controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
