@@ -318,6 +318,8 @@ namespace Nanoleaf_Plugin.API
                     else
                         this.Reachable = false;
                     await Task.Delay(5000);
+                    if(this.Reachable)
+                        UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
                 }
                 catch (Exception e)
                 {

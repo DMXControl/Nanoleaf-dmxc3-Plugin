@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
@@ -680,7 +681,7 @@ namespace Nanoleaf_Plugin.API
         public static event EventHandler<GestureEventArgs> StaticOnGestureEvent;
         public static event EventHandler<EffectEventArgs> StaticOnEffectEvent;
 
-        private const int _touchEventsPort = 60223;
+        private static int _touchEventsPort = -1;
         private static Thread eventListenerThread = null;
         private static Dictionary<string, TouchEvent> lastTouchEvent = new Dictionary<string, TouchEvent>();
         private static Thread eventCleanLoop = null;
@@ -733,8 +734,9 @@ namespace Nanoleaf_Plugin.API
                 eventListenerThreadRunning = true;
                 try
                 {
-                    using (var client = new UdpClient(_touchEventsPort))
+                    using (var client = new UdpClient(NextFreePort()))
                     {
+                        _touchEventsPort = ((IPEndPoint)client.Client.LocalEndPoint).Port;
                         do
                         {
                             if (String.IsNullOrWhiteSpace(Thread.CurrentThread.Name))
@@ -768,6 +770,23 @@ namespace Nanoleaf_Plugin.API
             eventListenerThread.Priority = ThreadPriority.BelowNormal;
             eventListenerThread.IsBackground = true;
             eventListenerThread.Start();
+
+            bool IsFree(int port)
+            {
+                IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
+                IPEndPoint[] listeners = properties.GetActiveTcpListeners();
+                int[] openPorts = listeners.Select(item => item.Port).ToArray<int>();
+                return openPorts.All(openPort => openPort != port);
+            }
+            int NextFreePort(int port = 0)
+            {
+                port = (port > 0) ? port : new Random().Next(1, 65535);
+                while (!IsFree(port))
+                {
+                    port += 1;
+                }
+                return port;
+            }
         }
         public static void StopEventListener()
         {
