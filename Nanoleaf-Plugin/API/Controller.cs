@@ -73,6 +73,7 @@ namespace Nanoleaf_Plugin.API
                     return;
                 this.reachable = value;
                 log.Info($"{this} is reachable.");
+                this.establishConnection();
             }
         }
         public void SetPowerOn()
@@ -307,20 +308,13 @@ namespace Nanoleaf_Plugin.API
             while (!isDisposed && Auth_token == null)
                 await Task.Delay(1000);
 
-            UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
-            externalControlInfo = await Communication.SetExternalControlStreaming(IP, PORT, Auth_token, DeviceType);
-            Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
-            await Communication.StartEventListener(IP, PORT, Auth_token);
-            while (!isDisposed)
+            do
             {
                 try
                 {
-                    var res=await ping.SendPingAsync(IP);
+                    var res = await ping.SendPingAsync(IP);
                     if (res.Status == IPStatus.Success)
-                    {
                         this.Reachable = true;
-                        UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
-                    }
                     else
                         this.Reachable = false;
                     await Task.Delay(5000);
@@ -329,6 +323,21 @@ namespace Nanoleaf_Plugin.API
                 {
                     NanoleafPlugin.Log.ErrorOrDebug(string.Empty, e);
                 }
+            } while (!isDisposed);
+        }
+        private async void establishConnection()
+        {
+            try
+            {
+                Communication.StaticOnLayoutEvent -= Communication_StaticOnLayoutEvent;
+                Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
+                UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
+                await Communication.StartEventListener(IP, PORT, Auth_token);
+                externalControlInfo = await Communication.SetExternalControlStreaming(IP, PORT, Auth_token, DeviceType);
+            }
+            catch (Exception e)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(string.Empty, e);
             }
         }
 

@@ -728,7 +728,7 @@ namespace Nanoleaf_Plugin.API
             if (eventListenerThread != null)
                 return;
 
-            eventListenerThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(async (o) =>
+            eventListenerThread = new Thread(new ParameterizedThreadStart(async (o) =>
             {
                 eventListenerThreadRunning = true;
                 try
@@ -737,6 +737,8 @@ namespace Nanoleaf_Plugin.API
                     {
                         do
                         {
+                            if (String.IsNullOrWhiteSpace(Thread.CurrentThread.Name))
+                                Thread.CurrentThread.Name = $"Nanoleaf EventListener";
                             try
                             {
 
@@ -762,7 +764,7 @@ namespace Nanoleaf_Plugin.API
 
                 }
             }));
-            eventListenerThread.Name = $"Nanoleaf EventListener";
+            eventListenerThread.Name = $"Nanoleaf TouchEventListener";
             eventListenerThread.Priority = ThreadPriority.BelowNormal;
             eventListenerThread.IsBackground = true;
             eventListenerThread.Start();
@@ -777,61 +779,68 @@ namespace Nanoleaf_Plugin.API
             eventCleanLoop?.Abort();
             eventCleanLoop = null;
         }
-       
+
         public static async Task StartEventListener(string ip, string port, string auth_token)
         {
-            string address = $"http://{ip}:{port}/api/v1/{auth_token}/events?id=1,2,3,4";
-            WebClient wc = new WebClient();
-            wc.Headers.Add("TouchEventsPort", _touchEventsPort.ToString());
-            wc.OpenReadAsync(new Uri(address));
-            bool isListening = true;
-            bool restart = false;
-            wc.OpenReadCompleted += (sender, args) =>
+            eventListenerThread = new Thread(new ParameterizedThreadStart(async (o) =>
             {
-                while (!shutdown)
+                string address = $"http://{ip}:{port}/api/v1/{auth_token}/events?id=1,2,3,4";
+                WebClient wc = new WebClient();
+                wc.Headers.Add("TouchEventsPort", _touchEventsPort.ToString());
+                wc.OpenReadAsync(new Uri(address));
+                bool isListening = true;
+                bool restart = false;
+                wc.OpenReadCompleted += (sender, args) =>
                 {
-                    string res = string.Empty;
-                    byte[] buffer;
-                    using (MemoryStream ms = new MemoryStream())
+                    while (!shutdown)
                     {
-                        List<byte[]> buffers = new List<byte[]>();
-                        do
+                        string res = string.Empty;
+                        byte[] buffer;
+                        using (MemoryStream ms = new MemoryStream())
                         {
-                            buffer = new byte[128];
-                            try
+                            List<byte[]> buffers = new List<byte[]>();
+                            do
                             {
-                                args.Result.Read(buffer, 0, buffer.Length);
-                            }
-                            catch (Exception e) when (e is IOException || e is WebException)//Timeout! Restart Listener without Logging
-                            {
-                                NanoleafPlugin.Log.Debug("Restarting EventListener because of:" + Environment.NewLine, e.Message);
-                                restart = true;
-                                isListening = false;
-                                goto DISPOSE;
-                            }
-                            catch (Exception e) when (e is TargetInvocationException)
-                            {
+                                buffer = new byte[128];
+                                try
+                                {
+                                    args.Result.Read(buffer, 0, buffer.Length);
+                                }
+                                catch (Exception e) when (e is IOException || e is WebException)//Timeout! Restart Listener without Logging
+                                {
+                                    NanoleafPlugin.Log.Debug("Restarting EventListener because of:" + Environment.NewLine, e.Message);
+                                    restart = true;
+                                    isListening = false;
+                                    goto DISPOSE;
+                                }
+                                catch (Exception e) when (e is TargetInvocationException)
+                                {
                                 //NanoleafPlugin.Log.Info("Connection Refused");
+                                }
+                                catch (Exception e)
+                                {
+                                    NanoleafPlugin.Log.ErrorOrDebug(string.Empty, e);
+                                }
+                                ms.Write(buffer, 0, buffer.Length);
                             }
-                            catch (Exception e)
-                            {
-                                NanoleafPlugin.Log.ErrorOrDebug(string.Empty, e);
-                            }
-                            ms.Write(buffer, 0, buffer.Length);
+                            while (buffer[buffer.Length - 1] != 0);
+                            res = System.Text.Encoding.Default.GetString(TrimTailingZeros(ms.GetBuffer()));
                         }
-                        while (buffer[buffer.Length - 1] != 0);
-                        res = System.Text.Encoding.Default.GetString(TrimTailingZeros(ms.GetBuffer()));
+                        FireEvent(ip, res);
                     }
-                    FireEvent(ip, res);
-                }
                 DISPOSE:
-                wc.Dispose();
-            };
-            while (isListening)
-                await Task.Delay(10);
+                    wc.Dispose();
+                };
+                while (isListening)
+                    await Task.Delay(10);
 
-            if (restart)
-                StartEventListener(ip, port, auth_token);
+                if (restart)
+                    StartEventListener(ip, port, auth_token);
+            }));
+            eventListenerThread.Name = $"Nanoleaf StreamEventListener";
+            eventListenerThread.Priority = ThreadPriority.BelowNormal;
+            eventListenerThread.IsBackground = true;
+            eventListenerThread.Start();
         }
 
         private static async Task FireEvent(string ip, string eventData)
