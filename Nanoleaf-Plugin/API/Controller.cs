@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using static Nanoleaf_Plugin.API.Panel;
@@ -17,8 +18,10 @@ namespace Nanoleaf_Plugin.API
         private static ILumosLog log = NanoleafPlugin.Log;
         public string IP { get; private set; }
         private const string PORT = "16021";
+
         public string Auth_token { get; private set; } = null;
         private bool isDisposed = false;
+        private Ping ping = new Ping();
 
         public string Name { get; private set; }
         public string Model { get; private set; }
@@ -29,6 +32,7 @@ namespace Nanoleaf_Plugin.API
 
         public EDeviceType DeviceType { get; private set; }
 
+
         public uint NumberOfPanels { get; private set; }
         private ushort globalOrientation;
         public ushort GlobalOrientation
@@ -36,7 +40,7 @@ namespace Nanoleaf_Plugin.API
             get { return globalOrientation; }
             private set
             {
-                Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, value);
+                _ = Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, value);
             }
         }
         public ushort GlobalOrientationMin
@@ -55,13 +59,29 @@ namespace Nanoleaf_Plugin.API
 
         public bool PowerOn { get; private set; }
         public bool PowerOff { get; private set; }
+
+        private bool reachable;
+        public bool Reachable
+        {
+            get
+            {
+                return this.reachable;
+            }
+            private set
+            {
+                if (this.reachable == value)
+                    return;
+                this.reachable = value;
+                log.Info($"{this} is reachable.");
+            }
+        }
         public void SetPowerOn()
         {
-            Communication.SetStateOnOff(IP, PORT, Auth_token, true);
+            _ = Communication.SetStateOnOff(IP, PORT, Auth_token, true);
         }
         public void SetPowerOff()
         {
-            Communication.SetStateOnOff(IP, PORT, Auth_token, false);
+            _ = Communication.SetStateOnOff(IP, PORT, Auth_token, false);
         }
 
         private ushort brightness;
@@ -70,7 +90,7 @@ namespace Nanoleaf_Plugin.API
             get { return brightness; }
             set
             {
-                Communication.SetStateBrightness(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateBrightness(IP, PORT, Auth_token, value);
             }
         }
         public ushort BrightnessMin
@@ -89,7 +109,7 @@ namespace Nanoleaf_Plugin.API
             get { return hue; }
             set
             {
-                Communication.SetStateHue(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateHue(IP, PORT, Auth_token, value);
             }
         }
         public ushort HueMin
@@ -108,7 +128,7 @@ namespace Nanoleaf_Plugin.API
             get { return saturation; }
             set
             {
-                Communication.SetStateSaturation(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateSaturation(IP, PORT, Auth_token, value);
             }
         }
         public ushort SaturationMin
@@ -127,7 +147,7 @@ namespace Nanoleaf_Plugin.API
             get { return colorTemprature; }
             set
             {
-                Communication.SetStateColorTemperature(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateColorTemperature(IP, PORT, Auth_token, value);
             }
         }
         public ushort ColorTempratureMin
@@ -290,12 +310,19 @@ namespace Nanoleaf_Plugin.API
             UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
             externalControlInfo = await Communication.SetExternalControlStreaming(IP, PORT, Auth_token, DeviceType);
             Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
-            Communication.StartEventListener(IP, PORT, Auth_token);
+            await Communication.StartEventListener(IP, PORT, Auth_token);
             while (!isDisposed)
             {
                 try
                 {
-                    UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
+                    var res=await ping.SendPingAsync(IP);
+                    if (res.Status == IPStatus.Success)
+                    {
+                        this.Reachable = true;
+                        UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
+                    }
+                    else
+                        this.Reachable = false;
                     await Task.Delay(5000);
                 }
                 catch (Exception e)
@@ -308,7 +335,11 @@ namespace Nanoleaf_Plugin.API
         private void UpdateInfos(AllPanelInfo allPanelInfo)
         {
             if (allPanelInfo == null)
+            {
+                this.Reachable = false;
                 return;
+            }
+            this.Reachable = true;
 
             Name = allPanelInfo.Name;
             Model = allPanelInfo.Model;

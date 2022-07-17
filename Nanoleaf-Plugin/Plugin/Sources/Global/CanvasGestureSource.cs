@@ -15,7 +15,7 @@ namespace Nanoleaf_Plugin
         public EGesture GestureType { get; private set; }
         private long beatValue = 0;
         private CanvasGestureSource(string serialNumber, EGesture gestureType) :
-            base(getID(serialNumber, gestureType), getDisplayName(gestureType), getCategory(serialNumber))
+            base(getID(serialNumber, gestureType), getDisplayName(gestureType), getCategory(serialNumber), default)
         {
             Communication.StaticOnGestureEvent += ExternalControlEndpoint_StaticOnGestureEvent;
             SerialNumber = serialNumber;

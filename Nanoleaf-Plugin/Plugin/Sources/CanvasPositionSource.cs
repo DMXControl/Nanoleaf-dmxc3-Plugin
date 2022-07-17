@@ -17,7 +17,7 @@ namespace Nanoleaf_Plugin
         public int PanelID { get; private set; }
         public EPositionPart Part { get; private set; }
         private CanvasPositionSource(string serialNumber, int panelID, EPositionPart part) :
-            base(getID(serialNumber, panelID, part), getDisplayName(part),getCategory(serialNumber, panelID))
+            base(getID(serialNumber, panelID, part), getDisplayName(part),getCategory(serialNumber, panelID), default)
         {
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
