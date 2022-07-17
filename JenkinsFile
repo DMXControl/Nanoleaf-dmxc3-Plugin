@@ -76,11 +76,16 @@ pipeline {
 		stage('Archive Artifacts'){
 			steps {
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net48\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net48\\Nanoleaf-Plugin.dll.config\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net48\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net48\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net48\\RestSharp.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net48\\System.Text.Encodings.Web.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net48\\System.Text.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\System.ComponentModel.Annotations.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				
 				archiveArtifacts artifacts: 'Releases/Nanoleaf-Plugin.dll, Releases/Nanoleaf-Plugin.pdb, Releases/NanoleafGUI-Plugin.dll, Releases/NanoleafGUI-Plugin.pdb, Releases/dependencies/RestSharp.dll, Releases/dependencies/Newtonsoft.Json.dll'
 			}			
