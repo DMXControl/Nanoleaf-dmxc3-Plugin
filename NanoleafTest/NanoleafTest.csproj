@@ -8,7 +8,7 @@
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Nanoleaf-Plugin.csproj" />
+    <ProjectReference Include="..\Nanoleaf-Plugin\Nanoleaf-Plugin.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />

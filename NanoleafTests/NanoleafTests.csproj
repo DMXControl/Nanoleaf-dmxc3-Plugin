@@ -58,7 +58,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Nanoleaf-Plugin.csproj">
+    <ProjectReference Include="..\Nanoleaf-Plugin\Nanoleaf-Plugin.csproj">
       <Project>{5d870168-aa5e-4d79-b5cd-7fe4cdb47a6c}</Project>
       <Name>Nanoleaf-Plugin</Name>
     </ProjectReference>

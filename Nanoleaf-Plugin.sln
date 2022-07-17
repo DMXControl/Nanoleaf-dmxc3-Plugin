@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nanoleaf-Plugin", "Nanoleaf-Plugin.csproj", "{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nanoleaf-Plugin", "Nanoleaf-Plugin\Nanoleaf-Plugin.csproj", "{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoleafTest", "NanoleafTest\NanoleafTest.csproj", "{BB09BDA4-B9EC-4BFF-8039-E5AC8F7754E4}"
 EndProject
