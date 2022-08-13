@@ -25,7 +25,8 @@ using T = LumosLIB.Tools.I18n.DummyT;
 namespace NanoleafGUI_Plugin
 {
     public class NanoleafGUI_Plugin : GuiPluginBase, IResourceProvider
-    { 
+    {
+        internal static readonly ILumosLog Log = LumosLogger.getInstance(nameof(NanoleafGUI_Plugin));
         private const string SETTINGS_CATEGORY_ID = "Settings:Nanoleaf";
 
         internal const string NANOLEAF_SHOW_IN_INPUTASSIGNMENT = "NANOLEAF.SHOW_IN_INPUTASSIGNMENT";

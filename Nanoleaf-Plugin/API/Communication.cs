@@ -676,7 +676,7 @@ namespace Nanoleaf_Plugin.API
                             }
                             catch (Exception e) when (e is TargetInvocationException)
                             {
-                                NanoleafPlugin.Log.Info("Connection Refused");
+                                //NanoleafPlugin.Log.Info("Connection Refused");
                             }
                             catch (Exception e)
                             {

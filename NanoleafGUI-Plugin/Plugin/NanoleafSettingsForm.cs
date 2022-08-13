@@ -182,6 +182,10 @@ namespace NanoleafGUI_Plugin
         private Bitmap renderLayout(JToken controller)
         {
             var panels = controller["Panels"];
+
+            if (panels == null || panels.HasValues == false)
+                return new Bitmap(1, 1);
+
             int maxX = panels.Select(p => (int)p["X"]).Max();
             int maxY = panels.Select(p => (int)p["Y"]).Max();
             int minX = panels.Select(p => (int)p["X"]).Min();
@@ -191,8 +195,8 @@ namespace NanoleafGUI_Plugin
             int penSize = 2;
             int width = maxX - minX;
             int height = maxY - minY;
-            width += maxSize+ penSize;
-            height += maxSize+ penSize;
+            width += maxSize * 2 + penSize; // *2 because the width of the hexagons is 2 * SideLength
+            height += maxSize * 2 + penSize; // *2 because the width of the hexagons is 2 * SideLength
             Bitmap bmp = new Bitmap(width, height);
             using (Graphics g = Graphics.FromImage(bmp))
             {
@@ -200,11 +204,9 @@ namespace NanoleafGUI_Plugin
                 Brush brush = new SolidBrush(this.ForeColor);
                 Font font = this.Font;
                 StringFormat stringFormat = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                int i = 0;
-                foreach (var panel in panels)
-                {
-                    i++;
 
+                foreach (var (panel, i) in panels.Select((value, i) => (value, i)))
+                {
                     int id = (int)panel["ID"];
                     int x = (int)panel["X"];
                     int y = (int)panel["Y"];
@@ -214,15 +216,16 @@ namespace NanoleafGUI_Plugin
                     int size = (int)panel["SideLength"];
                     int orientation = (int)panel["Orientation"];
 
+                    RectangleF rect_text;
                     string str = $"ID: {id}" + Environment.NewLine + $"Index: {i}" + Environment.NewLine + $"{orientation}°";
 
                     var shape = (int)panel["Shape"];
                     switch (shape)
                     {
-                        //Square
-                        case 2:
-                        case 3:
-                        case 4:
+                        //Canvas
+                        case 2: // Square
+                        case 3: // Controller (active)
+                        case 4: // Controller (inactive)
                             var rect = new RectangleF(x, y, size, size);
                             g.DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
                             g.DrawString(str, font, brush, rect, stringFormat);
@@ -238,6 +241,75 @@ namespace NanoleafGUI_Plugin
                                 }
                             }
                             break;
+                            //Shapes
+                            case 7: //Hexagon
+                                // Shift by maxSize because the Shapes return their center point
+                                var x_hex = x + maxSize;
+                                var y_hex = y + maxSize;
+
+                                rect_text = new RectangleF(x_hex - size, y_hex - size, size * 2, size * 2);
+
+                                //Create 6 points
+                                var points_hex = new PointF[6];
+                                for (int a = 0; a < 6; a++)
+                                {
+                                    points_hex[a] = new PointF(
+                                        x_hex + size * (float)Math.Cos((a * 60 + orientation) * Math.PI / 180f),
+                                        y_hex + size * (float)Math.Sin((a * 60 + orientation) * Math.PI / 180f));
+                                }
+                                g.DrawPolygon(pen, points_hex);
+                                g.DrawString(str, font, brush, rect_text, stringFormat);
+                                break;
+                            case 8: //Large Triangle
+                            case 9: //Small Triangle
+                                // Shift by maxSize because the Shapes return their center point
+                                var x_tri = x + maxSize;
+                                var y_tri = y + maxSize;
+
+                                rect_text = new RectangleF(x_tri - (size / 2), y_tri - (size / 2), size, size);
+                                var localFont = font;
+                                if (shape == 9) localFont = new Font("Microsoft Sans Serif",7);
+
+                                //Create 3 points
+                                var points_tri = new PointF[3];
+                                for (int a = 0; a < 3; a++)
+                                {
+                                    points_tri[a] = new PointF(
+                                        x_tri + (float)(size / Math.Sqrt(3)) * (float)Math.Cos((a * 120 + 30 + orientation) * Math.PI / 180f),
+                                        y_tri + (float)(size / Math.Sqrt(3)) * (float)Math.Sin((a * 120 + 30 + orientation) * Math.PI / 180f));
+                                }
+                                g.DrawPolygon(pen, points_tri);
+                                g.DrawString(str, localFont, brush, rect_text, stringFormat);
+                                break;
+                            case 12: //Controller (active)
+                                // Shift by maxSize because the Shapes return their center point
+                                var x_ctrl = x + maxSize + 9;
+                                var y_ctrl = y + maxSize - 4.5f;
+
+                                //Create 4 points
+                                var points_ctrl = new PointF[4];
+
+                                var temp_point = new PointF(
+                                        x_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Cos((30 + orientation) * Math.PI / 180f),
+                                        y_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Sin((30 + orientation) * Math.PI / 180f));
+
+                                points_ctrl[2] = new PointF(
+                                        x_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Cos((1 * 120 + 30 + orientation) * Math.PI / 180f),
+                                        y_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Sin((1 * 120 + 30 + orientation) * Math.PI / 180f));
+                                points_ctrl[3] = new PointF(
+                                        x_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Cos((2 * 120 + 30 + orientation) * Math.PI / 180f),
+                                        y_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Sin((2 * 120 + 30 + orientation) * Math.PI / 180f));
+
+                                points_ctrl[0] = new PointF(
+                                        points_ctrl[3].X + (float)((temp_point.X - points_ctrl[3].X) * 0.2),
+                                        points_ctrl[3].Y + (float)((temp_point.Y - points_ctrl[3].Y) * 0.2));
+
+                                points_ctrl[1] = new PointF(
+                                        points_ctrl[2].X - (float)((points_ctrl[2].X - temp_point.X) * 0.2),
+                                        points_ctrl[2].Y - (float)((points_ctrl[2].Y - temp_point.Y) * 0.2));
+
+                                g.DrawPolygon(pen, points_ctrl);
+                                break;
                     }
                 }                
             }
