@@ -170,6 +170,7 @@ namespace Nanoleaf_Plugin.API
             private set;
         }
         public string ColorMode { get; private set; }
+        public string ColorModeStored { get; private set; }
         private List<Panel> panels = new List<Panel>();
         private List<Panel> changedPanels = new List<Panel>();
         public ReadOnlyCollection<Panel> Panels
@@ -250,6 +251,7 @@ namespace Nanoleaf_Plugin.API
             HueStored = hue;
             SaturationStored = saturation;
             ColorTempratureStored = colorTemprature;
+            ColorModeStored = ColorMode;
 
             var panels = json[nameof(Panels)];
             foreach (var p in panels)
@@ -302,19 +304,19 @@ namespace Nanoleaf_Plugin.API
                     }
                     catch (Exception e)
                     {
-                        log.Info($"Device({IP}) is maybe not in Pairing-Mode. Please Hold the Powerbutton til you see a Visual Feedback on the Controller (5-7)s");
-                        await Task.Delay(8000);// If the Device is not in Pairing-Mode it tock 5-7s tu enable the Pairing mode by hand. We try it again abfer 8s
+                        log.Info($"Device({IP}) is maybe not in Pairing-Mode. Please hold the Powerbutton until you see a Visual Feedback on the Controller (5-7)s");
+                        await Task.Delay(8000);// If the device is not in Pairing-Mode it takes 5-7s to enable the pairing mode by hand. We try it again after 8s.
                         count++;
                         if (count >= tryes && Auth_token == null)
                         {
-                            log.Info($"Device({IP}) not Response after {count} tryes");
+                            log.Info($"Device({IP}) not Response after {count} retries");
                             return;
                         }
                     }
 
                 if (Auth_token != null)
                 {
-                    log.Info($"Received AuthToken ({Auth_token}) from Device({IP}) after {count} tryes");
+                    log.Info($"Received AuthToken ({Auth_token}) from Device({IP}) after {count} retries");
                     AuthTokenReceived?.Invoke(this, EventArgs.Empty);
                 }
             });
@@ -445,6 +447,7 @@ namespace Nanoleaf_Plugin.API
             HueStored = allPanelInfo.State.Hue.Value;
             SaturationStored = allPanelInfo.State.Saturation.Value;
             ColorTempratureStored = allPanelInfo.State.ColorTemprature.Value;
+            ColorModeStored = allPanelInfo.State.ColorMode;
         }
 
         private void Communication_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
@@ -565,20 +568,32 @@ namespace Nanoleaf_Plugin.API
             try
             {
                 await Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, GlobalOrientationStored);
-
-                await Communication.SetSelectedEffect(IP, PORT, Auth_token, SelectedEffectStored);
-
                 await Communication.SetStateBrightness(IP, PORT, Auth_token, BrightnessStored);
 
-                if (SelectedEffectStored != null && SelectedEffectStored.Equals("*Solid*"))
+                //Check, if the last state is restorable
+                if (SelectedEffectStored != null && !SelectedEffectStored.Equals("*Dynamic*"))
                 {
-                    await Communication.SetStateHue(IP, PORT, Auth_token, HueStored);
+                    await Communication.SetSelectedEffect(IP, PORT, Auth_token, SelectedEffectStored);
+                    await Communication.SetColorMode(IP, PORT, Auth_token, ColorModeStored);
 
-                    await Communication.SetStateSaturation(IP, PORT, Auth_token, SaturationStored);
-
-                    await Communication.SetStateColorTemperature(IP, PORT, Auth_token, ColorTempratureStored);
+                    if (ColorModeStored != null && ColorModeStored.Equals("ct"))
+                    {
+                        await Communication.SetStateColorTemperature(IP, PORT, Auth_token, ColorTempratureStored);
+                    }
+                    if (ColorModeStored != null && ColorModeStored.Equals("hs"))
+                    {
+                        await Communication.SetStateHue(IP, PORT, Auth_token, HueStored);
+                        await Communication.SetStateSaturation(IP, PORT, Auth_token, SaturationStored);
+                    }
+                }
+                else
+                {
+                    // If the selected effect was "Dynamic" then a preview scene was active which can not be restored. Thus, set a default scene
+                    await Communication.SetColorMode(IP, PORT, Auth_token, "ct");
+                    await Communication.SetStateColorTemperature(IP, PORT, Auth_token, 5000);
                 }
 
+                // Setting the power state must be the last thing to do due to the fact that all other commands activate the Nanoleafs
                 await Communication.SetStateOnOff(IP, PORT, Auth_token, PowerOnStored);
             }
             finally 

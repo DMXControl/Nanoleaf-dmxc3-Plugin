@@ -465,6 +465,18 @@ namespace Nanoleaf_Plugin.API
             }
             return result.Replace("\"", "");
         }
+
+        public static async Task<bool> SetColorMode(string ip, string port, string auth_token, string value)
+        {
+            bool result = false;
+            string address = $"http://{ip}:{port}/api/v1/{auth_token}/state/colorMode";
+            string contentString = "{" + $"\"select\": \"{value}\"" + "}";
+
+            var response = await put(address, contentString);
+            result = response.StatusCode == System.Net.HttpStatusCode.NoContent;
+
+            return result;
+        }
         #endregion
         #endregion
 
