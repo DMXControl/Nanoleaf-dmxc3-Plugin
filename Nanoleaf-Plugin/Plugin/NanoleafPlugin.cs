@@ -227,8 +227,8 @@ namespace Nanoleaf_Plugin
         protected override void shutdownPlugin()
         {
             Communication.StopDiscoveryTask();
-            Communication.StopEventListener();
             clients.ForEach(c => c.SelfDestruction());
+            Communication.StopEventListener();
             clients.Clear();
             Log.Info("Shutdown");
             debindInputAssignment();

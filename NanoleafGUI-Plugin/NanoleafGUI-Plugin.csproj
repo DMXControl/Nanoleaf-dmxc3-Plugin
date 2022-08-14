@@ -69,9 +69,10 @@
   <ItemGroup>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)NanoleafGUI-Plugin.*" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
-xcopy "$(TargetDir)Newtonsoft.Json.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
-xcopy "$(TargetDir)System.ComponentModel.Annotations.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+    <PostBuildEvent>FOR /F "skip=2 tokens=2,*" %%A IN ('reg.exe query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Lumos.exe" /v ""') DO set "DMXCRF=%%B"
+xcopy "$(TargetDir)NanoleafGUI-Plugin.*" "%DMXCRF%\GUI\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)Newtonsoft.Json.dll" "%DMXCRF%\GUI\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)System.ComponentModel.Annotations.dll" "%DMXCRF%\GUI\Plugins\Nanoleaf\" /C /F /R /Y /I
 
 </PostBuildEvent>
     <RunPostBuildEvent>Always</RunPostBuildEvent>

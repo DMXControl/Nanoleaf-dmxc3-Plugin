@@ -93,13 +93,14 @@
     <EmbeddedResource Remove="NanoleafGUI-Plugin\Properties\Resources.resx" />
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)Nanoleaf-Plugin.*" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+    <PostBuildEvent>FOR /F "skip=2 tokens=2,*" %%A IN ('reg.exe query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Lumos.exe" /v ""') DO set "DMXCRF=%%B"
+xcopy "$(TargetDir)Nanoleaf-Plugin.*" "%DMXCRF%\Kernel\Plugins\Nanoleaf\" /C /F /R /Y /I
 
-xcopy "$(TargetDir)Newtonsoft.Json.dll" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)Newtonsoft.Json.dll" "%DMXCRF%\Kernel\Plugins\Nanoleaf\" /C /F /R /Y /I
 
-xcopy "$(TargetDir)RestSharp.dll" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
-xcopy "$(TargetDir)System.Text.Json.dll" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
-xcopy "$(TargetDir)System.Text.Encodings.Web.dll" "D:\Git-Repos\Lumos\master\Lumos\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)RestSharp.dll" "%DMXCRF%\Kernel\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)System.Text.Json.dll" "%DMXCRF%\Kernel\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)System.Text.Encodings.Web.dll" "%DMXCRF%\Kernel\Plugins\Nanoleaf\" /C /F /R /Y /I
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

@@ -43,6 +43,7 @@ namespace Nanoleaf_Plugin.API
                 _ = Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, value);
             }
         }
+        public ushort GlobalOrientationStored { get; private set; }
         public ushort GlobalOrientationMin
         {
             get;
@@ -56,9 +57,11 @@ namespace Nanoleaf_Plugin.API
 
         public string[] EffectList { get; private set; }
         public string SelectedEffect { get; private set; }
+        public string SelectedEffectStored { get; private set; }
 
         public bool PowerOn { get; private set; }
         public bool PowerOff { get; private set; }
+        public bool PowerOnStored { get; private set; }
 
         private bool reachable;
         public bool Reachable
@@ -86,6 +89,7 @@ namespace Nanoleaf_Plugin.API
         }
 
         private ushort brightness;
+
         public ushort Brightness
         {
             get { return brightness; }
@@ -94,6 +98,7 @@ namespace Nanoleaf_Plugin.API
                 _ = Communication.SetStateBrightness(IP, PORT, Auth_token, value);
             }
         }
+        public ushort BrightnessStored { get; private set; }
         public ushort BrightnessMin
         {
             get;
@@ -113,6 +118,7 @@ namespace Nanoleaf_Plugin.API
                 _ = Communication.SetStateHue(IP, PORT, Auth_token, value);
             }
         }
+        public ushort HueStored { get; private set; }
         public ushort HueMin
         {
             get;
@@ -132,6 +138,7 @@ namespace Nanoleaf_Plugin.API
                 _ = Communication.SetStateSaturation(IP, PORT, Auth_token, value);
             }
         }
+        public ushort SaturationStored { get; private set; }
         public ushort SaturationMin
         {
             get;
@@ -151,6 +158,7 @@ namespace Nanoleaf_Plugin.API
                 _ = Communication.SetStateColorTemperature(IP, PORT, Auth_token, value);
             }
         }
+        public ushort ColorTempratureStored { get; private set; }
         public ushort ColorTempratureMin
         {
             get;
@@ -234,6 +242,15 @@ namespace Nanoleaf_Plugin.API
             ColorTempratureMax = (ushort)json[nameof(ColorTempratureMax)];
             ColorMode = (string)json[nameof(ColorMode)];
 
+            //Backup current state to restore it on shutdown
+            GlobalOrientationStored = globalOrientation;
+            SelectedEffectStored = SelectedEffect;
+            PowerOnStored = PowerOn;
+            BrightnessStored = brightness;
+            HueStored = hue;
+            SaturationStored = saturation;
+            ColorTempratureStored = colorTemprature;
+
             var panels = json[nameof(Panels)];
             foreach (var p in panels)
                 this.panels.Add(new Panel(p));
@@ -313,12 +330,17 @@ namespace Nanoleaf_Plugin.API
                 try
                 {
                     var res = await ping.SendPingAsync(IP);
-                    if (res.Status == IPStatus.Success)
-                        this.Reachable = true;
-                    else
-                        this.Reachable = false;
+                    if (!isDisposed)
+                    {
+                        if (res.Status == IPStatus.Success)
+                            this.Reachable = true;
+                        else
+                            this.Reachable = false;
+                    }
+
                     await Task.Delay(5000);
-                    if(this.Reachable && !isDisposed)
+
+                    if (this.Reachable && !isDisposed)
                         UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
                 }
                 catch (Exception e)
@@ -333,7 +355,10 @@ namespace Nanoleaf_Plugin.API
             {
                 Communication.StaticOnLayoutEvent -= Communication_StaticOnLayoutEvent;
                 Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
-                UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
+
+                var infos = await Communication.GetAllPanelInfo(IP, PORT, Auth_token);
+                BackupSettings(infos);
+                UpdateInfos(infos);
                 await Communication.StartEventListener(IP, PORT, Auth_token);
                 externalControlInfo = await Communication.SetExternalControlStreaming(IP, PORT, Auth_token, DeviceType);
             }
@@ -410,12 +435,25 @@ namespace Nanoleaf_Plugin.API
             UpdatePanelLayout(allPanelInfo.PanelLayout.Layout);
         }
 
+        private void BackupSettings(AllPanelInfo allPanelInfo)
+        {
+            //Backup current state to restore it on shutdown
+            GlobalOrientationStored = allPanelInfo.PanelLayout.GlobalOrientation.Value;
+            SelectedEffectStored = allPanelInfo.Effects.Selected;
+            PowerOnStored = allPanelInfo.State.On.On;
+            BrightnessStored = allPanelInfo.State.Brightness.Value;
+            HueStored = allPanelInfo.State.Hue.Value;
+            SaturationStored = allPanelInfo.State.Saturation.Value;
+            ColorTempratureStored = allPanelInfo.State.ColorTemprature.Value;
+        }
+
         private void Communication_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
             if (!e.IP.Equals(IP))
                 return;
 
-            UpdatePanelLayout(e.LayoutEvent.Layout);
+            if (!isDisposed)
+                UpdatePanelLayout(e.LayoutEvent.Layout);
         }
         private void UpdatePanelLayout(Layout layout)
         {
@@ -515,11 +553,40 @@ namespace Nanoleaf_Plugin.API
         public void SelfDestruction(bool deleteUser=false)
         {
             Dispose();
+            RestoreParameters();
             if (deleteUser)
                 Communication.DeleteUser(IP, PORT, Auth_token).GetAwaiter().GetResult();
 
             log.Info(string.Format("Destruct {0}", this));
         }
+
+        public async void RestoreParameters()
+        {
+            try
+            {
+                await Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, GlobalOrientationStored);
+
+                await Communication.SetSelectedEffect(IP, PORT, Auth_token, SelectedEffectStored);
+
+                await Communication.SetStateBrightness(IP, PORT, Auth_token, BrightnessStored);
+
+                if (SelectedEffectStored != null && SelectedEffectStored.Equals("*Solid*"))
+                {
+                    await Communication.SetStateHue(IP, PORT, Auth_token, HueStored);
+
+                    await Communication.SetStateSaturation(IP, PORT, Auth_token, SaturationStored);
+
+                    await Communication.SetStateColorTemperature(IP, PORT, Auth_token, ColorTempratureStored);
+                }
+
+                await Communication.SetStateOnOff(IP, PORT, Auth_token, PowerOnStored);
+            }
+            finally 
+            {
+                log.Info(string.Format("Reset parameters for {0}", this));
+            }
+        }
+
         public void Dispose()
         {
             isDisposed = true;
