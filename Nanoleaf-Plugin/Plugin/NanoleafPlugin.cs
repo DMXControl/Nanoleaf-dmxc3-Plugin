@@ -17,7 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using T = LumosLIB.Tools.I18n.Translatable;
+using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin
 {
