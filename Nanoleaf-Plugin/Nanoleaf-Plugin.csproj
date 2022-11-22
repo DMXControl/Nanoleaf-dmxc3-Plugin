@@ -66,7 +66,7 @@
 		</Compile>
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="Nanoleaf.ico"/>
+		<Content Include="Nanoleaf.ico" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Update="Properties\Resources.resx">
@@ -75,31 +75,32 @@
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3"/>
-		<PackageReference Include="RestSharp" Version="108.0.1"/>
-		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0"/>
-		<PackageReference Include="System.Drawing.Common" Version="6.0.0"/>
-		<PackageReference Include="System.Net.Http" Version="4.3.4"/>
-		<PackageReference Include="System.Resources.Extensions" Version="7.0.0"/>
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="RestSharp" Version="108.0.1" />
+		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
+		<PackageReference Include="System.Resources.Extensions" Version="7.0.0" />
+		<PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Remove="NanoleafGUI-Plugin\obj\Debug\net48\.NETFramework,Version=v4.8.AssemblyAttributes.cs"/>
-		<Compile Remove="NanoleafGUI-Plugin\Plugin\AddControlerForm.cs"/>
-		<Compile Remove="NanoleafGUI-Plugin\Plugin\AddControlerForm.Designer.cs"/>
-		<Compile Remove="NanoleafGUI-Plugin\Plugin\NanoleafGUI-Plugin.cs"/>
-		<Compile Remove="NanoleafGUI-Plugin\Plugin\NanoleafSettingsForm.cs"/>
-		<Compile Remove="NanoleafGUI-Plugin\Plugin\NanoleafSettingsForm.Designer.cs"/>
-		<Compile Remove="NanoleafGUI-Plugin\Plugin\Tools.cs"/>
-		<Compile Remove="NanoleafGUI-Plugin\Properties\Resources.Designer.cs"/>
-		<Compile Remove="NanoleafTests\obj\Debug\net48\.NETFramework,Version=v4.8.AssemblyAttributes.cs"/>
-		<Compile Remove="NanoleafTests\Properties\AssemblyInfo.cs"/>
-		<Compile Remove="NanoleafTests\UnitTest1.cs"/>
-		<Compile Remove="NanoleafTest\obj\Debug\.NETFramework,Version=v4.8.AssemblyAttributes.cs"/>
-		<Compile Remove="NanoleafTest\Program.cs"/>
-		<Compile Remove="NanoleafTest\Properties\AssemblyInfo.cs"/>
-		<EmbeddedResource Remove="NanoleafGUI-Plugin\Plugin\AddControlerForm.resx"/>
-		<EmbeddedResource Remove="NanoleafGUI-Plugin\Plugin\NanoleafSettingsForm.resx"/>
-		<EmbeddedResource Remove="NanoleafGUI-Plugin\Properties\Resources.resx"/>
+		<Compile Remove="NanoleafGUI-Plugin\obj\Debug\net48\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
+		<Compile Remove="NanoleafGUI-Plugin\Plugin\AddControlerForm.cs" />
+		<Compile Remove="NanoleafGUI-Plugin\Plugin\AddControlerForm.Designer.cs" />
+		<Compile Remove="NanoleafGUI-Plugin\Plugin\NanoleafGUI-Plugin.cs" />
+		<Compile Remove="NanoleafGUI-Plugin\Plugin\NanoleafSettingsForm.cs" />
+		<Compile Remove="NanoleafGUI-Plugin\Plugin\NanoleafSettingsForm.Designer.cs" />
+		<Compile Remove="NanoleafGUI-Plugin\Plugin\Tools.cs" />
+		<Compile Remove="NanoleafGUI-Plugin\Properties\Resources.Designer.cs" />
+		<Compile Remove="NanoleafTests\obj\Debug\net48\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
+		<Compile Remove="NanoleafTests\Properties\AssemblyInfo.cs" />
+		<Compile Remove="NanoleafTests\UnitTest1.cs" />
+		<Compile Remove="NanoleafTest\obj\Debug\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
+		<Compile Remove="NanoleafTest\Program.cs" />
+		<Compile Remove="NanoleafTest\Properties\AssemblyInfo.cs" />
+		<EmbeddedResource Remove="NanoleafGUI-Plugin\Plugin\AddControlerForm.resx" />
+		<EmbeddedResource Remove="NanoleafGUI-Plugin\Plugin\NanoleafSettingsForm.resx" />
+		<EmbeddedResource Remove="NanoleafGUI-Plugin\Properties\Resources.resx" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Properties\Settings.settings">
@@ -113,6 +114,6 @@
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 	</PropertyGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="FOR /F &quot;skip=2 tokens=2,*&quot; %25%25A IN ('reg.exe query &quot;HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Lumos.exe&quot; /v &quot;&quot;') DO set &quot;DMXCRF=%25%25B&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)Nanoleaf-Plugin.*&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)Newtonsoft.Json.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)RestSharp.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)System.Text.Json.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)System.Text.Encodings.Web.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I"/>
+		<Exec Command="FOR /F &quot;skip=2 tokens=2,*&quot; %25%25A IN ('reg.exe query &quot;HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Lumos.exe&quot; /v &quot;&quot;') DO (&#xD;&#xA;set &quot;DMXCRF=%25%25B&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)Nanoleaf-Plugin.*&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)Newtonsoft.Json.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)RestSharp.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)System.Text.Json.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)System.Text.Encodings.Web.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;)" />
 	</Target>
 </Project>
