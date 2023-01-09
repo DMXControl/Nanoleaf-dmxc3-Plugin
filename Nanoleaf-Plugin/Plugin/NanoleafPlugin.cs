@@ -101,7 +101,7 @@ namespace Nanoleaf_Plugin
             string ip = e.DiscoveredDevice.IP;
             string json= JsonConvert.SerializeObject(Communication.DiscoveredDevices);
             sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
-            addControllerAsync(ip);
+            _ = addControllerAsync(ip);
         }
         private async Task addControllerAsync(string ip, string authToken = null, bool setSettings=true)
         {
@@ -126,7 +126,7 @@ namespace Nanoleaf_Plugin
                 await Task.Delay(100);
                 Log.Info($"Controller Added: {controller.ToString()}");
 
-                bindInputAssignment();
+                _ = bindInputAssignment();
             }
             catch (Exception e)
             {
@@ -231,7 +231,7 @@ namespace Nanoleaf_Plugin
             Communication.StopEventListener();
             clients.Clear();
             Log.Info("Shutdown");
-            debindInputAssignment();
+            _ = debindInputAssignment();
             isStarted = false;
         }
 
@@ -290,9 +290,9 @@ namespace Nanoleaf_Plugin
                 case NANOLEAF_SHOW_IN_INPUTASSIGNMENT:
                     ShowInInputAssignment = (bool)args.NewValue;
                     if (ShowInInputAssignment)
-                        bindInputAssignment();
+                        _ = bindInputAssignment();
                     else
-                        debindInputAssignment();
+                        _ = debindInputAssignment();
                     break;
 
                 case NANOLEAF_DISCOVER:
@@ -331,9 +331,9 @@ namespace Nanoleaf_Plugin
                     string token = (string)objController["Token"];
 
                     if (objController["token"] != null)
-                        addControllerAsync(ip, token);
+                        _ = addControllerAsync(ip, token);
                     else
-                        addControllerAsync(ip);
+                        _ = addControllerAsync(ip);
                     break;
             }
         }
@@ -347,7 +347,7 @@ namespace Nanoleaf_Plugin
                 c.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 c.SelfDestruction();
             });
-            debindInputAssignment();
+            _ = debindInputAssignment();
             base.DisposePlugin(disposing);
             isDisposed = true;
         }

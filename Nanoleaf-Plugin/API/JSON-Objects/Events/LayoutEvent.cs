@@ -34,7 +34,7 @@ namespace Nanoleaf_Plugin.API
                 }
                 return new LayoutEvent() { Layout = layout, GlobalOrientation = globalOrientation };
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }

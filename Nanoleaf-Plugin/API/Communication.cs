@@ -16,7 +16,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Nanoleaf_Plugin.API.TouchEvent;
-using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin.API
 {
@@ -118,7 +117,7 @@ namespace Nanoleaf_Plugin.API
                 }
                 catch (Exception e)
                 {
-                    log.Warn("The Socket is already in use." + Environment.NewLine+
+                    log.Warn("The Socket is already in use." + Environment.NewLine +
                         "there Are a feaw things to fix this issue." + Environment.NewLine +
                         "Open the CMD.exe and perform the command \"netstat -a -n -o\"" + Environment.NewLine +
                         "Now you see all open Ports" + Environment.NewLine +
@@ -140,7 +139,7 @@ namespace Nanoleaf_Plugin.API
         {
             log.Debug("Request stop for DiscoverTask");
             discoveryThreadRunning = false;
-            for (int i=0;i<10;i++)
+            for (int i = 0; i < 10; i++)
             {
                 if (discoverTask?.IsCompleted ?? true)
                 {
@@ -177,7 +176,7 @@ namespace Nanoleaf_Plugin.API
             string address = $"http://{ip}:{port}/api/v1/{auth_token}";
             using (HttpClient hc = new HttpClient())
             {
-                var response = hc.DeleteAsync(address).GetAwaiter().GetResult();
+                var response = await hc.DeleteAsync(address);
                 result = response.StatusCode == System.Net.HttpStatusCode.NoContent;
             }
             return result;
@@ -199,11 +198,11 @@ namespace Nanoleaf_Plugin.API
                         result = JsonConvert.DeserializeObject<AllPanelInfo>(res);
                     }
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return null;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     log.Warn(e);
                 }
@@ -225,7 +224,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = JsonConvert.DeserializeObject<StateOnOff>(await response.Content.ReadAsStringAsync()).On;
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return false;
                 }
@@ -261,7 +260,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = JsonConvert.DeserializeObject<StateInfo>(await response.Content.ReadAsStringAsync()).Value;
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return 0;
                 }
@@ -313,7 +312,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = JsonConvert.DeserializeObject<StateInfo>(await response.Content.ReadAsStringAsync()).Value;
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return 0;
                 }
@@ -360,7 +359,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = JsonConvert.DeserializeObject<StateInfo>(await response.Content.ReadAsStringAsync()).Value;
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return 0;
                 }
@@ -407,7 +406,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = JsonConvert.DeserializeObject<StateInfo>(await response.Content.ReadAsStringAsync()).Value;
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return 0;
                 }
@@ -454,7 +453,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = await response.Content.ReadAsStringAsync();
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return null;
                 }
@@ -493,7 +492,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = await response.Content.ReadAsStringAsync();
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return null;
                 }
@@ -527,7 +526,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = JsonConvert.DeserializeObject<IEnumerable<string>>(await response.Content.ReadAsStringAsync()).ToArray();
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return null;
                 }
@@ -554,7 +553,7 @@ namespace Nanoleaf_Plugin.API
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         result = JsonConvert.DeserializeObject<StateInfo>(await response.Content.ReadAsStringAsync()).Value;
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return 0;
                 }
@@ -591,7 +590,7 @@ namespace Nanoleaf_Plugin.API
                         result = JsonConvert.DeserializeObject<Layout>(res);
                     }
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException)
                 {
                     return null;
                 }
@@ -704,7 +703,8 @@ namespace Nanoleaf_Plugin.API
         {
             if (eventCleanLoop == null)
             {
-                eventCleanLoop = new Thread(() => {
+                eventCleanLoop = new Thread(() =>
+                {
                     eventCleanLoopThreadRunning = true;
                     while (eventCleanLoopThreadRunning)
                     {
@@ -766,14 +766,14 @@ namespace Nanoleaf_Plugin.API
                                     StaticOnTouchEvent?.Invoke(null, new TouchEventArgs(ip, touchEvent));
                                 }
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
 
                             }
                         } while (eventListenerThreadRunning);
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
 
                 }
@@ -846,7 +846,7 @@ namespace Nanoleaf_Plugin.API
                                 }
                                 catch (Exception e) when (e is TargetInvocationException)
                                 {
-                                //NanoleafPlugin.Log.Info("Connection Refused");
+                                    //NanoleafPlugin.Log.Info("Connection Refused");
                                 }
                                 catch (Exception e)
                                 {
@@ -857,7 +857,7 @@ namespace Nanoleaf_Plugin.API
                             while (buffer[buffer.Length - 1] != 0);
                             res = System.Text.Encoding.Default.GetString(TrimTailingZeros(ms.GetBuffer()));
                         }
-                        FireEvent(ip, res);
+                        _ = FireEvent(ip, res);
                     }
                 DISPOSE:
                     wc.Dispose();
@@ -866,7 +866,7 @@ namespace Nanoleaf_Plugin.API
                     await Task.Delay(10);
 
                 if (restart)
-                    StartEventListener(ip, port, auth_token);
+                    _ = StartEventListener(ip, port, auth_token);
             }));
             eventListenerThread.Name = $"Nanoleaf StreamEventListener";
             eventListenerThread.Priority = ThreadPriority.BelowNormal;

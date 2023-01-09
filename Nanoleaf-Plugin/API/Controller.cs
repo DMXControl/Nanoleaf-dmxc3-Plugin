@@ -288,7 +288,7 @@ namespace Nanoleaf_Plugin.API
             });
             threadStream.IsBackground = true;
             threadStream.Priority = ThreadPriority.AboveNormal;
-            threadStream.ApartmentState = ApartmentState.MTA;
+            threadStream.SetApartmentState(ApartmentState.MTA);
             threadStream.Start();
         }
 
@@ -302,7 +302,7 @@ namespace Nanoleaf_Plugin.API
                     {
                         Auth_token = await Communication.AddUser(IP, PORT);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         log.Info($"Device({IP}) is maybe not in Pairing-Mode. Please hold the Powerbutton until you see a Visual Feedback on the Controller (5-7)s");
                         await Task.Delay(8000);// If the device is not in Pairing-Mode it takes 5-7s to enable the pairing mode by hand. We try it again after 8s.

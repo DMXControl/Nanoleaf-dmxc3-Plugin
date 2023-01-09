@@ -27,7 +27,7 @@ namespace NanoleafGUI_Plugin
 
                 return splitValues.All(r => byte.TryParse(r, out tempForParsing));
             }
-            catch(Exception e)
+            catch (Exception)
             {
                 return false;
             }
