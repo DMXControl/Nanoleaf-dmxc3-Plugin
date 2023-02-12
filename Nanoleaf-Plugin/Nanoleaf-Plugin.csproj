@@ -33,6 +33,10 @@
 			<HintPath>..\dep\log4net.dll</HintPath>
 		</Reference>
 		<Reference Include="Lumos">
+			<HintPath>..\dep\Lumos.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Lumos">
 			<HintPath>..\dep\Lumos.exe</HintPath>
 			<Private>False</Private>
 		</Reference>
