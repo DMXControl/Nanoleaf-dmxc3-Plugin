@@ -11,7 +11,7 @@ namespace Nanoleaf_Plugin
     {
         public string SerialNumber { get; private set; }
         public CurrentEffectSource(string serialNumber) :
-            base(getID(serialNumber), getDisplayName(), getCategory(serialNumber))
+            base(getID(serialNumber), getDisplayName(), getCategory(serialNumber), default)
         {
             Communication.StaticOnEffectEvent += ExternalControlEndpoint_StaticOnEffectEvent;
             SerialNumber = serialNumber;

@@ -57,7 +57,7 @@
     <Content Include="Resources\64\Nanoleaf.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
@@ -65,13 +65,23 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)NanoleafGUI-Plugin.*" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
-xcopy "$(TargetDir)Newtonsoft.Json.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
-xcopy "$(TargetDir)System.ComponentModel.Annotations.dll" "D:\Git-Repos\Lumos\master\LumosGUI\bin\Debug\Plugins\Nanoleaf\" /C /F /R /Y /I
+    <PostBuildEvent>FOR /F "skip=2 tokens=2,*" %%A IN ('reg.exe query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Lumos.exe" /v ""') DO set "DMXCRF=%%B"
+xcopy "$(TargetDir)NanoleafGUI-Plugin.*" "%DMXCRF%\GUI\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)Newtonsoft.Json.dll" "%DMXCRF%\GUI\Plugins\Nanoleaf\" /C /F /R /Y /I
+xcopy "$(TargetDir)System.ComponentModel.Annotations.dll" "%DMXCRF%\GUI\Plugins\Nanoleaf\" /C /F /R /Y /I
 
 </PostBuildEvent>
     <RunPostBuildEvent>Always</RunPostBuildEvent>

@@ -15,7 +15,7 @@ namespace Nanoleaf_Plugin
         public ETouch TouchType { get; private set; }
         private long beatValue = 0;
         private CanvasTouchSource(string serialNumber, int panelID, ETouch touchType) :
-            base(getID(serialNumber, panelID, touchType), getDisplayName(touchType), getCategory(serialNumber, panelID))
+            base(getID(serialNumber, panelID, touchType), getDisplayName(touchType), getCategory(serialNumber, panelID), default)
         {
             Communication.StaticOnTouchEvent += ExternalControlEndpoint_StaticOnTouchEvent;
             SerialNumber = serialNumber;

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using static Nanoleaf_Plugin.API.Panel;
@@ -17,8 +18,10 @@ namespace Nanoleaf_Plugin.API
         private static ILumosLog log = NanoleafPlugin.Log;
         public string IP { get; private set; }
         private const string PORT = "16021";
+
         public string Auth_token { get; private set; } = null;
         private bool isDisposed = false;
+        private Ping ping = new Ping();
 
         public string Name { get; private set; }
         public string Model { get; private set; }
@@ -29,6 +32,7 @@ namespace Nanoleaf_Plugin.API
 
         public EDeviceType DeviceType { get; private set; }
 
+
         public uint NumberOfPanels { get; private set; }
         private ushort globalOrientation;
         public ushort GlobalOrientation
@@ -36,9 +40,10 @@ namespace Nanoleaf_Plugin.API
             get { return globalOrientation; }
             private set
             {
-                Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, value);
+                _ = Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, value);
             }
         }
+        public ushort GlobalOrientationStored { get; private set; }
         public ushort GlobalOrientationMin
         {
             get;
@@ -52,27 +57,48 @@ namespace Nanoleaf_Plugin.API
 
         public string[] EffectList { get; private set; }
         public string SelectedEffect { get; private set; }
+        public string SelectedEffectStored { get; private set; }
 
         public bool PowerOn { get; private set; }
         public bool PowerOff { get; private set; }
+        public bool PowerOnStored { get; private set; }
+
+        private bool reachable;
+        public bool Reachable
+        {
+            get
+            {
+                return this.reachable;
+            }
+            private set
+            {
+                if (this.reachable == value)
+                    return;
+                this.reachable = value;
+                log.Info($"{this} is reachable.");
+                this.establishConnection();
+            }
+        }
         public void SetPowerOn()
         {
-            Communication.SetStateOnOff(IP, PORT, Auth_token, true);
+            _ = Communication.SetStateOnOff(IP, PORT, Auth_token, true);
         }
         public void SetPowerOff()
         {
-            Communication.SetStateOnOff(IP, PORT, Auth_token, false);
+            _ = Communication.SetStateOnOff(IP, PORT, Auth_token, false);
         }
 
         private ushort brightness;
+
         public ushort Brightness
         {
             get { return brightness; }
             set
             {
-                Communication.SetStateBrightness(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateBrightness(IP, PORT, Auth_token, value);
             }
         }
+        public ushort BrightnessStored { get; private set; }
         public ushort BrightnessMin
         {
             get;
@@ -89,9 +115,10 @@ namespace Nanoleaf_Plugin.API
             get { return hue; }
             set
             {
-                Communication.SetStateHue(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateHue(IP, PORT, Auth_token, value);
             }
         }
+        public ushort HueStored { get; private set; }
         public ushort HueMin
         {
             get;
@@ -108,9 +135,10 @@ namespace Nanoleaf_Plugin.API
             get { return saturation; }
             set
             {
-                Communication.SetStateSaturation(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateSaturation(IP, PORT, Auth_token, value);
             }
         }
+        public ushort SaturationStored { get; private set; }
         public ushort SaturationMin
         {
             get;
@@ -127,9 +155,10 @@ namespace Nanoleaf_Plugin.API
             get { return colorTemprature; }
             set
             {
-                Communication.SetStateColorTemperature(IP, PORT, Auth_token, value);
+                _ = Communication.SetStateColorTemperature(IP, PORT, Auth_token, value);
             }
         }
+        public ushort ColorTempratureStored { get; private set; }
         public ushort ColorTempratureMin
         {
             get;
@@ -141,6 +170,7 @@ namespace Nanoleaf_Plugin.API
             private set;
         }
         public string ColorMode { get; private set; }
+        public string ColorModeStored { get; private set; }
         private List<Panel> panels = new List<Panel>();
         private List<Panel> changedPanels = new List<Panel>();
         public ReadOnlyCollection<Panel> Panels
@@ -213,6 +243,16 @@ namespace Nanoleaf_Plugin.API
             ColorTempratureMax = (ushort)json[nameof(ColorTempratureMax)];
             ColorMode = (string)json[nameof(ColorMode)];
 
+            //Backup current state to restore it on shutdown
+            GlobalOrientationStored = globalOrientation;
+            SelectedEffectStored = SelectedEffect;
+            PowerOnStored = PowerOn;
+            BrightnessStored = brightness;
+            HueStored = hue;
+            SaturationStored = saturation;
+            ColorTempratureStored = colorTemprature;
+            ColorModeStored = ColorMode;
+
             var panels = json[nameof(Panels)];
             foreach (var p in panels)
                 this.panels.Add(new Panel(p));
@@ -248,7 +288,7 @@ namespace Nanoleaf_Plugin.API
             });
             threadStream.IsBackground = true;
             threadStream.Priority = ThreadPriority.AboveNormal;
-            threadStream.ApartmentState = ApartmentState.MTA;
+            threadStream.SetApartmentState(ApartmentState.MTA);
             threadStream.Start();
         }
 
@@ -262,21 +302,21 @@ namespace Nanoleaf_Plugin.API
                     {
                         Auth_token = await Communication.AddUser(IP, PORT);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        log.Info($"Device({IP}) is maybe not in Pairing-Mode. Please Hold the Powerbutton til you see a Visual Feedback on the Controller (5-7)s");
-                        await Task.Delay(8000);// If the Device is not in Pairing-Mode it tock 5-7s tu enable the Pairing mode by hand. We try it again abfer 8s
+                        log.Info($"Device({IP}) is maybe not in Pairing-Mode. Please hold the Powerbutton until you see a Visual Feedback on the Controller (5-7)s");
+                        await Task.Delay(8000);// If the device is not in Pairing-Mode it takes 5-7s to enable the pairing mode by hand. We try it again after 8s.
                         count++;
                         if (count >= tryes && Auth_token == null)
                         {
-                            log.Info($"Device({IP}) not Response after {count} tryes");
+                            log.Info($"Device({IP}) not Response after {count} retries");
                             return;
                         }
                     }
 
                 if (Auth_token != null)
                 {
-                    log.Info($"Received AuthToken ({Auth_token}) from Device({IP}) after {count} tryes");
+                    log.Info($"Received AuthToken ({Auth_token}) from Device({IP}) after {count} retries");
                     AuthTokenReceived?.Invoke(this, EventArgs.Empty);
                 }
             });
@@ -287,28 +327,57 @@ namespace Nanoleaf_Plugin.API
             while (!isDisposed && Auth_token == null)
                 await Task.Delay(1000);
 
-            UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
-            externalControlInfo = await Communication.SetExternalControlStreaming(IP, PORT, Auth_token, DeviceType);
-            Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
-            Communication.StartEventListener(IP, PORT, Auth_token);
-            while (!isDisposed)
+            do
             {
                 try
                 {
-                    UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
+                    var res = await ping.SendPingAsync(IP);
+                    if (!isDisposed)
+                    {
+                        if (res.Status == IPStatus.Success)
+                            this.Reachable = true;
+                        else
+                            this.Reachable = false;
+                    }
+
                     await Task.Delay(5000);
+
+                    if (this.Reachable && !isDisposed)
+                        UpdateInfos(await Communication.GetAllPanelInfo(IP, PORT, Auth_token));
                 }
                 catch (Exception e)
                 {
                     NanoleafPlugin.Log.ErrorOrDebug(string.Empty, e);
                 }
+            } while (!isDisposed);
+        }
+        private async void establishConnection()
+        {
+            try
+            {
+                Communication.StaticOnLayoutEvent -= Communication_StaticOnLayoutEvent;
+                Communication.StaticOnLayoutEvent += Communication_StaticOnLayoutEvent;
+
+                var infos = await Communication.GetAllPanelInfo(IP, PORT, Auth_token);
+                BackupSettings(infos);
+                UpdateInfos(infos);
+                await Communication.StartEventListener(IP, PORT, Auth_token);
+                externalControlInfo = await Communication.SetExternalControlStreaming(IP, PORT, Auth_token, DeviceType);
+            }
+            catch (Exception e)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(string.Empty, e);
             }
         }
 
         private void UpdateInfos(AllPanelInfo allPanelInfo)
         {
             if (allPanelInfo == null)
+            {
+                this.Reachable = false;
                 return;
+            }
+            this.Reachable = true;
 
             Name = allPanelInfo.Name;
             Model = allPanelInfo.Model;
@@ -368,12 +437,26 @@ namespace Nanoleaf_Plugin.API
             UpdatePanelLayout(allPanelInfo.PanelLayout.Layout);
         }
 
+        private void BackupSettings(AllPanelInfo allPanelInfo)
+        {
+            //Backup current state to restore it on shutdown
+            GlobalOrientationStored = allPanelInfo.PanelLayout.GlobalOrientation.Value;
+            SelectedEffectStored = allPanelInfo.Effects.Selected;
+            PowerOnStored = allPanelInfo.State.On.On;
+            BrightnessStored = allPanelInfo.State.Brightness.Value;
+            HueStored = allPanelInfo.State.Hue.Value;
+            SaturationStored = allPanelInfo.State.Saturation.Value;
+            ColorTempratureStored = allPanelInfo.State.ColorTemprature.Value;
+            ColorModeStored = allPanelInfo.State.ColorMode;
+        }
+
         private void Communication_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
             if (!e.IP.Equals(IP))
                 return;
 
-            UpdatePanelLayout(e.LayoutEvent.Layout);
+            if (!isDisposed)
+                UpdatePanelLayout(e.LayoutEvent.Layout);
         }
         private void UpdatePanelLayout(Layout layout)
         {
@@ -473,11 +556,52 @@ namespace Nanoleaf_Plugin.API
         public void SelfDestruction(bool deleteUser=false)
         {
             Dispose();
+            RestoreParameters();
             if (deleteUser)
                 Communication.DeleteUser(IP, PORT, Auth_token).GetAwaiter().GetResult();
 
             log.Info(string.Format("Destruct {0}", this));
         }
+
+        public async void RestoreParameters()
+        {
+            try
+            {
+                await Communication.SetPanelLayoutGlobalOrientation(IP, PORT, Auth_token, GlobalOrientationStored);
+                await Communication.SetStateBrightness(IP, PORT, Auth_token, BrightnessStored);
+
+                //Check, if the last state is restorable
+                if (SelectedEffectStored != null && !SelectedEffectStored.Equals("*Dynamic*"))
+                {
+                    await Communication.SetSelectedEffect(IP, PORT, Auth_token, SelectedEffectStored);
+                    await Communication.SetColorMode(IP, PORT, Auth_token, ColorModeStored);
+
+                    if (ColorModeStored != null && ColorModeStored.Equals("ct"))
+                    {
+                        await Communication.SetStateColorTemperature(IP, PORT, Auth_token, ColorTempratureStored);
+                    }
+                    if (ColorModeStored != null && ColorModeStored.Equals("hs"))
+                    {
+                        await Communication.SetStateHue(IP, PORT, Auth_token, HueStored);
+                        await Communication.SetStateSaturation(IP, PORT, Auth_token, SaturationStored);
+                    }
+                }
+                else
+                {
+                    // If the selected effect was "Dynamic" then a preview scene was active which can not be restored. Thus, set a default scene
+                    await Communication.SetColorMode(IP, PORT, Auth_token, "ct");
+                    await Communication.SetStateColorTemperature(IP, PORT, Auth_token, 5000);
+                }
+
+                // Setting the power state must be the last thing to do due to the fact that all other commands activate the Nanoleafs
+                await Communication.SetStateOnOff(IP, PORT, Auth_token, PowerOnStored);
+            }
+            finally 
+            {
+                log.Info(string.Format("Reset parameters for {0}", this));
+            }
+        }
+
         public void Dispose()
         {
             isDisposed = true;

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DMXC-Test": {
+      "commandName": "Executable",
+      "executablePath": "E:\\DMXControl 3\\Kernel\\Lumos.exe",
+      "workingDirectory": "E:\\DMXControl 3",
+      "nativeDebugging": false
+    }
+  }
+}

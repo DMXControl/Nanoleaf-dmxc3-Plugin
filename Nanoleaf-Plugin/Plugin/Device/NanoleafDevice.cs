@@ -71,7 +71,7 @@ namespace Nanoleaf_Plugin
                 List<GenericParameter> ret = new List<GenericParameter>();
                 try
                 {
-                    var panels = NanoleafPlugin.getAllPanels(this.DeviceType).Select(p => (object)p.ID.ToString()).ToEnumerable();
+                    var panels = NanoleafPlugin.getAllPanels(this.DeviceType).Select(p => p.ID.ToString()).ToArray();
                     ret.Add(new GenericParameter(DEVICE_TYPE_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.HIDDEN));
                     ret.Add(new GenericParameter(PANEL_ID_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.PERSISTANT, panels));
                 }

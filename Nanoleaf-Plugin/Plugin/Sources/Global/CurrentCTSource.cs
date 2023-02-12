@@ -12,7 +12,7 @@ namespace Nanoleaf_Plugin
     {
         public string SerialNumber { get; private set; }
         public CurrentCTSource(string serialNumber) :
-            base(getID(serialNumber), getDisplayName(), getCategory(serialNumber))
+            base(getID(serialNumber), getDisplayName(), getCategory(serialNumber), default)
         {
             Communication.StaticOnStateEvent += ExternalControlEndpoint_StaticOnStateEvent;
             SerialNumber = serialNumber;

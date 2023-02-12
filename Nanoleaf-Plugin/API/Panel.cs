@@ -98,7 +98,7 @@ namespace Nanoleaf_Plugin.API
             if (!IP.Equals(e.IP))
                 return;
 
-            var pp = e.LayoutEvent.Layout.PanelPositions.FirstOrDefault(p => p.PanelId.Equals(ID));
+            var pp = e.LayoutEvent.Layout?.PanelPositions?.FirstOrDefault(p => p.PanelId.Equals(ID));
             if (pp != null)
             {
                 X = pp.X;

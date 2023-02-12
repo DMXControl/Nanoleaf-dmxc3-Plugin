@@ -17,7 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using T = LumosLIB.Tools.I18n.Translatable;
+using T = LumosLIB.Tools.I18n.DummyT;
 
 namespace Nanoleaf_Plugin
 {
@@ -101,19 +101,18 @@ namespace Nanoleaf_Plugin
             string ip = e.DiscoveredDevice.IP;
             string json= JsonConvert.SerializeObject(Communication.DiscoveredDevices);
             sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
-            addControllerAsync(ip);
+            _ = addControllerAsync(ip);
         }
         private async Task addControllerAsync(string ip, string authToken = null, bool setSettings=true)
         {
             try
             {
-                Controller controller = new Controller(ip, authToken);
-                if (clients.Any(c => c.IP.Equals(controller.IP)))
+                if (clients.Any(c => c.IP.Equals(ip)))
                 {
-                    controller.SelfDestruction();
-                    Log.Info(string.Format("Client already Connected!" + Environment.NewLine + "{0}", controller));
+                    Log.Info(string.Format("Controller already Connected!" + Environment.NewLine + "{0}", ip));
                     return;
                 }
+                Controller controller = new Controller(ip, authToken);
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
                 controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
@@ -127,7 +126,7 @@ namespace Nanoleaf_Plugin
                 await Task.Delay(100);
                 Log.Info($"Controller Added: {controller.ToString()}");
 
-                bindInputAssignment();
+                _ = bindInputAssignment();
             }
             catch (Exception e)
             {
@@ -228,11 +227,11 @@ namespace Nanoleaf_Plugin
         protected override void shutdownPlugin()
         {
             Communication.StopDiscoveryTask();
-            Communication.StopEventListener();
             clients.ForEach(c => c.SelfDestruction());
+            Communication.StopEventListener();
             clients.Clear();
             Log.Info("Shutdown");
-            debindInputAssignment();
+            _ = debindInputAssignment();
             isStarted = false;
         }
 
@@ -291,9 +290,9 @@ namespace Nanoleaf_Plugin
                 case NANOLEAF_SHOW_IN_INPUTASSIGNMENT:
                     ShowInInputAssignment = (bool)args.NewValue;
                     if (ShowInInputAssignment)
-                        bindInputAssignment();
+                        _ = bindInputAssignment();
                     else
-                        debindInputAssignment();
+                        _ = debindInputAssignment();
                     break;
 
                 case NANOLEAF_DISCOVER:
@@ -332,9 +331,9 @@ namespace Nanoleaf_Plugin
                     string token = (string)objController["Token"];
 
                     if (objController["token"] != null)
-                        addControllerAsync(ip, token);
+                        _ = addControllerAsync(ip, token);
                     else
-                        addControllerAsync(ip);
+                        _ = addControllerAsync(ip);
                     break;
             }
         }
@@ -348,7 +347,7 @@ namespace Nanoleaf_Plugin
                 c.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 c.SelfDestruction();
             });
-            debindInputAssignment();
+            _ = debindInputAssignment();
             base.DisposePlugin(disposing);
             isDisposed = true;
         }
@@ -377,12 +376,12 @@ namespace Nanoleaf_Plugin
         {
             if (type == EResourceDataType.DeviceImage)
             {
-                if (name.Equals(EDeviceType.Canvas.ToString())
-                    || name.Equals(EDeviceType.LightPanles.ToString())
-                    || name.Equals(EDeviceType.Shapes.ToString())
-                    || name.Equals(EDeviceType.Elements.ToString())
-                    || name.Equals(EDeviceType.Lines.ToString())
-                    || name.Equals(EDeviceType.Essentials.ToString()))
+                if (name.Equals("Canvas")
+                    || name.Equals("LightPanles")
+                    || name.Equals("Shapes")
+                    || name.Equals("Elements")
+                    || name.Equals("Lines")
+                    || name.Equals("Essentials"))
                     return true;
             }
             return false;
@@ -394,12 +393,12 @@ namespace Nanoleaf_Plugin
             {
                 List<LumosDataMetadata> ret = new List<LumosDataMetadata>()
                 {
-                    new LumosDataMetadata(EDeviceType.Canvas.ToString()),
-                    new LumosDataMetadata(EDeviceType.LightPanles.ToString()),
-                    new LumosDataMetadata(EDeviceType.Shapes.ToString()),
-                    new LumosDataMetadata(EDeviceType.Elements.ToString()),
-                    new LumosDataMetadata(EDeviceType.Lines.ToString()),
-                    new LumosDataMetadata(EDeviceType.Essentials.ToString()),
+                    new LumosDataMetadata("Canvas"),
+                    new LumosDataMetadata("LightPanles"),
+                    new LumosDataMetadata("Shapes"),
+                    new LumosDataMetadata("Elements"),
+                    new LumosDataMetadata("Lines"),
+                    new LumosDataMetadata("Essentials"),
                 };
                 return ret.AsReadOnly();
             }
@@ -410,22 +409,22 @@ namespace Nanoleaf_Plugin
         {
             if (type == EResourceDataType.DeviceImage)
             {
-                if (name.Equals(EDeviceType.Canvas.ToString()))
+                if (name.Equals("Canvas"))
                     return toByteArray(Properties.Resources.NanoleafCanvas);
 
-                else if (name.Equals(EDeviceType.LightPanles.ToString()))
+                else if (name.Equals("LightPanles"))
                     return toByteArray(Properties.Resources.NanoleafLightPanles);
 
-                else if (name.Equals(EDeviceType.Shapes.ToString()))
+                else if (name.Equals("Shapes"))
                     return toByteArray(Properties.Resources.NanoleafShapes);
 
-                else if (name.Equals(EDeviceType.Elements.ToString()))
+                else if (name.Equals("Elements"))
                     return toByteArray(Properties.Resources.NanoleafElements);
 
-                else if (name.Equals(EDeviceType.Lines.ToString()))
+                else if (name.Equals("Lines"))
                     return toByteArray(Properties.Resources.NanoleafLines);
 
-                else if (name.Equals(EDeviceType.Essentials.ToString()))
+                else if (name.Equals("Essentials"))
                     return toByteArray(Properties.Resources.NanoleafEssentials);
             }
 
