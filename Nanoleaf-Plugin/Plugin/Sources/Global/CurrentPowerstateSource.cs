@@ -1,7 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
-using Nanoleaf_Plugin.API;
+using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System.Linq;
 

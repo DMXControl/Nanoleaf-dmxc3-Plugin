@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel.Log;
 using LumosProtobuf.Resource;
-using Nanoleaf_Plugin.API;
+using NanoleafAPI;
+using NanoleafAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using org.dmxc.lumos.Kernel.HAL.Handler;
@@ -226,7 +227,8 @@ namespace Nanoleaf_Plugin
 
         protected override void shutdownPlugin()
         {
-            Communication.StopDiscoveryTask();
+            Communication.StopDiscoverySSDPTask();
+            Communication.StopDiscoverymDNSTask();
             clients.ForEach(c => c.SelfDestruction());
             Communication.StopEventListener();
             clients.Clear();
@@ -267,9 +269,12 @@ namespace Nanoleaf_Plugin
                 }
 
 
-                Communication.IPs = new IPAddress[] { IPAddress.Any };// KernelNetManager.getInstance().IPAddresses.Select(s=> IPAddress.Parse(s)).ToArray();
-                if(Discover)
-                    Communication.StartDiscoveryTask();
+                Communication.RegisterIPAddress(IPAddress.Any);// KernelNetManager.getInstance().IPAddresses.Select(s=> IPAddress.Parse(s)).ToArray();
+                if (Discover)
+                {
+                    Communication.StartDiscoverymDNSTask();
+                    Communication.StartDiscoverySSDPTask();
+                }
                 if (ShowInInputAssignment)
                     bindInputAssignment().GetAwaiter();
 
@@ -298,9 +303,15 @@ namespace Nanoleaf_Plugin
                 case NANOLEAF_DISCOVER:
                     Discover = (bool)args.NewValue;
                     if (Discover)
-                        Communication.StartDiscoveryTask();
+                    {
+                        Communication.StartDiscoverymDNSTask();
+                        Communication.StartDiscoverySSDPTask();
+                    }
                     else
-                        Communication.StopDiscoveryTask();
+                    {
+                        Communication.StartDiscoverySSDPTask();
+                        Communication.StopDiscoverymDNSTask();
+                    }
                     break;
 
                 case NANOLEAF_AUTOREQUEST_TOKEN:

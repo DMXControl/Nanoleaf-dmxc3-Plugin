@@ -1,7 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosLIB.Kernel.Log;
 using LumosLIB.Tools;
-using Nanoleaf_Plugin.API;
+using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.HAL;
 using System;

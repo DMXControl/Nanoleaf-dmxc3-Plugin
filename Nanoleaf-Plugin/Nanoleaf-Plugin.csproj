@@ -13,31 +13,27 @@
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 	<ItemGroup>
-		<Reference Include="log4net">
-			<HintPath>..\Lumos\Lumos\LumosToolsLIB\bin\Debug\log4net.dll</HintPath>
-			<Private>True</Private>
-		</Reference>
 		<Reference Include="Lumos">
-			<HintPath>..\Lumos\master\Lumos\bin\Debug\Lumos.dll</HintPath>
+			<HintPath>..\Lumos\3.3\Lumos\bin\Debug\Lumos.exe</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="LumosLIB">
-			<HintPath>..\Lumos\master\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
+			<HintPath>..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="LumosToolsLIB">
-			<HintPath>..\Lumos\Lumos\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
+			<HintPath>..\Lumos\3.3\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="LumosProtobuf">
-			<HintPath>..\Lumos\Lumos\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
+			<HintPath>..\Lumos\3.3\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="log4net">
 			<HintPath>..\dep\log4net.dll</HintPath>
 		</Reference>
 		<Reference Include="Lumos">
-			<HintPath>..\dep\Lumos.dll</HintPath>
+			<HintPath>..\dep\Lumos.exe</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="LumosLIB">
@@ -75,8 +71,7 @@
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-		<PackageReference Include="RestSharp" Version="108.0.3" />
+		<PackageReference Include="NanoleafAPI" Version="0.0.2" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
 		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
