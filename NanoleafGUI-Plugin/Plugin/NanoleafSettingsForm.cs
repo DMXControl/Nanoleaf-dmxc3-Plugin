@@ -191,14 +191,15 @@ namespace NanoleafGUI_Plugin
             updateControllerPanel((LumosTabPage)tabControl1.SelectedTab);
         }
 
-        private void btRequestToken_Click(object sender, EventArgs e)
+        private async void btRequestToken_Click(object sender, EventArgs e)
         {
             try
             {
                 if (tabControl1.SelectedTab?.Tag == null)
                     return;
                 sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REQUEST_TOKEN, (string)((JToken)tabControl1.SelectedTab?.Tag)["IP"]);
-                Task.Delay(2000).GetAwaiter();
+                await Task.Delay(500);
+                sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REQUEST_TOKEN, "");
             }
             catch (Exception ex)
             {

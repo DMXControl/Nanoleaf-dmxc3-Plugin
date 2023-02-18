@@ -100,11 +100,12 @@ namespace Nanoleaf_Plugin
         {
             Log.Info($"Device Discovered: {e.DiscoveredDevice.ToString()}");
             string ip = e.DiscoveredDevice.IP;
+            string port = e.DiscoveredDevice.Port;
             string json= JsonConvert.SerializeObject(Communication.DiscoveredDevices);
             sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
-            _ = addControllerAsync(ip);
+            _ = addControllerAsync(ip, port);
         }
-        private async Task addControllerAsync(string ip, string authToken = null, bool setSettings=true)
+        private async Task addControllerAsync(string ip, string port, string authToken = null, bool setSettings=true)
         {
             try
             {
@@ -113,7 +114,7 @@ namespace Nanoleaf_Plugin
                     Log.Info(string.Format("Controller already Connected!" + Environment.NewLine + "{0}", ip));
                     return;
                 }
-                Controller controller = new Controller(ip, authToken);
+                Controller controller = new Controller(ip, port, authToken);
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
                 controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
