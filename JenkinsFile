@@ -33,18 +33,18 @@ pipeline {
 				//  Fetch all needed artifacts
 				script{
 					try {
-						println('Copy Kernel artefacts from Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'Lumos/bin/Release/net6.0/*', target: 'dep');
+						println('Copy Kernel artefacts from Job \"Lumos/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
+						copyArtifacts(projectName: 'Lumos/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'Lumos/bin/Release/net6.0/*', target: 'dep');
 					} catch (hudson.AbortException e) {
-						println('Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'Lumos/bin/Release/net6.0/*', target: 'dep');
+						println('Job \"Lumos/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
+						copyArtifacts(projectName: 'Lumos/master', flatten: true, filter: 'Lumos/bin/Release/net6.0/*', target: 'dep');
 					}
 					try {
-						println('Copy GUI artefacts from Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
+						println('Copy GUI artefacts from Job \"Lumos/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
+						copyArtifacts(projectName: 'Lumos/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
 					} catch (hudson.AbortException e) {
-						println('Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
+						println('Job \"Lumos/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
+						copyArtifacts(projectName: 'Lumos/master', flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
 					}
 				}
 			}
