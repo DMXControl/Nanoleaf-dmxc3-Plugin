@@ -19,7 +19,7 @@
   <ItemGroup>
 	<Reference Include="LumosGUI">
 		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosGUI\bin\Debug')">..\..\Lumos\3.3\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
-		<HintPath Condition="Exists('..\dep')">..\dep\LumosGUI.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosGUI.exe</HintPath>
 		<Private>True</Private>
 	</Reference>
 	<Reference Include="LumosControls">
