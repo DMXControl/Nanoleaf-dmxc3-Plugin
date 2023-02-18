@@ -1,56 +1,40 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
+		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
 		<RootNamespace>Nanoleaf_Plugin</RootNamespace>
+		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 	<PropertyGroup>
 		<RuntimeIdentifiers>win</RuntimeIdentifiers>
 	</PropertyGroup>
-	<PropertyGroup>
-		<ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
-	</PropertyGroup>
-	<PropertyGroup>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="Lumos">
-			<HintPath>..\Lumos\3.3\Lumos\bin\Debug\Lumos.exe</HintPath>
+			<HintPath Condition="Exists('..\Lumos\3.3\Lumos\bin\Debug')">..\Lumos\3.3\Lumos\bin\Debug\Lumos.dll</HintPath>
+			<HintPath Condition="Exists('..\dep')">..\dep\Lumos.dll</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="LumosLIB">
-			<HintPath>..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
+			<HintPath Condition="Exists('..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0')">..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
+			<HintPath Condition="Exists('..\dep')">..\dep\LumosLIB.dll</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="LumosToolsLIB">
-			<HintPath>..\Lumos\3.3\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
+			<HintPath Condition="Exists('..\Lumos\3.3\LumosToolsLIB\bin\Debug')">..\Lumos\3.3\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
+			<HintPath Condition="Exists('..\dep')">..\dep\LumosToolsLIB.dll</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="LumosProtobuf">
-			<HintPath>..\Lumos\3.3\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
+			<HintPath Condition="Exists('..\Lumos\3.3\LumosProtobuf\bin\Debug')">..\Lumos\3.3\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
+			<HintPath Condition="Exists('..\dep')">..\dep\LumosProtobuf.dll</HintPath>
 			<Private>True</Private>
 		</Reference>
 		<Reference Include="log4net">
 			<HintPath>..\dep\log4net.dll</HintPath>
-		</Reference>
-		<Reference Include="Lumos">
-			<HintPath>..\dep\Lumos.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Lumos">
-			<HintPath>..\dep\Lumos.exe</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="LumosLIB">
-			<HintPath>..\dep\LumosLIB.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="LumosToolsLIB">
-			<HintPath>..\dep\LumosToolsLIB.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="LumosProtobuf">
-			<HintPath>..\dep\LumosProtobuf.dll</HintPath>
-			<Private>False</Private>
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>
@@ -108,11 +92,6 @@
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
 	</ItemGroup>
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-	</PropertyGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="FOR /F &quot;skip=2 tokens=2,*&quot; %25%25A IN ('reg.exe query &quot;HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Lumos.exe&quot; /v &quot;&quot;') DO set &quot;DMXCRF=%25%25B&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)Nanoleaf-Plugin.*&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)Newtonsoft.Json.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(TargetDir)NanoleafAPI.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)RestSharp.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)System.Text.Json.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;xcopy &quot;$(TargetDir)System.Text.Encodings.Web.dll&quot; &quot;%25DMXCRF%25\Kernel\Plugins\Nanoleaf\&quot; /C /F /R /Y /I&#xD;&#xA;)" />
 	</Target>
