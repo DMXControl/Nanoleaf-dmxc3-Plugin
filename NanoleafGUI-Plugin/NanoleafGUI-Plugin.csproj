@@ -18,34 +18,44 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LumosControls">
-      <HintPath>..\..\Lumos\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+      <HintPath>..\..\Lumos\3.3\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+	  <Private>true</Private>
     </Reference>
     <Reference Include="LumosGUI">
-      <HintPath>..\..\Lumos\master\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
+      <HintPath>..\..\Lumos\3.3\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
+	  <Private>true</Private>
     </Reference>
     <Reference Include="LumosLIB">
-      <HintPath>..\..\Lumos\Lumos\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
+      <HintPath>..\..\Lumos\3.3\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
+	  <Private>true</Private>
     </Reference>
     <Reference Include="LumosToolsLIB">
-      <HintPath>..\..\Lumos\Lumos\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
+      <HintPath>..\..\Lumos\3.3\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
+	  <Private>true</Private>
     </Reference>
     <Reference Include="LumosProtobuf">
-      <HintPath>..\..\Lumos\Lumos\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
+      <HintPath>..\..\Lumos\3.3\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
+	  <Private>true</Private>
     </Reference>
     <Reference Include="LumosControls">
       <HintPath>..\dep\LumosControls.dll</HintPath>
+	  <Private>False</Private>
     </Reference>
     <Reference Include="LumosGUI">
       <HintPath>..\dep\LumosGUI.exe</HintPath>
+	  <Private>False</Private>
     </Reference>
     <Reference Include="LumosLIB">
       <HintPath>..\dep\LumosLIB.dll</HintPath>
+	  <Private>False</Private>
     </Reference>
     <Reference Include="LumosToolsLIB">
       <HintPath>..\dep\LumosToolsLIB.dll</HintPath>
-    </Reference>
-    <Reference Include="LumosProtobuf">
-      <HintPath>..\dep\LumosProtobuf.dll</HintPath>
+	  <Private>False</Private>
+	</Reference>
+	<Reference Include="LumosProtobuf">
+	  <HintPath>..\dep\LumosProtobuf.dll</HintPath>
+	  <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

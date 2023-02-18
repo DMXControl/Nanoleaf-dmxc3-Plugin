@@ -367,3 +367,4 @@ Thumbs.db
 
 # Keep 'Log' directories within 'src'
 !**/src/**/Log/
+*.bak

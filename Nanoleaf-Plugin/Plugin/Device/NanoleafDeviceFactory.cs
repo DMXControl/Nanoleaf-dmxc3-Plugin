@@ -1,5 +1,5 @@
 ﻿using LumosLIB.Kernel.Devices;
-using Nanoleaf_Plugin.API;
+using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.Devices.Factory;
 using org.dmxc.lumos.Kernel.Exceptions;

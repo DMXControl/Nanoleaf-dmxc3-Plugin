@@ -1,4 +1,4 @@
-﻿using Nanoleaf_Plugin.API;
+﻿using NanoleafAPI;
 using org.dmxc.lumos.Kernel.DeviceProperties;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.HAL.Handler;

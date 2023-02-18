@@ -1,15 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nanoleaf-Plugin", "Nanoleaf-Plugin\Nanoleaf-Plugin.csproj", "{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nanoleaf-Plugin", "Nanoleaf-Plugin\Nanoleaf-Plugin.csproj", "{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoleafTest", "NanoleafTest\NanoleafTest.csproj", "{BB09BDA4-B9EC-4BFF-8039-E5AC8F7754E4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoleafTests", "NanoleafTests\NanoleafTests.csproj", "{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoleafGUI-Plugin", "NanoleafGUI-Plugin\NanoleafGUI-Plugin.csproj", "{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanoleafGUI-Plugin", "NanoleafGUI-Plugin\NanoleafGUI-Plugin.csproj", "{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,14 +17,6 @@ Global
 		{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D870168-AA5E-4D79-B5CD-7FE4CDB47A6C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BB09BDA4-B9EC-4BFF-8039-E5AC8F7754E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB09BDA4-B9EC-4BFF-8039-E5AC8F7754E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BB09BDA4-B9EC-4BFF-8039-E5AC8F7754E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BB09BDA4-B9EC-4BFF-8039-E5AC8F7754E4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{24C9D6B1-DD1E-4358-82D3-CC808ECF332E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8711BED-FC6B-4C50-AF79-EB74FABD5F89}.Release|Any CPU.ActiveCfg = Release|Any CPU
