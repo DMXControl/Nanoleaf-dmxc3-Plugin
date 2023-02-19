@@ -54,7 +54,7 @@ namespace Nanoleaf_Plugin
         private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
             LayoutEvent events = e.LayoutEvent;
-            if (events == null)
+            if (events == null || events.Layout == null)
                 return;
 
             var position = events.Layout.PanelPositions.FirstOrDefault(p => p.PanelId.Equals(PanelID));

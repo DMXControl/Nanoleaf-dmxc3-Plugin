@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel.Log;
 using LumosProtobuf.Resource;
-using NanoleafAPI;
+using Microsoft.Extensions.Logging;
+using Nanoleaf_Plugin.Plugin.Logging;
 using NanoleafAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -86,13 +87,10 @@ namespace Nanoleaf_Plugin
         }
         public NanoleafPlugin() : base("{25a96576-fda7-4297-bc59-6c4f2256ab6e}", "Nanoleaf-Plugin")
         {
-//#if DEBUG
-//            while (!Debugger.IsAttached)
-//            {
-//                Thread.Sleep(100);
-//            }
-//            Log.Info("Debugger attaced!");
-//#endif
+            //Special LoggerWrapper is needed because Lumos uses the LumosLog class for logging, the NanoleafAPI uses MEL. 
+            Tools.LoggerFactory = new LoggerFactory();
+            Tools.LoggerFactory.AddProvider(new LumosLogWrapperProvider(nameof(NanoleafPlugin)));
+
             Communication.DeviceDiscovered += Communication_DeviceDiscovered;
         }
 
@@ -231,7 +229,15 @@ namespace Nanoleaf_Plugin
             Communication.StopDiscoverySSDPTask();
             Communication.StopDiscoverymDNSTask();
             clients.ForEach(c => c.SelfDestruction());
-            Communication.StopEventListener();
+
+            try
+            {
+                Communication.StopEventListener();
+            }
+            catch(Exception e)
+            {
+                //Needed to prevent exception when stopping the Nanoleaf plugin
+            }
             clients.Clear();
             Log.Info("Shutdown");
             _ = debindInputAssignment();
@@ -340,12 +346,13 @@ namespace Nanoleaf_Plugin
                         break;
                     JObject objController = JsonConvert.DeserializeObject(jsonController) as JObject;
                     ip = (string)objController["IP"];
+                    var port = (string)objController["Port"];
                     string token = (string)objController["Token"];
 
-                    if (objController["token"] != null)
-                        _ = addControllerAsync(ip, token);
+                    if (objController["Token"] != null)
+                        _ = addControllerAsync(ip, port, token);
                     else
-                        _ = addControllerAsync(ip);
+                        _ = addControllerAsync(ip, port);
                     break;
             }
         }
