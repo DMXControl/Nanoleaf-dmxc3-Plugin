@@ -49,7 +49,17 @@ namespace Nanoleaf_Plugin
         public static event EventHandler ControllerAdded;
 
         internal static bool ShowInInputAssignment = true, Discover = true, AutoConnect = true, AutoRequestToken = true;
-        internal static int RefreshRate = 44;
+
+        private static int refreshRate=44;
+        internal static int RefreshRate
+        {
+            get => refreshRate;
+            set
+            {
+                refreshRate = value;
+                clients.ForEach(c => c.RefreshRate = value);
+            }
+        }
 
         private static string discoverState = "Stopped";
         public static string DiscoverState

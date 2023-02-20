@@ -77,7 +77,7 @@ namespace Nanoleaf_Plugin
             try
             {
                 var Controler = NanoleafPlugin.getClient(SerialNumber);                
-                return Controler.SetPanelColor(Panel.ID, rgbw);
+                return Controler.SetPanelColor(Panel.ID, rgbw).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
