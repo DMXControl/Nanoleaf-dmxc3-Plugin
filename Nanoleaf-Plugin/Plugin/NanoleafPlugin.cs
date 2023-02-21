@@ -1,4 +1,5 @@
 ﻿using LumosLIB.Kernel.Log;
+using LumosLIB.Tools;
 using LumosProtobuf.Resource;
 using Microsoft.Extensions.Logging;
 using Nanoleaf_Plugin.Plugin.Logging;
@@ -42,6 +43,7 @@ namespace Nanoleaf_Plugin
 
         internal const string NANOLEAF_REQUEST_TOKEN = "NANOLEAF.REQUEST_TOKEN";
         internal const string NANOLEAF_ADD_CONTROLLER = "NANOLEAF.ADD_CONTROLLER";
+        internal const string NANOLEAF_REMOVE_CONTROLLER = "NANOLEAF.REMOVE_CONTROLLER";
 
         private bool isDisposed = false;
         private bool isStarted = false;
@@ -119,7 +121,7 @@ namespace Nanoleaf_Plugin
             {
                 if (clients.Any(c => c.IP.Equals(ip)))
                 {
-                    Log.Info(string.Format("Controller already Connected!" + Environment.NewLine + "{0}", ip));
+                    Log.Info(string.Format("Controller already Connected! IP: {0}", ip));
                     return;
                 }
                 Controller controller = new Controller(ip, port, authToken);
@@ -137,6 +139,39 @@ namespace Nanoleaf_Plugin
                 Log.Info($"Controller Added: {controller.ToString()}");
 
                 _ = bindInputAssignment();
+            }
+            catch (Exception e)
+            {
+                Log.Warn(string.Empty, e);
+            }
+        }
+
+        private async Task removeControllerAsync(Controller controller)
+        {
+            try
+            {
+                if (controller == null)
+                    return;
+
+                var controllerVita = controller.ToString();
+
+                _ = debindControllerInputAssignment(controller);
+
+                controller.AuthTokenReceived -= Controller_AuthTokenReceived;
+                controller.UpdatedInfos -= Controller_UpdatedInfos;
+                controller.PanelLayoutChanged -= Controller_PanelLayoutChanged;
+
+                await Communication.DeleteUser(controller.IP, controller.Port, controller.Auth_token);
+
+                controller.Dispose();
+                clients.Remove(controller);
+
+                string json = JsonConvert.SerializeObject(clients);
+                sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+                sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_REMOVE_CONTROLLER, "");
+
+                await Task.Delay(100);
+                Log.Info("Controller removed: {0}", controllerVita);
             }
             catch (Exception e)
             {
@@ -210,6 +245,7 @@ namespace Nanoleaf_Plugin
                     Log.Error(string.Empty, e);
                 }
         }
+
         private async Task debindInputAssignment()
         {
             try
@@ -226,6 +262,24 @@ namespace Nanoleaf_Plugin
                 Log.Error(string.Empty, e);
             }
         }
+
+        private async Task debindControllerInputAssignment(Controller controller)
+        {
+            try
+            {
+                var im = InputManager.getInstance();
+                var sinks = im.Sinks.Where(s => s.ID.Equals("Nanoleaf-" + controller.SerialNumber));
+                var sources = im.Sources.Where(s => s.ID.Equals("Nanoleaf-" + controller.SerialNumber));
+                im.UnregisterSinks(sinks);
+                im.UnregisterSources(sources);
+                Log.Info("Unregisterd {0} Sinks and {1} Sources of Controller {2}", sinks.Count(), sources.Count(), controller.SerialNumber);
+            }
+            catch (Exception e)
+            {
+                Log.Error(string.Empty, e);
+            }
+        }
+
         protected override void initializePlugin()
         {
             sm = SettingsManager.getInstance();
@@ -307,6 +361,7 @@ namespace Nanoleaf_Plugin
         private void SettingChanged(object sender, SettingChangedEventArgs args)
         {
             string ip = null;
+            Controller controller;
             switch (args.SettingsPath)
             {
                 case NANOLEAF_SHOW_IN_INPUTASSIGNMENT:
@@ -346,8 +401,9 @@ namespace Nanoleaf_Plugin
                     ip = (string)args.NewValue;
                     if (string.IsNullOrWhiteSpace(ip))
                         break;
-                    var controller = clients.FirstOrDefault(c => ip.Equals(c.IP));
-                    controller.RequestToken();
+                    controller = clients.FirstOrDefault(c => ip.Equals(c.IP));
+                    if (controller != null)
+                        controller.RequestToken();
                     break;
 
                 case NANOLEAF_ADD_CONTROLLER:
@@ -363,6 +419,20 @@ namespace Nanoleaf_Plugin
                         _ = addControllerAsync(ip, port, token);
                     else
                         _ = addControllerAsync(ip, port);
+                    break;
+                case NANOLEAF_REMOVE_CONTROLLER:
+                    ip = (string)args.NewValue;
+                    if (string.IsNullOrWhiteSpace(ip))
+                        break;
+                    controller = clients.FirstOrDefault(c => ip.Equals(c.IP));
+
+                    if (controller == null)
+                    {
+                        Log.Info(string.Format("Controller with IP {0} could not be found", ip));
+                        return;
+                    }
+
+                    _ = removeControllerAsync(controller);
                     break;
             }
         }
