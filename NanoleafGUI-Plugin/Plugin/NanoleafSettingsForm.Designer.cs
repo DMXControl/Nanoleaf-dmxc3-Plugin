@@ -55,6 +55,7 @@ namespace NanoleafGUI_Plugin
             this.lbSN = new LumosControls.Controls.LumosLabel();
             this.lbControllerIP = new LumosControls.Controls.LumosLabel();
             this.btRequestToken = new LumosControls.Controls.LumosButton();
+            this.btRemoveController = new LumosControls.Controls.LumosButton();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.cbShowInInputAssignment = new LumosControls.Controls.LumosCheckBox();
             this.cbDiscover = new LumosControls.Controls.LumosCheckBox();
@@ -170,6 +171,7 @@ namespace NanoleafGUI_Plugin
             this.panel1.Controls.Add(this.lbSN);
             this.panel1.Controls.Add(this.lbControllerIP);
             this.panel1.Controls.Add(this.btRequestToken);
+            this.panel1.Controls.Add(this.btRemoveController);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 35);
             this.panel1.Name = "panel1";
@@ -342,6 +344,17 @@ namespace NanoleafGUI_Plugin
             this.btRequestToken.Text = "Request Token";
             this.btRequestToken.UseVisualStyleBackColor = true;
             this.btRequestToken.Click += new System.EventHandler(this.btRequestToken_Click);
+            // 
+            // btRemoveController
+            // 
+            this.btRemoveController.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.btRemoveController.Location = new System.Drawing.Point(688, 147);
+            this.btRemoveController.Name = "btRemoveController";
+            this.btRemoveController.Size = new System.Drawing.Size(106, 50);
+            this.btRemoveController.TabIndex = 0;
+            this.btRemoveController.Text = "Remove Controller";
+            this.btRemoveController.UseVisualStyleBackColor = true;
+            this.btRemoveController.Click += new System.EventHandler(this.btRemoveController_Click);
             // 
             // flowLayoutPanel1
             // 
@@ -567,6 +580,7 @@ namespace NanoleafGUI_Plugin
         private LumosLabel lbSN;
         private LumosLabel lbControllerIP;
         private LumosButton btRequestToken;
+        private LumosButton btRemoveController;
         private LumosTextBox_v2 tbFW;
         private LumosTextBox_v2 tbName;
         private LumosLabel lbName;

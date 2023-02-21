@@ -207,6 +207,21 @@ namespace NanoleafGUI_Plugin
             }
         }
 
+        private void btRemoveController_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (tabControl1.SelectedTab?.Tag == null)
+                    return;
+                if (MessageBox.Show("Do you want to remove this controller?", "Remove Controller?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REMOVE_CONTROLLER, (string)((JToken)tabControl1.SelectedTab?.Tag)["IP"]);
+            }
+            catch (Exception ex)
+            {
+                NanoleafGUI_Plugin.Log.Error(ex);
+            }
+        }
+
         private void btAddController_Click(object sender, EventArgs e)
         {
             try
