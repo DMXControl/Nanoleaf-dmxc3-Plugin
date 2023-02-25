@@ -4,6 +4,7 @@ using LumosProtobuf.Resource;
 using Microsoft.Extensions.Logging;
 using Nanoleaf_Plugin.Plugin.Logging;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
+using Nanoleaf_Plugin.Plugin.Sinks;
 using NanoleafAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -236,6 +237,8 @@ namespace Nanoleaf_Plugin
                     im.RegisterSource(CanvasGestureSource.CreateSwipeUp(controller.SerialNumber));
                     im.RegisterSource(CanvasGestureSource.CreateSwipeRight(controller.SerialNumber));
                     im.RegisterSource(CanvasGestureSource.CreateSwipeLeft(controller.SerialNumber));
+
+                    im.RegisterSink(new BrightnessSink(controller.SerialNumber));
 
                     foreach (Panel panel in controller.Panels)
                     {
