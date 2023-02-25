@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 
@@ -12,12 +13,19 @@ namespace Nanoleaf_Plugin
         public CurrentOrientationSource(string serialNumber) :
             base(getID(serialNumber), getDisplayName(), getCategory(serialNumber), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CurrentOrientationSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
             var controller = NanoleafPlugin.getClient(SerialNumber);
             min = controller.GlobalOrientationMin;
             max = controller.GlobalOrientationMax;
             CurrentValue = controller.GlobalOrientation;
+        }
+
+        private void CurrentOrientationSource_EnabledChanged(object sender, System.EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
         }
 
         private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)

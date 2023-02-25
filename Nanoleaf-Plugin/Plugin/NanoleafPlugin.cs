@@ -3,11 +3,13 @@ using LumosLIB.Tools;
 using LumosProtobuf.Resource;
 using Microsoft.Extensions.Logging;
 using Nanoleaf_Plugin.Plugin.Logging;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using org.dmxc.lumos.Kernel.HAL.Handler;
 using org.dmxc.lumos.Kernel.Input.v2;
+using org.dmxc.lumos.Kernel.MainSwitch;
 using org.dmxc.lumos.Kernel.Plugin;
 using org.dmxc.lumos.Kernel.Project;
 using org.dmxc.lumos.Kernel.Resource;
@@ -29,6 +31,7 @@ namespace Nanoleaf_Plugin
         internal static readonly ILumosLog Log = LumosLogger.getInstance(nameof(NanoleafPlugin));
         private static List<Controller> clients = new List<Controller>();
         private static List<Controller> clientsBindedToInputAssignment = new List<Controller>();
+
         private const string SETTINGS_CATEGORY_ID = "Settings:Nanoleaf";
 
         internal const string NANOLEAF_SHOW_IN_INPUTASSIGNMENT = "NANOLEAF.SHOW_IN_INPUTASSIGNMENT";
@@ -130,6 +133,13 @@ namespace Nanoleaf_Plugin
                 controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 clients.Add(controller);
                 ControllerAdded?.Invoke(this, EventArgs.Empty);
+                if (NanoleafMainSwitch.getInstance().Enabled)
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(5000);
+                        controller?.StartStreaming();
+                    });
+
                 if (setSettings)
                 {
                     saveClients();
@@ -176,6 +186,7 @@ namespace Nanoleaf_Plugin
                 Log.Warn(string.Empty, e);
             }
         }
+
 
         private static void saveClients()
         {
@@ -287,6 +298,25 @@ namespace Nanoleaf_Plugin
             ResourceManager.getInstance().registerResourceProvider(this);
             HandlerFactory.getInstance().registerHandlerNode<NanoleafHandlerNode>("nanoleaf");
             DeviceManager.getInstance().registerDeviceFactory(new NanoleafDeviceFactory());
+
+            NanoleafMainSwitch.getInstance().EnabledChanged += NanoleafMainSwitch_EnabledChanged;
+            MainSwitchManager.getInstance().RegisterMainSwitch(NanoleafMainSwitch.getInstance());
+        }
+
+        private void NanoleafMainSwitch_EnabledChanged(object sender, EventArgs e)
+        {
+            if (NanoleafMainSwitch.getInstance().Enabled)
+            {
+                clients.ForEach(client => {
+                    _ = client.StartStreaming();
+                });
+            }
+            else
+            {
+                clients.ForEach(client => {
+                    _ = client.StopStreaming();
+                });
+            }
         }
 
         protected override void shutdownPlugin()
@@ -337,6 +367,13 @@ namespace Nanoleaf_Plugin
                             controller.UpdatedInfos += Controller_UpdatedInfos;
                             controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
                             ControllerAdded?.Invoke(this, EventArgs.Empty);
+
+                            if (NanoleafMainSwitch.getInstance().Enabled)
+                                Task.Run(async () =>
+                                {
+                                    await Task.Delay(5000);
+                                    controller?.StartStreaming();
+                                });
                         }
                 }
 

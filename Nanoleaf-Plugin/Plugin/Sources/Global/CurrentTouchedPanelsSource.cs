@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 
@@ -12,10 +13,17 @@ namespace Nanoleaf_Plugin
         public CurrentTouchedPanelsSource(string serialNumber) :
             base(getID(serialNumber), getDisplayName(), getCategory(serialNumber), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CurrentTouchedPanelsSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnTouchEvent += ExternalControlEndpoint_StaticOnTouchEvent;
             SerialNumber = serialNumber;
             min = 0;
             max = ushort.MaxValue;
+        }
+
+        private void CurrentTouchedPanelsSource_EnabledChanged(object sender, System.EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;  
         }
 
         private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)

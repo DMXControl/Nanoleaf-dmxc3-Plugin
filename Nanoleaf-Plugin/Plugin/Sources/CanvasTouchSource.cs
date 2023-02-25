@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System.Linq;
@@ -16,10 +17,17 @@ namespace Nanoleaf_Plugin
         private CanvasTouchSource(string serialNumber, int panelID, ETouch touchType) :
             base(getID(serialNumber, panelID, touchType), getDisplayName(touchType), getCategory(serialNumber, panelID), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CanvasTouchSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnTouchEvent += ExternalControlEndpoint_StaticOnTouchEvent;
             SerialNumber = serialNumber;
             PanelID = panelID;
             TouchType = touchType;
+        }
+
+        private void CanvasTouchSource_EnabledChanged(object sender, System.EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
         }
 
         public static CanvasTouchSource CreateHover(string serialNumber, int panelID)

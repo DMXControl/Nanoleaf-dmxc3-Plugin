@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using org.dmxc.lumos.Kernel.PropertyType;
@@ -58,6 +59,8 @@ namespace Nanoleaf_Plugin
 
         public override bool UpdateValue(object newValue)
         {
+            if (!NanoleafMainSwitch.getInstance().Enabled) return true;
+
             Panel.RGBW rgbw = new Panel.RGBW();
             if (newValue is Color)
             {
@@ -77,7 +80,7 @@ namespace Nanoleaf_Plugin
             try
             {
                 var Controler = NanoleafPlugin.getClient(SerialNumber);                
-                return Controler.SetPanelColor(Panel.ID, rgbw).GetAwaiter().GetResult();
+                return Controler.SetPanelColor(Panel.ID, rgbw);
             }
             catch (Exception e)
             {

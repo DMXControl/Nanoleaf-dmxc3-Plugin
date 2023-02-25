@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
@@ -14,12 +15,19 @@ namespace Nanoleaf_Plugin
         public CurrentHueSource(string serialNumber) :
             base(getID(serialNumber), getDisplayName(), getCategory(serialNumber), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CurrentHueSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnStateEvent += ExternalControlEndpoint_StaticOnStateEvent;
             SerialNumber = serialNumber;
             var controller = NanoleafPlugin.getClient(SerialNumber);
             min = controller.HueMin;
             max = controller.HueMax;
             CurrentValue = controller.Hue;
+        }
+
+        private void CurrentHueSource_EnabledChanged(object sender, EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
         }
 
         private void ExternalControlEndpoint_StaticOnStateEvent(object sender, StateEventArgs e)

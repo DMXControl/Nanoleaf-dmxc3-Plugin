@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace Nanoleaf_Plugin
         private CanvasPositionSource(string serialNumber, int panelID, EPositionPart part) :
             base(getID(serialNumber, panelID, part), getDisplayName(part),getCategory(serialNumber, panelID), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CanvasPositionSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
             PanelID = panelID;
@@ -36,6 +39,11 @@ namespace Nanoleaf_Plugin
                     CurrentValue = position.Orientation;
                     break;
             }
+        }
+
+        private void CanvasPositionSource_EnabledChanged(object sender, System.EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
         }
 
         public static CanvasPositionSource CreateX(string serialNumber, int panelID)
