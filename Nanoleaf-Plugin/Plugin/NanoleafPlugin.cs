@@ -132,8 +132,7 @@ namespace Nanoleaf_Plugin
                 ControllerAdded?.Invoke(this, EventArgs.Empty);
                 if (setSettings)
                 {
-                    string json = JsonConvert.SerializeObject(clients);
-                    sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+                    saveClients();
                 }
                 await Task.Delay(100);
                 Log.Info($"Controller Added: {controller.ToString()}");
@@ -166,8 +165,7 @@ namespace Nanoleaf_Plugin
                 controller.Dispose();
                 clients.Remove(controller);
 
-                string json = JsonConvert.SerializeObject(clients);
-                sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+                saveClients();
                 sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_REMOVE_CONTROLLER, "");
 
                 await Task.Delay(100);
@@ -179,22 +177,25 @@ namespace Nanoleaf_Plugin
             }
         }
 
+        private static void saveClients()
+        {
+            string json = JsonConvert.SerializeObject(clients.Where(c => Tools.IsTokenValid(c.Auth_token) && c.DeviceType != EDeviceType.UNKNOWN));
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+        }
+
         private void Controller_PanelLayoutChanged(object sender, EventArgs e)
         {
-            string json = JsonConvert.SerializeObject(clients);
-            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            saveClients();
         }
 
         private void Controller_UpdatedInfos(object sender, EventArgs e)
         {
-            string json = JsonConvert.SerializeObject(clients);
-            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            saveClients();
         }
 
         private void Controller_AuthTokenReceived(object sender, EventArgs e)
         {
-            string json = JsonConvert.SerializeObject(clients);
-            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            saveClients();
         }
 
         private async Task bindInputAssignment()
@@ -330,7 +331,7 @@ namespace Nanoleaf_Plugin
                     if (objControllers != null)
                         foreach (var c in objControllers)
                         {
-                            var controller = new Controller(c);
+                            var controller = new Controller((string)c["IP"], (string)c["Port"], (string)c["Auth_token"]);
                             clients.Add(controller);
                             controller.AuthTokenReceived += Controller_AuthTokenReceived;
                             controller.UpdatedInfos += Controller_UpdatedInfos;
