@@ -516,6 +516,7 @@ namespace Nanoleaf_Plugin
                 if (name.Equals("Canvas")
                     || name.Equals("LightPanles")
                     || name.Equals("Shapes")
+                    || name.Equals("Shapes-Black")
                     || name.Equals("Elements")
                     || name.Equals("Lines")
                     || name.Equals("Essentials"))
@@ -533,6 +534,7 @@ namespace Nanoleaf_Plugin
                     new LumosDataMetadata("Canvas"),
                     new LumosDataMetadata("LightPanles"),
                     new LumosDataMetadata("Shapes"),
+                    new LumosDataMetadata("Shapes-Black"),
                     new LumosDataMetadata("Elements"),
                     new LumosDataMetadata("Lines"),
                     new LumosDataMetadata("Essentials"),
@@ -554,6 +556,8 @@ namespace Nanoleaf_Plugin
 
                 else if (name.Equals("Shapes"))
                     return toByteArray(Properties.Resources.NanoleafShapes);
+                else if (name.Equals("Shapes-Black"))
+                    return toByteArray(Properties.Resources.NanoleafShapesBlack);
 
                 else if (name.Equals("Elements"))
                     return toByteArray(Properties.Resources.NanoleafElements);

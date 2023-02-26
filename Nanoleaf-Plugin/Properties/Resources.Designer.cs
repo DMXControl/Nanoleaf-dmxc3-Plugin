@@ -119,5 +119,15 @@ namespace Nanoleaf_Plugin.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap NanoleafShapesBlack {
+            get {
+                object obj = ResourceManager.GetObject("NanoleafShapesBlack", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

@@ -368,3 +368,4 @@ Thumbs.db
 # Keep 'Log' directories within 'src'
 !**/src/**/Log/
 *.bak
+/Nanoleaf-Plugin/Properties/launchSettings.json
