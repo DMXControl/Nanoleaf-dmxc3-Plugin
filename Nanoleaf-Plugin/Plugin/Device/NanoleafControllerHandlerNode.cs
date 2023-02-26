@@ -51,11 +51,6 @@ namespace Nanoleaf_Plugin
             get;
             set;
         }
-        private StrobeProperty StrobeProperty
-        {
-            get;
-            set;
-        }
         private RawStepProperty EffectProperty
         {
             get;
@@ -75,7 +70,13 @@ namespace Nanoleaf_Plugin
                     serialNumber = ((NanoleafControllerDevice)value.ParentDevice).SerialNumber;
                     deviceType = ((NanoleafControllerDevice)value.ParentDevice).DeviceType;
                     this._instance = NanoleafPlugin.getClient(serialNumber);
-                    updateEffectList();
+
+                    if (this._instance != null)
+                    {
+                        this.dimmerValue = _instance.Brightness;
+                        updateEffectList();
+                        this.effectValue = _instance.SelectedEffect.Contains("*ExtControl*", StringComparison.OrdinalIgnoreCase) ? DMXC_CONTROLLED_NAME : _instance.SelectedEffect;
+                    }
                 }
                 else
                     throw new ArgumentException("This Type of Handler needs to be assigned to a " + NanoleafControllerDevice.NANOLEAF_CONTROLLER_TYPE_NAME);
@@ -93,8 +94,6 @@ namespace Nanoleaf_Plugin
             _effectList.AddRange(_instance.EffectList.Where(e => !e.Contains("*ExtControl*", StringComparison.OrdinalIgnoreCase)));
         }
 
-        private StrobeEmulator _strobeEmulator;
-        private HALHandleContext _lastStrobeContext;
         private NanoleafControllerHandlerNode()
             : base()
         {
@@ -147,15 +146,7 @@ namespace Nanoleaf_Plugin
         {
             get
             {
-                if (this.StrobeProperty == null)
-                {
-                    this.StrobeProperty = new StrobeProperty(this.ParentBeam);
-                }
-
                 List<PropertyDependencyBag> optProps = new List<PropertyDependencyBag>();
-
-                optProps.Add(new PropertyDependencyBag(this.StrobeProperty, getDependencies(),
-                    this.ParentHandler is AbstractDMXHandlerNode));
 
                 return optProps;
             }
@@ -179,8 +170,6 @@ namespace Nanoleaf_Plugin
         {
             if (prop is DimmerProperty)
                 return new IntensityType<double>(0.0, 100.0);
-            if (prop is StrobeProperty)
-                return new StrobeType(StrobeEmulator.EMULATOR_MIN, StrobeEmulator.EMULATOR_MAX);
             if (prop is RawStepProperty)
             {
                 var c = new StringEnumType(this._effectList);
@@ -214,7 +203,9 @@ namespace Nanoleaf_Plugin
                 this.deviceType = d.DeviceType;
                 this.serialNumber = d.SerialNumber;
                 this.setInstance();
+                this.dimmerValue = _instance.Brightness;
                 updateEffectList();
+                this.effectValue = _instance.SelectedEffect.Contains("*ExtControl*", StringComparison.OrdinalIgnoreCase) ? DMXC_CONTROLLED_NAME : _instance.SelectedEffect;
             }
         }
         private void setInstance()
