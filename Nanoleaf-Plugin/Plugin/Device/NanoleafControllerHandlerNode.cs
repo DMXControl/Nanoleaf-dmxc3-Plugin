@@ -10,25 +10,16 @@ using System.Text;
 using org.dmxc.lumos.Kernel.HAL.Handler.Matrix;
 using LumosLIB.Tools;
 using org.dmxc.lumos.Kernel.HAL.Handler.Helper;
+using Nanoleaf_Plugin.Plugin.Device;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
 
 namespace Nanoleaf_Plugin
 {
-    sealed class NanoleafHandlerNode : AbstractHandlerNode
+    sealed class NanoleafControllerHandlerNode : AbstractHandlerNode
     {
-        private int panelId = 0;
+        private string controllerId;
         private EDeviceType deviceType = EDeviceType.UNKNOWN;
-        private Panel _instance = null;
-        private System.Drawing.Color colorValue;
-        public System.Drawing.Color ColorValue
-        {
-            get { return this.colorValue; }
-            set
-            {
-                this.colorValue = value;
-                this.sendValueToPanel();
-            }
-        }
+        private Controller _instance = null;
         private double dimmerValue;
         public double DimmerValue
         {
@@ -36,27 +27,21 @@ namespace Nanoleaf_Plugin
             set
             {
                 this.dimmerValue = value;
-                this.sendValueToPanel();
+                this.sendValueToController();
             }
         }
         public double StrobeValue
         {
-            get { return this._strobeEmulator == null ? 0.0 : this._strobeEmulator.Frequency; }
+            get { return this._strobeEmulator == null ? 1.0 : this._strobeEmulator.Frequency; }
             private set
             {
                 if (this._strobeEmulator != null)
                     this._strobeEmulator.Frequency = value;
 
-                this.sendValueToPanel();
+                this.sendValueToController();
             }
         }
 
-
-        private ColorProperty ColorProperty
-        {
-            get;
-            set;
-        }
         private DimmerProperty DimmerProperty
         {
             get;
@@ -73,24 +58,24 @@ namespace Nanoleaf_Plugin
             get { return base.ParentBeam; }
             set
             {
-                if (value != null && value.ParentDevice.Type.Equals(NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME))
+                if (value != null && value.ParentDevice.Type.Equals(NanoleafControllerDevice.NANOLEAF_CONTROLLER_TYPE_NAME))
                 {
                     //Setting base.ParentBeam throws an Exception when Beam has already been set.
                     base.ParentBeam = value;
-                    ((NanoleafDevice)value.ParentDevice).PanelIDChanged += new EventHandler(NanoleafHandlerNode_PanelIDChanged);
-                    panelId = ((NanoleafDevice)value.ParentDevice).PanelID;
-                    deviceType = ((NanoleafDevice)value.ParentDevice).DeviceType;
-                    this._instance = NanoleafPlugin.getAllPanels(deviceType).FirstOrDefault(p=>p.ID.Equals(panelId));
+                    ((NanoleafControllerDevice)value.ParentDevice).ControllerIDChanged += new EventHandler(NanoleafHandlerNode_ControllerIDChanged);
+                    controllerId = ((NanoleafControllerDevice)value.ParentDevice).SerialNumber;
+                    deviceType = ((NanoleafControllerDevice)value.ParentDevice).DeviceType;
+                    this._instance = NanoleafPlugin.getClient(controllerId);
                 }
                 else
-                    throw new ArgumentException("This Type of Handler needs to be assigned to a " + NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME);
+                    throw new ArgumentException("This Type of Handler needs to be assigned to a " + NanoleafControllerDevice.NANOLEAF_CONTROLLER_TYPE_NAME);
             }
         }
 
-        private bool _strobeOff;
+        private bool _strobeOff = true;
         private StrobeEmulator _strobeEmulator;
         private HALHandleContext _lastStrobeContext;
-        private NanoleafHandlerNode()
+        private NanoleafControllerHandlerNode()
             : base()
         {
             NanoleafPlugin.ControllerAdded += NanoleafPlugin_ControllerAdded;
@@ -98,7 +83,7 @@ namespace Nanoleaf_Plugin
 
         private void NanoleafPlugin_ControllerAdded(object sender, EventArgs e)
         {
-            if (this._instance == null && panelId != 0)
+            if (this._instance == null && !string.IsNullOrWhiteSpace(controllerId))
             {
                 this.setInstance();
             }
@@ -106,8 +91,6 @@ namespace Nanoleaf_Plugin
 
         protected override PropertyHandlerWorker getPropertyWorker(IDeviceProperty prop)
         {
-            if (prop is ColorProperty)
-                return new PropertyHandlerWorker(handleColorValue);
             if (prop is DimmerProperty)
                 return new PropertyHandlerWorker(handleDimmerValue);
             if (prop is StrobeProperty)
@@ -121,11 +104,11 @@ namespace Nanoleaf_Plugin
             get
             {
                 List<PropertyDependencyBag> props = new List<PropertyDependencyBag>();
-                if (this.ColorProperty == null)
-                {
-                    this.ColorProperty = new ColorProperty(this.ParentBeam, hasRgb: true);
-                }
-                props.Add(new PropertyDependencyBag(this.ColorProperty, getDependencies()));
+                //if (this.ColorProperty == null)
+                //{
+                //    this.ColorProperty = new ColorProperty(this.ParentBeam, hasRgb: true);
+                //}
+                //props.Add(new PropertyDependencyBag(this.ColorProperty, getDependencies()));
                 return props;
             }
         }
@@ -153,18 +136,13 @@ namespace Nanoleaf_Plugin
                 return optProps;
             }
         }
-        private void sendValueToPanel()
+        private void sendValueToController()
         {
             if (this._instance != null && NanoleafMainSwitch.getInstance().Enabled)
-                NanoleafPlugin.getControllerFromPanel(this._instance.ID)?.SetPanelColor(this._instance.ID, new Panel.RGBW((byte)(this.colorValue.R * this.DimmerValue), (byte)(this.colorValue.G * this.DimmerValue), (byte)(this.colorValue.B * this.DimmerValue)));
+                _instance.Brightness = (ushort)(_strobeOff ? dimmerValue * 100 : 0);
         }
         protected override IPropertyType getPropTypeInstance(IDeviceProperty prop)
         {
-            if (prop is ColorProperty)
-                return new ColorType()
-                {
-                    ColorValue = LumosColor.White
-                };
             if (prop is DimmerProperty)
                 return new IntensityType<double>(0.0, 100.0);
             if (prop is StrobeProperty)
@@ -175,42 +153,22 @@ namespace Nanoleaf_Plugin
 
         protected override IDeviceProperty SingleHandleProperty
         {
-            get { return this.ColorProperty; }
+            get { return null; }
         }
 
-        private void NanoleafHandlerNode_PanelIDChanged(object sender, EventArgs e)
+        private void NanoleafHandlerNode_ControllerIDChanged(object sender, EventArgs e)
         {
-            var d = sender as NanoleafDevice;
+            var d = sender as NanoleafControllerDevice;
             if (d != null)
             {
                 this.deviceType = d.DeviceType;
-                this.panelId = d.PanelID;
+                this.controllerId = d.SerialNumber;
                 this.setInstance();
             }
         }
         private void setInstance()
         {
-            this._instance = NanoleafPlugin.getAllPanels(this.deviceType).FirstOrDefault(p => p.ID.Equals(this.panelId));
-
-            NanoleafPlugin.getControllers().ForEach(c => c.PanelAdded -= PanelAdded);
-            NanoleafPlugin.getControllers().ForEach(c => c.PanelRemoved -= PanelRemoved);
-
-            if (this._instance == null)
-                NanoleafPlugin.getControllers().ForEach(c => c.PanelAdded += PanelAdded);
-            else
-                NanoleafPlugin.getControllers().ForEach(c => c.PanelRemoved += PanelRemoved);
-
-        }
-
-        private void PanelAdded(object sender, EventArgs e)
-        {
-            if (this._instance == null)
-                setInstance();
-        }
-        private void PanelRemoved(object sender, EventArgs e)
-        {
-            if (this._instance != null)
-                setInstance();
+            this._instance = NanoleafPlugin.getClient(controllerId);
         }
 
         protected override void initializeHandler()
@@ -225,31 +183,10 @@ namespace Nanoleaf_Plugin
 
         protected override void DisposeHook()
         {
-            NanoleafPlugin.getControllers().ForEach(c => c.PanelAdded -= PanelAdded);
-            NanoleafPlugin.getControllers().ForEach(c => c.PanelRemoved -= PanelRemoved);
             NanoleafPlugin.ControllerAdded -= NanoleafPlugin_ControllerAdded;
             base.DisposeHook();
         }
 
-        private bool handleColorValue(HALHandleContext ctx)
-        {
-            if (this._instance == null)
-                return false;
-
-            System.Drawing.Color? c = null;
-
-            if (ctx.Value is LumosColor lc)
-                c = lc.ColorValue;
-            else if (ctx.Value is System.Drawing.Color _c)
-                c = _c;
-
-            if (c.HasValue)
-            {
-                this.ColorValue = c.Value;
-                return true;
-            }
-            return false;
-        }
         private bool handleDimmerValue(HALHandleContext ctx)
         {
             if (!(ctx.Value is double)) return false;
@@ -268,7 +205,7 @@ namespace Nanoleaf_Plugin
             this._lastStrobeContext = ctx;
             if (this._strobeEmulator == null)
             {
-                this._strobeEmulator = new StrobeEmulator("RGB-Color-Strobe");
+                this._strobeEmulator = new StrobeEmulator("Dimmer-Strobe");
                 this._strobeEmulator.StrobeOff += handleEmulatorStrobeOff;
                 this._strobeEmulator.StrobeOn += handleEmulatorStrobeOn;
             }
@@ -281,30 +218,24 @@ namespace Nanoleaf_Plugin
         private void handleEmulatorStrobeOff(object sender, EventArgs args)
         {
             this._strobeOff = true;
-            this.sendValueToPanel();
+            this.sendValueToController();
         }
 
         private void handleEmulatorStrobeOn(object sender, EventArgs args)
         {
             this._strobeOff = false;
-            this.sendValueToPanel();
+            this.sendValueToController();
         }
         protected override object getPropBlackoutValue(IDeviceProperty prop)
         {
-            if (prop is ColorProperty)
-                return LumosColor.BLACKOUT_VALUE;
-
             if (prop is DimmerProperty)
-                return 0.0;
+                return 1.0;
 
             return base.getPropBlackoutValue(prop);
         }
 
         protected override object getPropHighlightValue(IDeviceProperty prop)
         {
-            if (prop is ColorProperty)// && this.ColorValue.ColorsEqual(_Color.Black))
-                return LumosColor.HIGHLIGHT_VALUE;
-
             if (prop is DimmerProperty)
                 return 100.0;
 

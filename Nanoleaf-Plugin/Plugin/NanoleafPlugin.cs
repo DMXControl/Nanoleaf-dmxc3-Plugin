@@ -300,6 +300,7 @@ namespace Nanoleaf_Plugin
             sm = SettingsManager.getInstance();
             ResourceManager.getInstance().registerResourceProvider(this);
             HandlerFactory.getInstance().registerHandlerNode<NanoleafHandlerNode>("nanoleaf");
+            HandlerFactory.getInstance().registerHandlerNode<NanoleafControllerHandlerNode>("nanoleaf-controller");
             DeviceManager.getInstance().registerDeviceFactory(new NanoleafDeviceFactory());
 
             NanoleafMainSwitch.getInstance().EnabledChanged += NanoleafMainSwitch_EnabledChanged;
