@@ -333,7 +333,7 @@ namespace Nanoleaf_Plugin
             {
                 Communication.StopEventListener();
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 //Needed to prevent exception when stopping the Nanoleaf plugin
             }

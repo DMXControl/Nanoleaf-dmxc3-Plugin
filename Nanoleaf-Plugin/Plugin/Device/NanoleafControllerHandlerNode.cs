@@ -1,46 +1,50 @@
-﻿using NanoleafAPI;
+﻿using LumosLIB.Tools;
+using Nanoleaf_Plugin.Plugin.Device;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
+using NanoleafAPI;
 using org.dmxc.lumos.Kernel.DeviceProperties;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.HAL.Handler;
+using org.dmxc.lumos.Kernel.HAL.Handler.Helper;
 using org.dmxc.lumos.Kernel.PropertyType;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using org.dmxc.lumos.Kernel.HAL.Handler.Matrix;
-using LumosLIB.Tools;
-using org.dmxc.lumos.Kernel.HAL.Handler.Helper;
-using Nanoleaf_Plugin.Plugin.Device;
-using Nanoleaf_Plugin.Plugin.MainSwitch;
 
 namespace Nanoleaf_Plugin
 {
     sealed class NanoleafControllerHandlerNode : AbstractHandlerNode
     {
-        private string controllerId;
+        public static readonly string DMXC_CONTROLLED_NAME = "DMXC3 controlled";
+        private string serialNumber;
         private EDeviceType deviceType = EDeviceType.UNKNOWN;
         private Controller _instance = null;
         private double dimmerValue;
+        private string effectValue;
         public double DimmerValue
         {
-            get { if (!this._strobeOff || this.StrobeValue == 0) return this.dimmerValue; else return 0; }
+            get { return this.dimmerValue; }
             set
             {
                 this.dimmerValue = value;
-                this.sendValueToController();
+                sendDimmerValueToController();
+                    
             }
         }
-        public double StrobeValue
+
+        public string EffectValue
         {
-            get { return this._strobeEmulator == null ? 1.0 : this._strobeEmulator.Frequency; }
+            get { return this.effectValue; }
             private set
             {
-                if (this._strobeEmulator != null)
-                    this._strobeEmulator.Frequency = value;
-
-                this.sendValueToController();
+                this.effectValue = value;
+                sendEffectValueToController();
             }
         }
+
+        public bool DMXCControlled => EffectValue.Contains(DMXC_CONTROLLED_NAME, StringComparison.OrdinalIgnoreCase);
+
+        private readonly List<string> _effectList = new List<string>();
 
         private DimmerProperty DimmerProperty
         {
@@ -48,6 +52,11 @@ namespace Nanoleaf_Plugin
             set;
         }
         private StrobeProperty StrobeProperty
+        {
+            get;
+            set;
+        }
+        private RawStepProperty EffectProperty
         {
             get;
             set;
@@ -63,16 +72,27 @@ namespace Nanoleaf_Plugin
                     //Setting base.ParentBeam throws an Exception when Beam has already been set.
                     base.ParentBeam = value;
                     ((NanoleafControllerDevice)value.ParentDevice).ControllerIDChanged += new EventHandler(NanoleafHandlerNode_ControllerIDChanged);
-                    controllerId = ((NanoleafControllerDevice)value.ParentDevice).SerialNumber;
+                    serialNumber = ((NanoleafControllerDevice)value.ParentDevice).SerialNumber;
                     deviceType = ((NanoleafControllerDevice)value.ParentDevice).DeviceType;
-                    this._instance = NanoleafPlugin.getClient(controllerId);
+                    this._instance = NanoleafPlugin.getClient(serialNumber);
+                    updateEffectList();
                 }
                 else
                     throw new ArgumentException("This Type of Handler needs to be assigned to a " + NanoleafControllerDevice.NANOLEAF_CONTROLLER_TYPE_NAME);
             }
         }
 
-        private bool _strobeOff = true;
+        private void updateEffectList()
+        {
+            _effectList.Clear();
+            _effectList.Add(DMXC_CONTROLLED_NAME);
+
+            if (_instance == null)
+                return;
+
+            _effectList.AddRange(_instance.EffectList.Where(e => !e.Contains("*ExtControl*", StringComparison.OrdinalIgnoreCase)));
+        }
+
         private StrobeEmulator _strobeEmulator;
         private HALHandleContext _lastStrobeContext;
         private NanoleafControllerHandlerNode()
@@ -83,7 +103,7 @@ namespace Nanoleaf_Plugin
 
         private void NanoleafPlugin_ControllerAdded(object sender, EventArgs e)
         {
-            if (this._instance == null && !string.IsNullOrWhiteSpace(controllerId))
+            if (this._instance == null && !string.IsNullOrWhiteSpace(serialNumber))
             {
                 this.setInstance();
             }
@@ -93,8 +113,8 @@ namespace Nanoleaf_Plugin
         {
             if (prop is DimmerProperty)
                 return new PropertyHandlerWorker(handleDimmerValue);
-            if (prop is StrobeProperty)
-                return new PropertyHandlerWorker(handleStrobeValue);
+            if (prop is RawStepProperty)
+                return new PropertyHandlerWorker(handleRawValue);
 
             return null;
         }
@@ -103,12 +123,22 @@ namespace Nanoleaf_Plugin
         {
             get
             {
+                if (this.DimmerProperty == null)
+                {
+                    this.DimmerProperty = new DimmerProperty(this.ParentBeam);
+                }
+                if (this.EffectProperty == null)
+                {
+                    this.EffectProperty = new RawStepProperty(this.ParentBeam, "Scene");
+                }
+
                 List<PropertyDependencyBag> props = new List<PropertyDependencyBag>();
-                //if (this.ColorProperty == null)
-                //{
-                //    this.ColorProperty = new ColorProperty(this.ParentBeam, hasRgb: true);
-                //}
-                //props.Add(new PropertyDependencyBag(this.ColorProperty, getDependencies()));
+                props.Add(new PropertyDependencyBag(this.DimmerProperty, getDependencies(),
+                    this.ParentHandler is AbstractDMXHandlerNode));
+
+                props.Add(new PropertyDependencyBag(this.EffectProperty, getDependencies(),
+                    this.ParentHandler is AbstractDMXHandlerNode));
+
                 return props;
             }
         }
@@ -117,18 +147,12 @@ namespace Nanoleaf_Plugin
         {
             get
             {
-                if (this.DimmerProperty == null)
-                {
-                    this.DimmerProperty = new DimmerProperty(this.ParentBeam);
-                }
                 if (this.StrobeProperty == null)
                 {
                     this.StrobeProperty = new StrobeProperty(this.ParentBeam);
                 }
 
                 List<PropertyDependencyBag> optProps = new List<PropertyDependencyBag>();
-                optProps.Add(new PropertyDependencyBag(this.DimmerProperty, getDependencies(),
-                    this.ParentHandler is AbstractDMXHandlerNode));
 
                 optProps.Add(new PropertyDependencyBag(this.StrobeProperty, getDependencies(),
                     this.ParentHandler is AbstractDMXHandlerNode));
@@ -136,18 +160,44 @@ namespace Nanoleaf_Plugin
                 return optProps;
             }
         }
-        private void sendValueToController()
+
+        private bool canSendValueToController() => this._instance != null && NanoleafMainSwitch.getInstance().Enabled;
+
+        private void sendDimmerValueToController()
         {
-            if (this._instance != null && NanoleafMainSwitch.getInstance().Enabled)
-                _instance.Brightness = (ushort)(_strobeOff ? dimmerValue * 100 : 0);
+            if(canSendValueToController())
+                _instance.Brightness = (ushort)(dimmerValue * 100);
         }
+
+        private void sendEffectValueToController()
+        {
+            if (canSendValueToController())
+                _instance.SetEffect(DMXCControlled, EffectValue);
+        }
+
         protected override IPropertyType getPropTypeInstance(IDeviceProperty prop)
         {
             if (prop is DimmerProperty)
                 return new IntensityType<double>(0.0, 100.0);
             if (prop is StrobeProperty)
                 return new StrobeType(StrobeEmulator.EMULATOR_MIN, StrobeEmulator.EMULATOR_MAX);
-
+            if (prop is RawStepProperty)
+            {
+                var c = new StringEnumType(this._effectList);
+                if (this.DefaultVal != null)
+                {
+                    var n = c.EnumValues.ElementAtOrDefault((int)this.DefaultVal.Value);
+                    if (n != null)
+                        c.Value = n;
+                }
+                else if (this.DefaultValString != null)
+                {
+                    var n = c.EnumValues.FirstOrDefault(e => Equals(e.ID, this.DefaultValString));
+                    if (n != null)
+                        c.Value = n;
+                }
+                return c;
+            }
             return null;
         }
 
@@ -162,13 +212,14 @@ namespace Nanoleaf_Plugin
             if (d != null)
             {
                 this.deviceType = d.DeviceType;
-                this.controllerId = d.SerialNumber;
+                this.serialNumber = d.SerialNumber;
                 this.setInstance();
+                updateEffectList();
             }
         }
         private void setInstance()
         {
-            this._instance = NanoleafPlugin.getClient(controllerId);
+            this._instance = NanoleafPlugin.getClient(serialNumber);
         }
 
         protected override void initializeHandler()
@@ -197,35 +248,17 @@ namespace Nanoleaf_Plugin
             return true;
         }
 
-        private bool handleStrobeValue(HALHandleContext ctx)
+        private bool handleRawValue(HALHandleContext ctx)
         {
-            Strobe t = ctx.Value as Strobe;
-            if (t == null) return false;
-
-            this._lastStrobeContext = ctx;
-            if (this._strobeEmulator == null)
+            if (ctx.Value is EnumString st)
             {
-                this._strobeEmulator = new StrobeEmulator("Dimmer-Strobe");
-                this._strobeEmulator.StrobeOff += handleEmulatorStrobeOff;
-                this._strobeEmulator.StrobeOn += handleEmulatorStrobeOn;
+                this.EffectValue = st.ToString();
+                ctx.AddHandleBag(new PropertyValueHandleBag(ctx.Property, st, this.HandlerName, this.getDependencies()));
+                return true;
             }
-
-            this.StrobeValue = t.Speed;
-
-            ctx.AddHandleBag(new PropertyValueHandleBag(ctx.Property, (Strobe)this.StrobeValue, this.HandlerName, this.getDependencies()));
-            return true;
-        }
-        private void handleEmulatorStrobeOff(object sender, EventArgs args)
-        {
-            this._strobeOff = true;
-            this.sendValueToController();
+            return false;
         }
 
-        private void handleEmulatorStrobeOn(object sender, EventArgs args)
-        {
-            this._strobeOff = false;
-            this.sendValueToController();
-        }
         protected override object getPropBlackoutValue(IDeviceProperty prop)
         {
             if (prop is DimmerProperty)
@@ -245,6 +278,11 @@ namespace Nanoleaf_Plugin
         protected override IEnumerable<string> getDependencies()
         {
             yield return "";
+        }
+        private IEnumerable<DMXRangeWithDiscreteValue> getPossibleValues(EHandlerValueType handlerType)
+        {
+            return this.getNestedHandlerValues(this, handlerType, typeof(DMXRangeWithDiscreteValue))
+                .Cast<DMXRangeWithDiscreteValue>();
         }
     }
 }
