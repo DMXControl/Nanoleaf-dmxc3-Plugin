@@ -61,6 +61,9 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
+                return;
+
             LayoutEvent events = e.LayoutEvent;
             if (events == null || events.Layout == null)
                 return;

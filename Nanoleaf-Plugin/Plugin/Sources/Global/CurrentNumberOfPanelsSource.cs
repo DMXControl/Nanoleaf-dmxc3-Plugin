@@ -30,7 +30,7 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
-            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
             LayoutEvent events = e.LayoutEvent;

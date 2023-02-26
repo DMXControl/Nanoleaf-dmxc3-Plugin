@@ -28,7 +28,7 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)
         {
-            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
             TouchEvent events = e.TouchEvent;

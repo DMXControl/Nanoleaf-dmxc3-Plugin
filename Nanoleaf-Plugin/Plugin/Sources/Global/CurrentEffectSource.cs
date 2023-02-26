@@ -28,7 +28,7 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnEffectEvent(object sender, EffectEventArgs e)
         {
-            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
             EffectEvents events = e.EffectEvents;

@@ -61,7 +61,7 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnGestureEvent(object sender, GestureEventArgs e)
         {
-            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
             GestureEvents events = e.GestureEvents;
