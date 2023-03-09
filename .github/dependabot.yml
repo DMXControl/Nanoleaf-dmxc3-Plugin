@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/Nanoleaf-Plugin/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "nuget"
+    directory: "/NanoleafGUI-Plugin/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
