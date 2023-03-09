@@ -5,7 +5,7 @@ env:
   PluginName: "Nanoleaf-Plugin"
   SolutionName: "Nanoleaf-Plugin"
 
-on: push
+on: [push, pull_request]
 
 jobs:
   build:
