@@ -3,7 +3,7 @@ using LumosProtobuf;
 using LumosProtobuf.Input;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
-using Newtonsoft.Json.Linq;
+using NanoleafAPI.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
 using System.Linq;
@@ -65,14 +65,9 @@ namespace Nanoleaf_Plugin
                 return;
 
             GestureEvents events = e.GestureEvents;
-            if (events == null)
-                return;
-            var val = events.Events.FirstOrDefault(g => g.Gesture == GestureType);
-            if (val!=null)
-            {
-                beatValue++;
-                CurrentValue = beatValue;
-            }
+            var val = events.Events.First(g => g.Gesture == GestureType);
+            beatValue++;
+            CurrentValue = beatValue;
         }
 
         private static string getID(string serialNumber, EGesture part)

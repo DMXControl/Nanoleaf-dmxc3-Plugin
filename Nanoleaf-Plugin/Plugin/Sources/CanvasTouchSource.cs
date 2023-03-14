@@ -56,30 +56,27 @@ namespace Nanoleaf_Plugin
             if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
-            TouchEvent events = e.TouchEvent;
-            if (events == null)
+            if (!e.TouchEvent.TouchPanelEvents.Any(ev => ev.PanelId.Equals(PanelID)))
                 return;
 
-            var touch = events.TouchPanelEvents.FirstOrDefault(ev => ev.PanelId.Equals(PanelID));
-            if (touch != null)
+            var touch = e.TouchEvent.TouchPanelEvents.First(ev => ev.PanelId.Equals(PanelID));
+
+            switch (TouchType)
             {
-                switch (TouchType)
-                {
-                    case ETouch.Hold:
-                    case ETouch.Hover:
-                        if (touch.Type == TouchType)
-                            CurrentValue = true;
-                        else
-                            CurrentValue = false;
-                        break;
-                    default:
-                        if (touch.Type == TouchType)
-                        {
-                            beatValue++;
-                            CurrentValue = beatValue;
-                        }
-                        break;
-                }
+                case ETouch.Hold:
+                case ETouch.Hover:
+                    if (touch.Type == TouchType)
+                        CurrentValue = true;
+                    else
+                        CurrentValue = false;
+                    break;
+                default:
+                    if (touch.Type == TouchType)
+                    {
+                        beatValue++;
+                        CurrentValue = beatValue;
+                    }
+                    break;
             }
         }
 

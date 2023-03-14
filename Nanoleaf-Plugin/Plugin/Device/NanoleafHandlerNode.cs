@@ -156,7 +156,7 @@ namespace Nanoleaf_Plugin
         private void sendValueToPanel()
         {
             if (this._instance != null && NanoleafMainSwitch.getInstance().Enabled)
-                NanoleafPlugin.getControllerFromPanel(this._instance.ID)?.SetPanelColor(this._instance.ID, new Panel.RGBW((byte)(this.colorValue.R * this.DimmerValue), (byte)(this.colorValue.G * this.DimmerValue), (byte)(this.colorValue.B * this.DimmerValue)));
+                NanoleafPlugin.getControllerFromPanel(this._instance.ID)?.SetPanelColor(this._instance.ID, new RGBW((byte)(this.colorValue.R * this.DimmerValue), (byte)(this.colorValue.G * this.DimmerValue), (byte)(this.colorValue.B * this.DimmerValue)));
         }
         protected override IPropertyType getPropTypeInstance(IDeviceProperty prop)
         {

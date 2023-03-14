@@ -61,20 +61,20 @@ namespace Nanoleaf_Plugin
         {
             if (!NanoleafMainSwitch.getInstance().Enabled) return true;
 
-            Panel.RGBW rgbw = new Panel.RGBW();
+            RGBW rgbw = new RGBW();
             if (newValue is Color)
             {
                 var color = (Color)newValue;
-                rgbw = new Panel.RGBW(color.R, color.G, color.B);
+                rgbw = new RGBW(color.R, color.G, color.B);
             }
             else if (newValue is LumosColor)
             {
                 var lumosColor = (LumosColor)newValue;
-                rgbw = new Panel.RGBW((byte)(lumosColor.Red * 255), (byte)(lumosColor.Green * 255), (byte)(lumosColor.Blue * 255));
+                rgbw = new RGBW((byte)(lumosColor.Red * 255), (byte)(lumosColor.Green * 255), (byte)(lumosColor.Blue * 255));
             }
-            else if (newValue is Panel.RGBW)
+            else if (newValue is RGBW)
             {
-                rgbw = (Panel.RGBW)newValue;
+                rgbw = (RGBW)newValue;
             }
             else return false;
             try

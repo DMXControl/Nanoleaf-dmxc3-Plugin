@@ -35,13 +35,8 @@ namespace Nanoleaf_Plugin
                 return;
 
             StateEvents events = e.StateEvents;
-            if (events == null)
-                return;
-
-            var value = events.Events.FirstOrDefault(v => v.Attribute == StateEvent.EAttribute.CCT);
-
-            if (value != null)
-                this.CurrentValue = value.Value;
+            var value = events.Events.First(v => v.Attribute == StateEvent.EAttribute.CCT);
+            this.CurrentValue = value.Value;
         }
 
         private static string getID(string serialNumber)

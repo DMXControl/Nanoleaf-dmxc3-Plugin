@@ -64,13 +64,16 @@ namespace Nanoleaf_Plugin
             if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
-            LayoutEvent events = e.LayoutEvent;
-            if (events == null || events.Layout == null)
-                return;
+            foreach (LayoutEvent _event in e.LayoutEvents.Events)
+            {
+                if (_event.Layout == null)
+                    continue;
+                Layout layout = _event.Layout.Value;
+                if (!layout.PanelPositions.Any(p => p.PanelId.Equals(PanelID)))
+                    continue;
 
-            var position = events.Layout.PanelPositions.FirstOrDefault(p => p.PanelId.Equals(PanelID));
+                var position = layout.PanelPositions.First(p => p.PanelId.Equals(PanelID));
 
-            if (position != null)
                 switch (Part)
                 {
                     case EPositionPart.X:
@@ -83,6 +86,7 @@ namespace Nanoleaf_Plugin
                         CurrentValue = position.Orientation;
                         break;
                 }
+            }
         }
 
         private static string getID(string serialNumber, int panelID, EPositionPart part)

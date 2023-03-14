@@ -32,9 +32,6 @@ namespace Nanoleaf_Plugin
                 return;
 
             EffectEvents events = e.EffectEvents;
-            if (events == null)
-                return;
-
             this.CurrentValue = events.Events.First().Value;
         }
 

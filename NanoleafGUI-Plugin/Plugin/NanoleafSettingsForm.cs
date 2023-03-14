@@ -1,19 +1,15 @@
 ﻿using Lumos.GUI.BaseWindow;
 using Lumos.GUI.Settings;
 using LumosControls.Controls;
+using LumosLIB.Tools.I18n;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using org.dmxc.lumos.Kernel.Settings;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using LumosLIB.Tools.I18n;
 
 namespace NanoleafGUI_Plugin
 {

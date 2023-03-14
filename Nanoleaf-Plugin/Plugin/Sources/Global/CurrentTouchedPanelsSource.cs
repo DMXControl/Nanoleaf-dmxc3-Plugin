@@ -31,10 +31,7 @@ namespace Nanoleaf_Plugin
             if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
-            TouchEvent events = e.TouchEvent;
-            if (events == null)
-                return;
-            CurrentValue = events.TouchedPanelsNumber;
+            CurrentValue = e.TouchEvent.TouchedPanelsNumber;
         }
 
         private static string getID(string serialNumber)

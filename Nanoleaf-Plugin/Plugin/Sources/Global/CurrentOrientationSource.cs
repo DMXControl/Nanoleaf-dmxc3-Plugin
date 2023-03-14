@@ -4,6 +4,7 @@ using LumosProtobuf.Input;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
+using System.Linq;
 
 namespace Nanoleaf_Plugin
 {
@@ -33,14 +34,12 @@ namespace Nanoleaf_Plugin
             if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
-            LayoutEvent events = e.LayoutEvent;
-            if (events == null)
+            LayoutEvent _event = e.LayoutEvents.Events.Last();
+            if (_event.GlobalOrientation == null)
                 return;
 
-            var value = events.GlobalOrientation;
-
-            if (value.HasValue)
-                this.CurrentValue = value.Value;
+            var value = _event.GlobalOrientation;
+            this.CurrentValue = value;
         }
 
         private static string getID(string serialNumber)
