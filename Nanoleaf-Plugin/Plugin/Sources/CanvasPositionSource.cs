@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace Nanoleaf_Plugin
         private CanvasPositionSource(string serialNumber, int panelID, EPositionPart part) :
             base(getID(serialNumber, panelID, part), getDisplayName(part),getCategory(serialNumber, panelID), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CanvasPositionSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
             PanelID = panelID;
@@ -38,6 +41,11 @@ namespace Nanoleaf_Plugin
             }
         }
 
+        private void CanvasPositionSource_EnabledChanged(object sender, System.EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
+        }
+
         public static CanvasPositionSource CreateX(string serialNumber, int panelID)
         {
             return new CanvasPositionSource(serialNumber, panelID, EPositionPart.X);
@@ -53,13 +61,19 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
-            LayoutEvent events = e.LayoutEvent;
-            if (events == null)
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
-            var position = events.Layout.PanelPositions.FirstOrDefault(p => p.PanelId.Equals(PanelID));
+            foreach (LayoutEvent _event in e.LayoutEvents.Events)
+            {
+                if (_event.Layout == null)
+                    continue;
+                Layout layout = _event.Layout.Value;
+                if (!layout.PanelPositions.Any(p => p.PanelId.Equals(PanelID)))
+                    continue;
 
-            if (position != null)
+                var position = layout.PanelPositions.First(p => p.PanelId.Equals(PanelID));
+
                 switch (Part)
                 {
                     case EPositionPart.X:
@@ -72,6 +86,7 @@ namespace Nanoleaf_Plugin
                         CurrentValue = position.Orientation;
                         break;
                 }
+            }
         }
 
         private static string getID(string serialNumber, int panelID, EPositionPart part)

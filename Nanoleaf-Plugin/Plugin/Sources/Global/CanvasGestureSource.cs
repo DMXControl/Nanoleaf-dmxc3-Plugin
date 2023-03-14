@@ -1,7 +1,9 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
+using NanoleafAPI.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
 using System.Linq;
@@ -11,16 +13,25 @@ namespace Nanoleaf_Plugin
 {
     public class CanvasGestureSource : AbstractInputSource
     {
+        
+
         public string SerialNumber { get; private set; }
         public EGesture GestureType { get; private set; }
         private long beatValue = 0;
         private CanvasGestureSource(string serialNumber, EGesture gestureType) :
             base(getID(serialNumber, gestureType), getDisplayName(gestureType), getCategory(serialNumber), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CanvasGestureSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnGestureEvent += ExternalControlEndpoint_StaticOnGestureEvent;
             SerialNumber = serialNumber;
             GestureType = gestureType;
             CurrentValue = beatValue;
+        }
+
+        private void CanvasGestureSource_EnabledChanged(object sender, EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
         }
 
         public static CanvasGestureSource CreateSingleTap(string serialNumber)
@@ -50,18 +61,13 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnGestureEvent(object sender, GestureEventArgs e)
         {
-            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
             GestureEvents events = e.GestureEvents;
-            if (events == null)
-                return;
-            var val = events.Events.FirstOrDefault(g => g.Gesture == GestureType);
-            if (val!=null)
-            {
-                beatValue++;
-                CurrentValue = beatValue;
-            }
+            var val = events.Events.First(g => g.Gesture == GestureType);
+            beatValue++;
+            CurrentValue = beatValue;
         }
 
         private static string getID(string serialNumber, EGesture part)

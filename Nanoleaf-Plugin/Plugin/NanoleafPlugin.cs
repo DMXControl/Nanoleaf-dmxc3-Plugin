@@ -1,11 +1,14 @@
 ﻿using LumosLIB.Kernel.Log;
+using LumosLIB.Tools;
 using LumosProtobuf.Resource;
+using Microsoft.Extensions.Logging;
+using Nanoleaf_Plugin.Plugin.Logging;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
+using Nanoleaf_Plugin.Plugin.Sinks;
 using NanoleafAPI;
-using NanoleafAPI;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using org.dmxc.lumos.Kernel.HAL.Handler;
 using org.dmxc.lumos.Kernel.Input.v2;
+using org.dmxc.lumos.Kernel.MainSwitch;
 using org.dmxc.lumos.Kernel.Plugin;
 using org.dmxc.lumos.Kernel.Project;
 using org.dmxc.lumos.Kernel.Resource;
@@ -17,6 +20,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using T = LumosLIB.Tools.I18n.DummyT;
 
@@ -27,6 +31,7 @@ namespace Nanoleaf_Plugin
         internal static readonly ILumosLog Log = LumosLogger.getInstance(nameof(NanoleafPlugin));
         private static List<Controller> clients = new List<Controller>();
         private static List<Controller> clientsBindedToInputAssignment = new List<Controller>();
+
         private const string SETTINGS_CATEGORY_ID = "Settings:Nanoleaf";
 
         internal const string NANOLEAF_SHOW_IN_INPUTASSIGNMENT = "NANOLEAF.SHOW_IN_INPUTASSIGNMENT";
@@ -41,6 +46,7 @@ namespace Nanoleaf_Plugin
 
         internal const string NANOLEAF_REQUEST_TOKEN = "NANOLEAF.REQUEST_TOKEN";
         internal const string NANOLEAF_ADD_CONTROLLER = "NANOLEAF.ADD_CONTROLLER";
+        internal const string NANOLEAF_REMOVE_CONTROLLER = "NANOLEAF.REMOVE_CONTROLLER";
 
         private bool isDisposed = false;
         private bool isStarted = false;
@@ -48,7 +54,17 @@ namespace Nanoleaf_Plugin
         public static event EventHandler ControllerAdded;
 
         internal static bool ShowInInputAssignment = true, Discover = true, AutoConnect = true, AutoRequestToken = true;
-        internal static int RefreshRate = 44;
+
+        private static int refreshRate=44;
+        internal static int RefreshRate
+        {
+            get => refreshRate;
+            set
+            {
+                refreshRate = value;
+                clients.ForEach(c => c.RefreshRate = value);
+            }
+        }
 
         private static string discoverState = "Stopped";
         public static string DiscoverState
@@ -86,13 +102,10 @@ namespace Nanoleaf_Plugin
         }
         public NanoleafPlugin() : base("{25a96576-fda7-4297-bc59-6c4f2256ab6e}", "Nanoleaf-Plugin")
         {
-//#if DEBUG
-//            while (!Debugger.IsAttached)
-//            {
-//                Thread.Sleep(100);
-//            }
-//            Log.Info("Debugger attaced!");
-//#endif
+            //Special LoggerWrapper is needed because Lumos uses the LumosLog class for logging, the NanoleafAPI uses MEL. 
+            Tools.LoggerFactory = new LoggerFactory();
+            Tools.LoggerFactory.AddProvider(new LumosLogWrapperProvider(nameof(NanoleafPlugin)));
+
             Communication.DeviceDiscovered += Communication_DeviceDiscovered;
         }
 
@@ -100,34 +113,46 @@ namespace Nanoleaf_Plugin
         {
             Log.Info($"Device Discovered: {e.DiscoveredDevice.ToString()}");
             string ip = e.DiscoveredDevice.IP;
-            string json= JsonConvert.SerializeObject(Communication.DiscoveredDevices);
+            string port = e.DiscoveredDevice.Port;
+            if (string.Equals("6517", port))
+            {
+                Log?.Info($"Port is: {port}, falback to 16021");
+                port = "16021";
+            }
+            string json= JsonSerializer.Serialize(Communication.DiscoveredDevices);
             sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
-            _ = addControllerAsync(ip);
+            _ = addControllerAsync(new Controller(ip, port));
         }
-        private async Task addControllerAsync(string ip, string authToken = null, bool setSettings=true)
+        private async Task addControllerAsync(Controller controller, bool setSettings=true)
         {
             try
             {
-                if (clients.Any(c => c.IP.Equals(ip)))
+                if (clients.Any(c => c.IP.Equals(controller.IP)))
                 {
-                    Log.Info(string.Format("Controller already Connected!" + Environment.NewLine + "{0}", ip));
+                    Log.Info(string.Format("Controller already Connected! IP: {0}", controller.IP));
+                    controller.Dispose();
                     return;
                 }
-                Controller controller = new Controller(ip, authToken);
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
                 controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
                 clients.Add(controller);
                 ControllerAdded?.Invoke(this, EventArgs.Empty);
+                if (NanoleafMainSwitch.getInstance().Enabled)
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(5000);
+                        controller?.StartStreaming();
+                    });
+
                 if (setSettings)
-                {
-                    string json = JsonConvert.SerializeObject(clients);
-                    sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
-                }
+                    saveClients();
+
                 await Task.Delay(100);
                 Log.Info($"Controller Added: {controller.ToString()}");
 
-                _ = bindInputAssignment();
+                if (ShowInInputAssignment)
+                    _ = bindInputAssignment();
             }
             catch (Exception e)
             {
@@ -135,22 +160,58 @@ namespace Nanoleaf_Plugin
             }
         }
 
+        private async Task removeControllerAsync(Controller controller)
+        {
+            try
+            {
+                if (controller == null)
+                    return;
+
+                var controllerVita = controller.ToString();
+
+                _ = debindControllerInputAssignment(controller);
+
+                controller.AuthTokenReceived -= Controller_AuthTokenReceived;
+                controller.UpdatedInfos -= Controller_UpdatedInfos;
+                controller.PanelLayoutChanged -= Controller_PanelLayoutChanged;
+
+                await Communication.DeleteUser(controller.IP, controller.Port, controller.Auth_token);
+
+                controller.Dispose();
+                clients.Remove(controller);
+
+                saveClients();
+                sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_REMOVE_CONTROLLER, "");
+
+                await Task.Delay(100);
+                Log.Info("Controller removed: {0}", controllerVita);
+            }
+            catch (Exception e)
+            {
+                Log.Warn(string.Empty, e);
+            }
+        }
+
+
+        private static void saveClients()
+        {
+            string json = JsonSerializer.Serialize(clients.Where(c => Tools.IsTokenValid(c.Auth_token) && c.DeviceType != EDeviceType.UNKNOWN));
+            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+        }
+
         private void Controller_PanelLayoutChanged(object sender, EventArgs e)
         {
-            string json = JsonConvert.SerializeObject(clients);
-            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            saveClients();
         }
 
         private void Controller_UpdatedInfos(object sender, EventArgs e)
         {
-            string json = JsonConvert.SerializeObject(clients);
-            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            saveClients();
         }
 
         private void Controller_AuthTokenReceived(object sender, EventArgs e)
         {
-            string json = JsonConvert.SerializeObject(clients);
-            sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS, json);
+            saveClients();
         }
 
         private async Task bindInputAssignment()
@@ -181,6 +242,8 @@ namespace Nanoleaf_Plugin
                     im.RegisterSource(CanvasGestureSource.CreateSwipeRight(controller.SerialNumber));
                     im.RegisterSource(CanvasGestureSource.CreateSwipeLeft(controller.SerialNumber));
 
+                    im.RegisterSink(new BrightnessSink(controller.SerialNumber));
+
                     foreach (Panel panel in controller.Panels)
                     {
                         im.RegisterSource(CanvasPositionSource.CreateX(controller.SerialNumber, panel.ID));
@@ -191,7 +254,11 @@ namespace Nanoleaf_Plugin
                         im.RegisterSource(CanvasTouchSource.CreateHold(controller.SerialNumber, panel.ID));
                         im.RegisterSource(CanvasTouchSource.CreateUp(controller.SerialNumber, panel.ID));
                         im.RegisterSource(CanvasTouchSource.CreateSwipe(controller.SerialNumber, panel.ID));
-                        im.RegisterSink(new CanvasSink(controller.SerialNumber, panel));
+
+                        var sink = new CanvasSink(controller.SerialNumber, panel);
+                        if (!im.Sinks.OfType<CanvasSink>().Any(s => s.ID.Equals(sink.ID)))
+                            im.RegisterSink(sink);
+
                         im.RegisterSink(new CanvasSink(controller.SerialNumber, panel, true));
                     }
                     clientsBindedToInputAssignment.Add(controller);
@@ -201,6 +268,7 @@ namespace Nanoleaf_Plugin
                     Log.Error(string.Empty, e);
                 }
         }
+
         private async Task debindInputAssignment()
         {
             try
@@ -217,12 +285,50 @@ namespace Nanoleaf_Plugin
                 Log.Error(string.Empty, e);
             }
         }
+
+        private async Task debindControllerInputAssignment(Controller controller)
+        {
+            try
+            {
+                var im = InputManager.getInstance();
+                var sinks = im.Sinks.Where(s => s.ID.Equals("Nanoleaf-" + controller.SerialNumber));
+                var sources = im.Sources.Where(s => s.ID.Equals("Nanoleaf-" + controller.SerialNumber));
+                im.UnregisterSinks(sinks);
+                im.UnregisterSources(sources);
+                Log.Info("Unregisterd {0} Sinks and {1} Sources of Controller {2}", sinks.Count(), sources.Count(), controller.SerialNumber);
+            }
+            catch (Exception e)
+            {
+                Log.Error(string.Empty, e);
+            }
+        }
+
         protected override void initializePlugin()
         {
             sm = SettingsManager.getInstance();
             ResourceManager.getInstance().registerResourceProvider(this);
             HandlerFactory.getInstance().registerHandlerNode<NanoleafHandlerNode>("nanoleaf");
+            HandlerFactory.getInstance().registerHandlerNode<NanoleafControllerHandlerNode>("nanoleaf-controller");
             DeviceManager.getInstance().registerDeviceFactory(new NanoleafDeviceFactory());
+
+            NanoleafMainSwitch.getInstance().EnabledChanged += NanoleafMainSwitch_EnabledChanged;
+            MainSwitchManager.getInstance().RegisterMainSwitch(NanoleafMainSwitch.getInstance());
+        }
+
+        private void NanoleafMainSwitch_EnabledChanged(object sender, EventArgs e)
+        {
+            if (NanoleafMainSwitch.getInstance().Enabled)
+            {
+                clients.ForEach(client => {
+                    _ = client.StartStreaming();
+                });
+            }
+            else
+            {
+                clients.ForEach(client => {
+                    _ = client.StopStreaming();
+                });
+            }
         }
 
         protected override void shutdownPlugin()
@@ -230,7 +336,15 @@ namespace Nanoleaf_Plugin
             Communication.StopDiscoverySSDPTask();
             Communication.StopDiscoverymDNSTask();
             clients.ForEach(c => c.SelfDestruction());
-            Communication.StopEventListener();
+
+            try
+            {
+                Communication.StopEventListener();
+            }
+            catch(Exception)
+            {
+                //Needed to prevent exception when stopping the Nanoleaf plugin
+            }
             clients.Clear();
             Log.Info("Shutdown");
             _ = debindInputAssignment();
@@ -255,28 +369,29 @@ namespace Nanoleaf_Plugin
                 if (AutoConnect)
                 {
                     string jsonControllers = sm.GetKernelSetting<string>(ESettingsType.APPLICATION, NANOLEAF_CONTROLLERS);
-                    JArray objControllers = JsonConvert.DeserializeObject(jsonControllers) as JArray;
-                    if (objControllers != null)
-                        foreach (var c in objControllers)
-                        {
-                            var controller = new Controller(c);
-                            clients.Add(controller);
-                            controller.AuthTokenReceived += Controller_AuthTokenReceived;
-                            controller.UpdatedInfos += Controller_UpdatedInfos;
-                            controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
-                            ControllerAdded?.Invoke(this, EventArgs.Empty);
-                        }
+                    if (!string.IsNullOrWhiteSpace(jsonControllers))
+                    {
+                        var objControllers = JsonSerializer.Deserialize<IReadOnlyList<Controller>>(jsonControllers);
+                        if (objControllers != null)
+                            foreach (Controller controller in objControllers)
+                                _ = addControllerAsync(controller, false);
+                    }
                 }
 
 
                 Communication.RegisterIPAddress(IPAddress.Any);// KernelNetManager.getInstance().IPAddresses.Select(s=> IPAddress.Parse(s)).ToArray();
                 if (Discover)
                 {
-                    Communication.StartDiscoverymDNSTask();
-                    Communication.StartDiscoverySSDPTask();
+                    try
+                    {
+                        Communication.StartDiscoverymDNSTask();
+                        Communication.StartDiscoverySSDPTask();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.ErrorOrDebug(e);
+                    }
                 }
-                if (ShowInInputAssignment)
-                    bindInputAssignment().GetAwaiter();
 
                 Communication.StartEventListener();
             }
@@ -290,6 +405,7 @@ namespace Nanoleaf_Plugin
         private void SettingChanged(object sender, SettingChangedEventArgs args)
         {
             string ip = null;
+            Controller controller;
             switch (args.SettingsPath)
             {
                 case NANOLEAF_SHOW_IN_INPUTASSIGNMENT:
@@ -302,15 +418,22 @@ namespace Nanoleaf_Plugin
 
                 case NANOLEAF_DISCOVER:
                     Discover = (bool)args.NewValue;
-                    if (Discover)
+                    try
                     {
-                        Communication.StartDiscoverymDNSTask();
-                        Communication.StartDiscoverySSDPTask();
+                        if (Discover)
+                        {
+                            Communication.StartDiscoverymDNSTask();
+                            Communication.StartDiscoverySSDPTask();
+                        }
+                        else
+                        {
+                            Communication.StartDiscoverySSDPTask();
+                            Communication.StopDiscoverymDNSTask();
+                        }
                     }
-                    else
+                    catch(Exception e)
                     {
-                        Communication.StartDiscoverySSDPTask();
-                        Communication.StopDiscoverymDNSTask();
+                        Log.ErrorOrDebug(e);
                     }
                     break;
 
@@ -329,22 +452,31 @@ namespace Nanoleaf_Plugin
                     ip = (string)args.NewValue;
                     if (string.IsNullOrWhiteSpace(ip))
                         break;
-                    var controller = clients.FirstOrDefault(c => ip.Equals(c.IP));
-                    controller.RequestToken();
+                    controller = clients.FirstOrDefault(c => ip.Equals(c.IP));
+                    if (controller != null)
+                        controller.RequestToken();
                     break;
 
                 case NANOLEAF_ADD_CONTROLLER:
                     string jsonController = (string)args.NewValue;
                     if (string.IsNullOrWhiteSpace(jsonController))
                         break;
-                    JObject objController = JsonConvert.DeserializeObject(jsonController) as JObject;
-                    ip = (string)objController["IP"];
-                    string token = (string)objController["Token"];
+                    Controller objController = JsonSerializer.Deserialize<Controller>(jsonController);
+                    _ = addControllerAsync(objController);
+                    break;
+                case NANOLEAF_REMOVE_CONTROLLER:
+                    ip = (string)args.NewValue;
+                    if (string.IsNullOrWhiteSpace(ip))
+                        break;
+                    controller = clients.FirstOrDefault(c => ip.Equals(c.IP));
 
-                    if (objController["token"] != null)
-                        _ = addControllerAsync(ip, token);
-                    else
-                        _ = addControllerAsync(ip);
+                    if (controller == null)
+                    {
+                        Log.Info(string.Format("Controller with IP {0} could not be found", ip));
+                        return;
+                    }
+
+                    _ = removeControllerAsync(controller);
                     break;
             }
         }
@@ -390,6 +522,7 @@ namespace Nanoleaf_Plugin
                 if (name.Equals("Canvas")
                     || name.Equals("LightPanles")
                     || name.Equals("Shapes")
+                    || name.Equals("Shapes-Black")
                     || name.Equals("Elements")
                     || name.Equals("Lines")
                     || name.Equals("Essentials"))
@@ -407,6 +540,7 @@ namespace Nanoleaf_Plugin
                     new LumosDataMetadata("Canvas"),
                     new LumosDataMetadata("LightPanles"),
                     new LumosDataMetadata("Shapes"),
+                    new LumosDataMetadata("Shapes-Black"),
                     new LumosDataMetadata("Elements"),
                     new LumosDataMetadata("Lines"),
                     new LumosDataMetadata("Essentials"),
@@ -428,6 +562,8 @@ namespace Nanoleaf_Plugin
 
                 else if (name.Equals("Shapes"))
                     return toByteArray(Properties.Resources.NanoleafShapes);
+                else if (name.Equals("Shapes-Black"))
+                    return toByteArray(Properties.Resources.NanoleafShapesBlack);
 
                 else if (name.Equals("Elements"))
                     return toByteArray(Properties.Resources.NanoleafElements);

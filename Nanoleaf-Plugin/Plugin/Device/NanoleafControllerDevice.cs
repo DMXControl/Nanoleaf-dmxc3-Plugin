@@ -7,26 +7,27 @@ using org.dmxc.lumos.Kernel.HAL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 
-namespace Nanoleaf_Plugin
+namespace Nanoleaf_Plugin.Plugin.Device
 {
-    sealed class NanoleafDevice : AbstractDevice
+    public class NanoleafControllerDevice : AbstractDevice
     {
-        public static readonly string NANOLEAF_DEVICE_TYPE_NAME = "NanoleafDevice";
-        public static readonly string PANEL_ID_PARAMETER = "Panel ID";
-        public static readonly string DEVICE_TYPE_PARAMETER = "DeviceType";
+        public static readonly string NANOLEAF_CONTROLLER_TYPE_NAME = "NanoleafController";
+        public static readonly string CONTROLLER_ID_PARAMETER = "Controller ID";
+        public static readonly string CONTROLLER_TYPE_PARAMETER = "ControllerType";
         private static readonly ILumosLog log = LumosLogger.getInstance(nameof(NanoleafDevice));
 
-        private int _panelId;
-        public event EventHandler PanelIDChanged;
+        private string _serialNumber;
+        public event EventHandler ControllerIDChanged;
 
-        public NanoleafDevice(string id)
-           : base(id, null, false, NANOLEAF_DEVICE_TYPE_NAME)
+        public NanoleafControllerDevice(string id) : base(id, null, false, NANOLEAF_CONTROLLER_TYPE_NAME)
         {
             XmlDocument d = new XmlDocument();
             XmlNode node = d.CreateElement("root");
-            node.AppendChild(d.CreateElement("nanoleaf"));
+            node.AppendChild(d.CreateElement("nanoleaf-controller"));
 
             DDFParseContext ctx = new DDFParseContext(node)
             {
@@ -38,16 +39,16 @@ namespace Nanoleaf_Plugin
             this.addBeam(b);
         }
 
-        public int PanelID
+        public string SerialNumber
         {
-            get { return this._panelId; }
+            get { return this._serialNumber; }
             internal set
             {
-                if (value != this._panelId)
+                if (value != this._serialNumber)
                 {
-                    this._panelId = value;
-                    if (PanelIDChanged != null)
-                        PanelIDChanged(this, EventArgs.Empty);
+                    this._serialNumber = value;
+                    if (ControllerIDChanged != null)
+                        ControllerIDChanged(this, EventArgs.Empty);
                 }
             }
         }
@@ -64,6 +65,7 @@ namespace Nanoleaf_Plugin
                 else this.Image = null;
             }
         }
+
         protected override IEnumerable<GenericParameter> ParametersInternal
         {
             get
@@ -71,9 +73,9 @@ namespace Nanoleaf_Plugin
                 List<GenericParameter> ret = new List<GenericParameter>();
                 try
                 {
-                    var panels = NanoleafPlugin.getAllPanels(this.DeviceType).Where(p => p.ID != 0).Select(p => p.ID.ToString()).ToArray();
-                    ret.Add(new GenericParameter(DEVICE_TYPE_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.HIDDEN));
-                    ret.Add(new GenericParameter(PANEL_ID_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.PERSISTANT, panels));
+                    var controllers = NanoleafPlugin.getControllers().Select(p => p.SerialNumber.ToString()).ToArray();
+                    ret.Add(new GenericParameter(CONTROLLER_TYPE_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.HIDDEN));
+                    ret.Add(new GenericParameter(CONTROLLER_ID_PARAMETER, DeviceParameters.DeviceParameterType, typeof(string), EGenericParameterOptions.PERSISTANT, controllers));
                 }
                 catch (Exception e)
                 {
@@ -87,10 +89,10 @@ namespace Nanoleaf_Plugin
         {
             try
             {
-                if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
+                if (parameter.Name.EqualsIgnoreCase(CONTROLLER_TYPE_PARAMETER))
                     return this.DeviceType.ToString();
-                if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
-                    return this.PanelID;
+                if (parameter.Name.EqualsIgnoreCase(CONTROLLER_ID_PARAMETER))
+                    return this.SerialNumber;
             }
             catch (Exception e)
             {
@@ -104,7 +106,7 @@ namespace Nanoleaf_Plugin
             try
             {
                 valueToSend = null;
-                if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
+                if (parameter.Name.EqualsIgnoreCase(CONTROLLER_TYPE_PARAMETER))
                 {
                     if (value is EDeviceType dt)
                         this.DeviceType = dt;
@@ -113,21 +115,16 @@ namespace Nanoleaf_Plugin
                     else if (value is int i)
                         this.DeviceType = (EDeviceType)i;
                 }
-                if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
+                if (parameter.Name.EqualsIgnoreCase(CONTROLLER_ID_PARAMETER))
                 {
-                    if (value is int id)
+                    if (value is string id)
                     {
-                        valueToSend = this.PanelID = id;
+                        valueToSend = this.SerialNumber = id;
                         return true;
                     }
                     else
                     {
-                        var val = LumosTools.TryConvertToInt32(value);
-                        if (val.HasValue)
-                        {
-                            this.PanelID = val.Value;
-                            return true;
-                        }
+                        return false;
                     }
                 }
             }
@@ -143,13 +140,13 @@ namespace Nanoleaf_Plugin
         {
             try
             {
-                if (parameter.Name.EqualsIgnoreCase(DEVICE_TYPE_PARAMETER))
+                if (parameter.Name.EqualsIgnoreCase(CONTROLLER_TYPE_PARAMETER))
                 {
                     if (value is EDeviceType dt) return true;
                     else if (value is string str) return true;
                     else if (value is int i) return true;
                 }
-                if (parameter.Name.EqualsIgnoreCase(PANEL_ID_PARAMETER))
+                if (parameter.Name.EqualsIgnoreCase(CONTROLLER_ID_PARAMETER))
                 {
                     try
                     {

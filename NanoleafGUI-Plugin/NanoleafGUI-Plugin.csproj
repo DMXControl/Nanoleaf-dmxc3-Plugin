@@ -17,46 +17,31 @@
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LumosControls">
-      <HintPath>..\..\Lumos\3.3\LumosControls\bin\Debug\LumosControls.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="LumosGUI">
-      <HintPath>..\..\Lumos\3.3\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="LumosLIB">
-      <HintPath>..\..\Lumos\3.3\LumosLIB\bin\Debug\LumosLIB.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="LumosToolsLIB">
-      <HintPath>..\..\Lumos\3.3\LumosToolsLIB\bin\Debug\LumosToolsLIB.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="LumosProtobuf">
-      <HintPath>..\..\Lumos\3.3\LumosProtobuf\bin\Debug\LumosProtobuf.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="LumosControls">
-      <HintPath>..\dep\LumosControls.dll</HintPath>
-	  <Private>False</Private>
-    </Reference>
-    <Reference Include="LumosGUI">
-      <HintPath>..\dep\LumosGUI.exe</HintPath>
-	  <Private>False</Private>
-    </Reference>
-    <Reference Include="LumosLIB">
-      <HintPath>..\dep\LumosLIB.dll</HintPath>
-	  <Private>False</Private>
-    </Reference>
-    <Reference Include="LumosToolsLIB">
-      <HintPath>..\dep\LumosToolsLIB.dll</HintPath>
-	  <Private>False</Private>
+	<Reference Include="LumosGUI">
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosGUI\bin\Debug')">..\..\Lumos\3.3\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosGUI.exe</HintPath>
+		<Private>True</Private>
+	</Reference>
+	<Reference Include="LumosControls">
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosControls\bin\Debug')">..\..\Lumos\3.3\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosControls.dll</HintPath>
+		<Private>True</Private>
+	</Reference>
+	<Reference Include="LumosLIB">
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0')">..\..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosLIB.dll</HintPath>
+		<Private>True</Private>
+	</Reference>
+	<Reference Include="LumosToolsLIB">
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosToolsLIB\bin\Debug\netstandard2.0')">..\..\Lumos\3.3\LumosToolsLIB\bin\Debug\netstandard2.0\LumosToolsLIB.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosToolsLIB.dll</HintPath>
+		<Private>True</Private>
 	</Reference>
 	<Reference Include="LumosProtobuf">
-	  <HintPath>..\dep\LumosProtobuf.dll</HintPath>
-	  <Private>False</Private>
-    </Reference>
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosProtobuf\bin\Debug\netstandard2.0')">..\..\Lumos\3.3\LumosProtobuf\bin\Debug\netstandard2.0\LumosProtobuf.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosProtobuf.dll</HintPath>
+		<Private>True</Private>
+	</Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
@@ -67,7 +52,7 @@
     <Content Include="Resources\64\Nanoleaf.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">

@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
@@ -14,6 +15,8 @@ namespace Nanoleaf_Plugin
         public CurrentHueSource(string serialNumber) :
             base(getID(serialNumber), getDisplayName(), getCategory(serialNumber), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CurrentHueSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnStateEvent += ExternalControlEndpoint_StaticOnStateEvent;
             SerialNumber = serialNumber;
             var controller = NanoleafPlugin.getClient(SerialNumber);
@@ -22,18 +25,19 @@ namespace Nanoleaf_Plugin
             CurrentValue = controller.Hue;
         }
 
+        private void CurrentHueSource_EnabledChanged(object sender, EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
+        }
+
         private void ExternalControlEndpoint_StaticOnStateEvent(object sender, StateEventArgs e)
         {
-            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
+
             StateEvents events = e.StateEvents;
-            if (events == null)
-                return;
-
-            var value = events.Events.FirstOrDefault(v => v.Attribute == StateEvent.EAttribute.Hue);
-
-            if (value != null)
-                this.CurrentValue = value.Value;
+            var value = events.Events.First(v => v.Attribute == StateEvent.EAttribute.Hue);
+            this.CurrentValue = value.Value;
         }
 
         private static string getID(string serialNumber)

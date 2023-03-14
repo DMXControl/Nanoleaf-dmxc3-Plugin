@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System.Linq;
@@ -13,20 +14,24 @@ namespace Nanoleaf_Plugin
         public CurrentEffectSource(string serialNumber) :
             base(getID(serialNumber), getDisplayName(), getCategory(serialNumber), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CurrentEffectSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnEffectEvent += ExternalControlEndpoint_StaticOnEffectEvent;
             SerialNumber = serialNumber;
             CurrentValue = NanoleafPlugin.getClient(SerialNumber).SelectedEffect;
         }
 
+        private void CurrentEffectSource_EnabledChanged(object sender, System.EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
+        }
+
         private void ExternalControlEndpoint_StaticOnEffectEvent(object sender, EffectEventArgs e)
         {
-            if (!NanoleafPlugin.getClient(this.SerialNumber).IP.Equals(e.IP))
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
             EffectEvents events = e.EffectEvents;
-            if (events == null)
-                return;
-
             this.CurrentValue = events.Events.First().Value;
         }
 

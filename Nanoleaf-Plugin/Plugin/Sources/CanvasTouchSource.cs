@@ -1,6 +1,7 @@
 ﻿using LumosLIB.Kernel;
 using LumosProtobuf;
 using LumosProtobuf.Input;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System.Linq;
@@ -16,10 +17,17 @@ namespace Nanoleaf_Plugin
         private CanvasTouchSource(string serialNumber, int panelID, ETouch touchType) :
             base(getID(serialNumber, panelID, touchType), getDisplayName(touchType), getCategory(serialNumber, panelID), default)
         {
+            NanoleafMainSwitch.getInstance().EnabledChanged += CanvasTouchSource_EnabledChanged;
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
             Communication.StaticOnTouchEvent += ExternalControlEndpoint_StaticOnTouchEvent;
             SerialNumber = serialNumber;
             PanelID = panelID;
             TouchType = touchType;
+        }
+
+        private void CanvasTouchSource_EnabledChanged(object sender, System.EventArgs e)
+        {
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
         }
 
         public static CanvasTouchSource CreateHover(string serialNumber, int panelID)
@@ -45,30 +53,30 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)
         {
-            TouchEvent events = e.TouchEvent;
-            if (events == null)
+            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                 return;
 
-            var touch = events.TouchPanelEvents.FirstOrDefault(ev => ev.PanelId.Equals(PanelID));
-            if (touch != null)
+            if (!e.TouchEvent.TouchPanelEvents.Any(ev => ev.PanelId.Equals(PanelID)))
+                return;
+
+            var touch = e.TouchEvent.TouchPanelEvents.First(ev => ev.PanelId.Equals(PanelID));
+
+            switch (TouchType)
             {
-                switch (TouchType)
-                {
-                    case ETouch.Hold:
-                    case ETouch.Hover:
-                        if (touch.Type == TouchType)
-                            CurrentValue = true;
-                        else
-                            CurrentValue = false;
-                        break;
-                    default:
-                        if (touch.Type == TouchType)
-                        {
-                            beatValue++;
-                            CurrentValue = beatValue;
-                        }
-                        break;
-                }
+                case ETouch.Hold:
+                case ETouch.Hover:
+                    if (touch.Type == TouchType)
+                        CurrentValue = true;
+                    else
+                        CurrentValue = false;
+                    break;
+                default:
+                    if (touch.Type == TouchType)
+                    {
+                        beatValue++;
+                        CurrentValue = beatValue;
+                    }
+                    break;
             }
         }
 

@@ -1,19 +1,15 @@
 ﻿using Lumos.GUI.BaseWindow;
 using Lumos.GUI.Settings;
 using LumosControls.Controls;
+using LumosLIB.Tools.I18n;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using org.dmxc.lumos.Kernel.Settings;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using LumosLIB.Tools.I18n;
 
 namespace NanoleafGUI_Plugin
 {
@@ -191,14 +187,30 @@ namespace NanoleafGUI_Plugin
             updateControllerPanel((LumosTabPage)tabControl1.SelectedTab);
         }
 
-        private void btRequestToken_Click(object sender, EventArgs e)
+        private async void btRequestToken_Click(object sender, EventArgs e)
         {
             try
             {
                 if (tabControl1.SelectedTab?.Tag == null)
                     return;
                 sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REQUEST_TOKEN, (string)((JToken)tabControl1.SelectedTab?.Tag)["IP"]);
-                Task.Delay(2000).GetAwaiter();
+                await Task.Delay(500);
+                sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REQUEST_TOKEN, "");
+            }
+            catch (Exception ex)
+            {
+                NanoleafGUI_Plugin.Log.Error(ex);
+            }
+        }
+
+        private void btRemoveController_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (tabControl1.SelectedTab?.Tag == null)
+                    return;
+                if (MessageBox.Show("Do you want to remove this controller?", "Remove Controller?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    sm.SetKernelSetting(ESettingsType.APPLICATION, NanoleafGUI_Plugin.NANOLEAF_REMOVE_CONTROLLER, (string)((JToken)tabControl1.SelectedTab?.Tag)["IP"]);
             }
             catch (Exception ex)
             {
@@ -234,6 +246,7 @@ namespace NanoleafGUI_Plugin
                 int minX = panels.Select(p => (int)p["X"]).Min();
                 int minY = panels.Select(p => (int)p["Y"]).Min();
                 int maxSize = panels.Select(p => (int)p["SideLength"]).Max();
+                int globalOrientation = (int)controller["GlobalOrientation"];
 
                 int penSize = 2;
                 int width = maxX - minX;
@@ -324,8 +337,49 @@ namespace NanoleafGUI_Plugin
                                 break;
                             case 12: //Controller (active)
                                 // Shift by maxSize because the Shapes return their center point
-                                var x_ctrl = x + maxSize + 9;
-                                var y_ctrl = y + maxSize - 4.5f;
+                                orientation = ((360 - orientation) - 120) % 360;
+
+                                int x_offset = 0;
+                                float y_offset = 0;
+
+                                switch (orientation) {
+                                    
+                                    case 0:
+                                    case -360:
+                                        x_offset = 9;
+                                        y_offset = 4.5f;
+                                        break;
+                                    case 60: //tested
+                                    case -300:
+                                        x_offset = 0;
+                                        y_offset = 9f;
+                                        break;
+                                    case 120:
+                                    case -240:
+                                        x_offset = -9;
+                                        y_offset = 4.5f;
+                                        break;
+                                    case 180: //tested
+                                    case -180:
+                                        x_offset = -9;
+                                        y_offset = -4.5f;
+                                        break;
+                                    case 240: //tested
+                                    case -120:
+                                        x_offset = 0;
+                                        y_offset = -9f;
+                                        break;
+                                    case 300: //tested
+                                    case -60:
+                                        x_offset = 9;
+                                        y_offset = -4.5f;
+                                        break;
+                                }
+                                     
+
+                                var x_ctrl = x + maxSize + x_offset;
+                                var y_ctrl = y + maxSize + y_offset;
+                                
 
                                 //Create 4 points
                                 var points_ctrl = new PointF[4];
@@ -334,27 +388,27 @@ namespace NanoleafGUI_Plugin
                                         x_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Cos((30 + orientation) * Math.PI / 180f),
                                         y_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Sin((30 + orientation) * Math.PI / 180f));
 
-                                points_ctrl[2] = new PointF(
+                                points_ctrl[3] = new PointF(
                                         x_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Cos((1 * 120 + 30 + orientation) * Math.PI / 180f),
                                         y_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Sin((1 * 120 + 30 + orientation) * Math.PI / 180f));
-                                points_ctrl[3] = new PointF(
+                                points_ctrl[0] = new PointF(
                                         x_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Cos((2 * 120 + 30 + orientation) * Math.PI / 180f),
                                         y_ctrl + (float)(67 / Math.Sqrt(3)) * (float)Math.Sin((2 * 120 + 30 + orientation) * Math.PI / 180f));
 
-                                points_ctrl[0] = new PointF(
-                                        points_ctrl[3].X + (float)((temp_point.X - points_ctrl[3].X) * 0.2),
-                                        points_ctrl[3].Y + (float)((temp_point.Y - points_ctrl[3].Y) * 0.2));
-
                                 points_ctrl[1] = new PointF(
-                                        points_ctrl[2].X - (float)((points_ctrl[2].X - temp_point.X) * 0.2),
-                                        points_ctrl[2].Y - (float)((points_ctrl[2].Y - temp_point.Y) * 0.2));
+                                        points_ctrl[0].X + (float)((temp_point.X - points_ctrl[0].X) * 0.2),
+                                        points_ctrl[0].Y + (float)((temp_point.Y - points_ctrl[0].Y) * 0.2));
+
+                                points_ctrl[2] = new PointF(
+                                        points_ctrl[3].X - (float)((points_ctrl[3].X - temp_point.X) * 0.2),
+                                        points_ctrl[3].Y - (float)((points_ctrl[3].Y - temp_point.Y) * 0.2));
 
                                 g.DrawPolygon(pen, points_ctrl);
                                 break;
                         }
                     }
                 }
-                int globalOrientation = (int)controller["GlobalOrientation"];
+                //int globalOrientation = (int)controller["GlobalOrientation"];
                 //return RotateImage(bmp, globalOrientation);
                 return bmp;
             }
