@@ -4,6 +4,7 @@ using LumosProtobuf.Input;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
+using System;
 
 namespace Nanoleaf_Plugin
 {
@@ -28,10 +29,17 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)
         {
-            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
-                return;
+            try
+            {
+                if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
+                    return;
 
-            CurrentValue = e.TouchEvent.TouchedPanelsNumber;
+                CurrentValue = e.TouchEvent.TouchedPanelsNumber;
+            }
+            catch (Exception ex)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(ex);
+            }
         }
 
         private static string getID(string serialNumber)

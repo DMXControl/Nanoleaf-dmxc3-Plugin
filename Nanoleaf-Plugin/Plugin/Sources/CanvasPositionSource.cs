@@ -4,6 +4,7 @@ using LumosProtobuf.Input;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
+using System;
 using System.Linq;
 
 namespace Nanoleaf_Plugin
@@ -61,34 +62,41 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnLayoutEvent(object sender, LayoutEventArgs e)
         {
-            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
-                return;
-
-            foreach (LayoutEvent _event in e.LayoutEvents.Events)
+            try
             {
-                if (_event.Layout == null)
-                    continue;
-                Layout layout = _event.Layout.Value;
-                if (!layout.PanelPositions.Any(p => p.PanelId.Equals(PanelID)))
-                    continue;
+                if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
+                    return;
 
-                var position = layout.PanelPositions.First(p => p.PanelId.Equals(PanelID));
-
-                switch (Part)
+                foreach (LayoutEvent _event in e.LayoutEvents.Events)
                 {
-                    case EPositionPart.X:
-                        CurrentValue = position.X;
-                        break;
-                    case EPositionPart.Y:
-                        CurrentValue = position.Y;
-                        break;
-                    case EPositionPart.Orientation:
-                        CurrentValue = position.Orientation;
-                        break;
+                    if (_event.Layout == null)
+                        continue;
+                    Layout layout = _event.Layout.Value;
+                    if (!layout.PanelPositions.Any(p => p.PanelId.Equals(PanelID)))
+                        continue;
+
+                    var position = layout.PanelPositions.First(p => p.PanelId.Equals(PanelID));
+
+                    switch (Part)
+                    {
+                        case EPositionPart.X:
+                            CurrentValue = position.X;
+                            break;
+                        case EPositionPart.Y:
+                            CurrentValue = position.Y;
+                            break;
+                        case EPositionPart.Orientation:
+                            CurrentValue = position.Orientation;
+                            break;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(ex);
+            }
         }
-
+        
         private static string getID(string serialNumber, int panelID, EPositionPart part)
         {
             return $"Nanoleaf-{serialNumber}-Canvas:{panelID}-Position:{part}";

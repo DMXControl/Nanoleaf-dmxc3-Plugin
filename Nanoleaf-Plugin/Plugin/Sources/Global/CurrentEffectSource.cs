@@ -4,6 +4,7 @@ using LumosProtobuf.Input;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
+using System;
 using System.Linq;
 
 namespace Nanoleaf_Plugin
@@ -28,11 +29,18 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnEffectEvent(object sender, EffectEventArgs e)
         {
-            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
-                return;
+            try
+            {
+                if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
+                    return;
 
-            EffectEvents events = e.EffectEvents;
-            this.CurrentValue = events.Events.First().Value;
+                EffectEvents events = e.EffectEvents;
+                this.CurrentValue = events.Events.First().Value;
+            }
+            catch (Exception ex)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(ex);
+            }
         }
 
         private static string getID(string serialNumber)

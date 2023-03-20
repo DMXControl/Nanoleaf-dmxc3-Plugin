@@ -4,6 +4,7 @@ using LumosProtobuf.Input;
 using Nanoleaf_Plugin.Plugin.MainSwitch;
 using NanoleafAPI;
 using org.dmxc.lumos.Kernel.Input.v2;
+using System;
 using System.Linq;
 
 namespace Nanoleaf_Plugin
@@ -53,30 +54,37 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)
         {
-            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
-                return;
-
-            if (!e.TouchEvent.TouchPanelEvents.Any(ev => ev.PanelId.Equals(PanelID)))
-                return;
-
-            var touch = e.TouchEvent.TouchPanelEvents.First(ev => ev.PanelId.Equals(PanelID));
-
-            switch (TouchType)
+            try
             {
-                case ETouch.Hold:
-                case ETouch.Hover:
-                    if (touch.Type == TouchType)
-                        CurrentValue = true;
-                    else
-                        CurrentValue = false;
-                    break;
-                default:
-                    if (touch.Type == TouchType)
-                    {
-                        beatValue++;
-                        CurrentValue = beatValue;
-                    }
-                    break;
+                if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
+                    return;
+
+                if (!e.TouchEvent.TouchPanelEvents.Any(ev => ev.PanelId.Equals(PanelID)))
+                    return;
+
+                var touch = e.TouchEvent.TouchPanelEvents.First(ev => ev.PanelId.Equals(PanelID));
+
+                switch (TouchType)
+                {
+                    case ETouch.Hold:
+                    case ETouch.Hover:
+                        if (touch.Type == TouchType)
+                            CurrentValue = true;
+                        else
+                            CurrentValue = false;
+                        break;
+                    default:
+                        if (touch.Type == TouchType)
+                        {
+                            beatValue++;
+                            CurrentValue = beatValue;
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(ex);
             }
         }
 
