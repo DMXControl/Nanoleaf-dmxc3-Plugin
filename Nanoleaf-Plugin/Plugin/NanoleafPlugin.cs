@@ -218,59 +218,76 @@ namespace Nanoleaf_Plugin
             saveClients();
         }
 
+        private bool bindInputAssignmentRunning = false;
         private async Task bindInputAssignment()
         {
-            var list = clients.Except(clientsBindedToInputAssignment).ToArray();
-            foreach (var controller in list)
-                try
-                {
-                    while (controller.SerialNumber == null)
-                        await Task.Delay(1000);
-
-
-                    var im = InputManager.getInstance();
-                    im.RegisterSource(new CurrentPowerstateSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentBrightnessSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentCTSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentHueSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentSaturationSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentEffectSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentOrientationSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentNumberOfPanelsSource(controller.SerialNumber));
-                    im.RegisterSource(new CurrentTouchedPanelsSource(controller.SerialNumber));
-
-                    im.RegisterSource(CanvasGestureSource.CreateSingleTap(controller.SerialNumber));
-                    im.RegisterSource(CanvasGestureSource.CreateDoubleTap(controller.SerialNumber));
-                    im.RegisterSource(CanvasGestureSource.CreateSwipeDown(controller.SerialNumber));
-                    im.RegisterSource(CanvasGestureSource.CreateSwipeUp(controller.SerialNumber));
-                    im.RegisterSource(CanvasGestureSource.CreateSwipeRight(controller.SerialNumber));
-                    im.RegisterSource(CanvasGestureSource.CreateSwipeLeft(controller.SerialNumber));
-
-                    im.RegisterSink(new BrightnessSink(controller.SerialNumber));
-
-                    foreach (Panel panel in controller.Panels)
+            if (bindInputAssignmentRunning)
+                return;
+            bindInputAssignmentRunning = true;
+            while (true)
+            {
+                Controller[] list = null;
+                lock (clientsBindedToInputAssignment)
+                    list = clients.Except(clientsBindedToInputAssignment).ToArray();
+                if (list.Empty())
+                    break;
+                foreach (var controller in list)
+                    try
                     {
-                        im.RegisterSource(CanvasPositionSource.CreateX(controller.SerialNumber, panel.ID));
-                        im.RegisterSource(CanvasPositionSource.CreateY(controller.SerialNumber, panel.ID));
-                        im.RegisterSource(CanvasPositionSource.CreateOrientation(controller.SerialNumber, panel.ID));
-                        im.RegisterSource(CanvasTouchSource.CreateHover(controller.SerialNumber, panel.ID));
-                        im.RegisterSource(CanvasTouchSource.CreateDown(controller.SerialNumber, panel.ID));
-                        im.RegisterSource(CanvasTouchSource.CreateHold(controller.SerialNumber, panel.ID));
-                        im.RegisterSource(CanvasTouchSource.CreateUp(controller.SerialNumber, panel.ID));
-                        im.RegisterSource(CanvasTouchSource.CreateSwipe(controller.SerialNumber, panel.ID));
+                        while (controller.SerialNumber == null)
+                            await Task.Delay(1000);
 
-                        var sink = new CanvasSink(controller.SerialNumber, panel);
-                        if (!im.Sinks.OfType<CanvasSink>().Any(s => s.ID.Equals(sink.ID)))
-                            im.RegisterSink(sink);
+                        lock (clientsBindedToInputAssignment)
+                        {
+                            if (clientsBindedToInputAssignment.Contains(controller))
+                                continue;
+                            clientsBindedToInputAssignment.Add(controller);
+                        }
 
-                        im.RegisterSink(new CanvasSink(controller.SerialNumber, panel, true));
+                        var im = InputManager.getInstance();
+                        im.RegisterSource(new CurrentPowerstateSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentBrightnessSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentCTSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentHueSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentSaturationSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentEffectSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentOrientationSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentNumberOfPanelsSource(controller.SerialNumber));
+                        im.RegisterSource(new CurrentTouchedPanelsSource(controller.SerialNumber));
+
+                        im.RegisterSource(CanvasGestureSource.CreateSingleTap(controller.SerialNumber));
+                        im.RegisterSource(CanvasGestureSource.CreateDoubleTap(controller.SerialNumber));
+                        im.RegisterSource(CanvasGestureSource.CreateSwipeDown(controller.SerialNumber));
+                        im.RegisterSource(CanvasGestureSource.CreateSwipeUp(controller.SerialNumber));
+                        im.RegisterSource(CanvasGestureSource.CreateSwipeRight(controller.SerialNumber));
+                        im.RegisterSource(CanvasGestureSource.CreateSwipeLeft(controller.SerialNumber));
+
+                        im.RegisterSink(new BrightnessSink(controller.SerialNumber));
+
+                        foreach (Panel panel in controller.Panels)
+                        {
+                            im.RegisterSource(CanvasPositionSource.CreateX(controller.SerialNumber, panel.ID));
+                            im.RegisterSource(CanvasPositionSource.CreateY(controller.SerialNumber, panel.ID));
+                            im.RegisterSource(CanvasPositionSource.CreateOrientation(controller.SerialNumber, panel.ID));
+                            im.RegisterSource(CanvasTouchSource.CreateHover(controller.SerialNumber, panel.ID));
+                            im.RegisterSource(CanvasTouchSource.CreateDown(controller.SerialNumber, panel.ID));
+                            im.RegisterSource(CanvasTouchSource.CreateHold(controller.SerialNumber, panel.ID));
+                            im.RegisterSource(CanvasTouchSource.CreateUp(controller.SerialNumber, panel.ID));
+                            im.RegisterSource(CanvasTouchSource.CreateSwipe(controller.SerialNumber, panel.ID));
+
+                            var sink = new CanvasSink(controller.SerialNumber, panel);
+                            if (!im.Sinks.OfType<CanvasSink>().Any(s => s.ID.Equals(sink.ID)))
+                                im.RegisterSink(sink);
+
+                            im.RegisterSink(new CanvasSink(controller.SerialNumber, panel, true));
+                        }
                     }
-                    clientsBindedToInputAssignment.Add(controller);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(string.Empty, e);
-                }
+                    catch (Exception e)
+                    {
+                        Log.Error(string.Empty, e);
+                    }
+            }
+            bindInputAssignmentRunning = false;
         }
 
         private async Task debindInputAssignment()
@@ -282,6 +299,8 @@ namespace Nanoleaf_Plugin
                 var sources = im.Sources.Where(s => s.Category.Name.Equals("Nanoleaf"));
                 im.UnregisterSinks(sinks);
                 im.UnregisterSources(sources);
+                lock (clientsBindedToInputAssignment)
+                    clientsBindedToInputAssignment.Clear();
                 Log.Info("Unregisterd {0} Sinks and {1} Sources", sinks.Count(), sources.Count());
             }
             catch(Exception e)
@@ -299,6 +318,8 @@ namespace Nanoleaf_Plugin
                 var sources = im.Sources.Where(s => s.ID.Equals("Nanoleaf-" + controller.SerialNumber));
                 im.UnregisterSinks(sinks);
                 im.UnregisterSources(sources);
+                lock (clientsBindedToInputAssignment)
+                    clientsBindedToInputAssignment.Remove(controller);
                 Log.Info("Unregisterd {0} Sinks and {1} Sources of Controller {2}", sinks.Count(), sources.Count(), controller.SerialNumber);
             }
             catch (Exception e)
