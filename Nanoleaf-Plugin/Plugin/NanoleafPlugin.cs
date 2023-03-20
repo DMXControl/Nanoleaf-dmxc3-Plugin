@@ -20,6 +20,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using System.Threading.Tasks;
 using T = LumosLIB.Tools.I18n.DummyT;
@@ -330,6 +332,7 @@ namespace Nanoleaf_Plugin
 
         protected override void initializePlugin()
         {
+            Log.Info("Initialize");
             sm = SettingsManager.getInstance();
             ResourceManager.getInstance().registerResourceProvider(this);
             HandlerFactory.getInstance().registerHandlerNode<NanoleafHandlerNode>("nanoleaf");
@@ -338,6 +341,7 @@ namespace Nanoleaf_Plugin
 
             NanoleafMainSwitch.getInstance().EnabledChanged += NanoleafMainSwitch_EnabledChanged;
             MainSwitchManager.getInstance().RegisterMainSwitch(NanoleafMainSwitch.getInstance());
+            Log.Info("Version: {0}, NanolaefAPI Version: {1}", Assembly.GetExecutingAssembly().GetName().Version, Assembly.GetAssembly(typeof(Communication)).GetName().Version);
         }
 
         private void NanoleafMainSwitch_EnabledChanged(object sender, EventArgs e)
@@ -575,6 +579,8 @@ namespace Nanoleaf_Plugin
 
             return null;
         }
+
+        [SupportedOSPlatform("windows")]
         public Stream loadResource(EResourceDataType type, string name)
         {
             if (type == EResourceDataType.DeviceImage)
@@ -602,6 +608,8 @@ namespace Nanoleaf_Plugin
 
             return null;
         }
+
+        [SupportedOSPlatform("windows")]
         private Stream toByteArray(Bitmap i)
         {
             var m = new System.IO.MemoryStream();
