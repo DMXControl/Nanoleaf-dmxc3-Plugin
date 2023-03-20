@@ -78,7 +78,6 @@ pipeline {
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\NanoleafAPI.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SSDP.UPnP.PCL.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\ISSDP.UPnP.PCL.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SimpleHttpListener.Rx.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
