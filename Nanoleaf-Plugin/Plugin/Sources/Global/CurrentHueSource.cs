@@ -37,6 +37,9 @@ namespace Nanoleaf_Plugin
                 if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
                     return;
 
+                if (!e.StateEvents.Events.Any(v => v.Attribute == StateEvent.EAttribute.Hue))
+                    return;
+
                 StateEvents events = e.StateEvents;
                 var value = events.Events.First(v => v.Attribute == StateEvent.EAttribute.Hue);
                 this.CurrentValue = value.Value;
