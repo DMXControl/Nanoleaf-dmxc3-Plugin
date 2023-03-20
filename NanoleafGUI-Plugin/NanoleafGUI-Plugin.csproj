@@ -11,7 +11,7 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Nanoleaf.ico</ApplicationIcon>
+    <ApplicationIcon>DMXC3_Nanoleaf_Plugin.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
@@ -47,7 +47,7 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Nanoleaf.ico" />
+    <Content Include="DMXC3_Nanoleaf_Plugin.ico" />
     <Content Include="Resources\32\Nanoleaf.png" />
     <Content Include="Resources\64\Nanoleaf.png" />
   </ItemGroup>
