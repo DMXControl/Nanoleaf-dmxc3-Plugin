@@ -65,7 +65,9 @@ namespace Nanoleaf_Plugin
                 return;
 
             GestureEvents events = e.GestureEvents;
-            var val = events.Events.First(g => g.Gesture == GestureType);
+            var val = events.Events.FirstOrDefault(g => g.Gesture == GestureType);
+            if (val.Gesture == EGesture.UNKNOWN)
+                return;
             beatValue++;
             CurrentValue = beatValue;
         }
