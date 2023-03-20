@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Reflection;
 
 namespace NanoleafGUI_Plugin
 {
@@ -46,6 +47,7 @@ namespace NanoleafGUI_Plugin
         {
             try
             {
+                Log.Info("Initialize");
                 ResourceManager.getInstance().registerResourceProvider(this);
                 this.settingsBranch = (SettingsBranch)PEManager.getInstance().GetBranchByID("Settings");
 
@@ -53,6 +55,7 @@ namespace NanoleafGUI_Plugin
                 nanoleafNode.DisplayWhere = EDisplayCategory.APPLICATION_SETTINGS;
                 nanoleafNode.PropertiesForm = typeof(NanoleafSettingsForm);
                 settingsBranch.AddRecursive(settingsBranch.ID, nanoleafNode);
+                Log.Info("GUI Version: {0}", Assembly.GetExecutingAssembly().GetName().Version);
             }
             catch(Exception e)
             {
