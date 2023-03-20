@@ -121,7 +121,7 @@ namespace Nanoleaf_Plugin
             }
             string json= JsonSerializer.Serialize(Communication.DiscoveredDevices);
             sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
-            _ = addControllerAsync(new Controller(ip, port));
+            _ = addControllerAsync(Controller.CreateFromIPPort(ip, port));
         }
         private async Task addControllerAsync(Controller controller, bool setSettings=true)
         {
@@ -133,6 +133,8 @@ namespace Nanoleaf_Plugin
                     controller.Dispose();
                     return;
                 }
+                if (!(controller.IsInitializing || controller.IsInitialized))
+                    await controller.Initialize();
                 controller.AuthTokenReceived += Controller_AuthTokenReceived;
                 controller.UpdatedInfos += Controller_UpdatedInfos;
                 controller.PanelLayoutChanged += Controller_PanelLayoutChanged;
@@ -141,7 +143,9 @@ namespace Nanoleaf_Plugin
                 if (NanoleafMainSwitch.getInstance().Enabled)
                     _ = Task.Run(async () =>
                     {
-                        await Task.Delay(5000);
+                        for (int i = 0; i < 100; i++)
+                            if (!controller.IsInitialized)
+                                await Task.Delay(5000);
                         controller?.StartStreaming();
                     });
 
