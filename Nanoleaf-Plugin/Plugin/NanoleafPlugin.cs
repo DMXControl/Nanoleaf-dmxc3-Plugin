@@ -32,7 +32,6 @@ namespace Nanoleaf_Plugin
     {
         internal static readonly ILumosLog Log = LumosLogger.getInstance(nameof(NanoleafPlugin));
         private static List<Controller> clients = new List<Controller>();
-        private static List<Controller> clientsBindedToInputAssignment = new List<Controller>();
 
         private const string SETTINGS_CATEGORY_ID = "Settings:Nanoleaf";
 
@@ -208,11 +207,13 @@ namespace Nanoleaf_Plugin
         private void Controller_PanelLayoutChanged(object sender, EventArgs e)
         {
             saveClients();
+            _ = bindInputAssignment();
         }
 
         private void Controller_UpdatedInfos(object sender, EventArgs e)
         {
             saveClients();
+            _ = bindInputAssignment();
         }
 
         private void Controller_AuthTokenReceived(object sender, EventArgs e)
@@ -226,47 +227,52 @@ namespace Nanoleaf_Plugin
             if (bindInputAssignmentRunning)
                 return;
             bindInputAssignmentRunning = true;
-            while (true)
-            {
-                Controller[] list = null;
-                lock (clientsBindedToInputAssignment)
-                    list = clients.Except(clientsBindedToInputAssignment).ToArray();
-                if (list.Empty())
-                    break;
-                foreach (var controller in list)
-                    try
+            Controller[] list = null;
+            list = clients.ToArray();
+            if (list.Empty())
+                return;
+            foreach (var controller in list)
+                try
+                {
+                    while (controller.SerialNumber == null)
+                        await Task.Delay(1000);
+
+                    var im = InputManager.getInstance();
+                    if (!im.Sinks.Any(s => s.ID.Contains(controller.SerialNumber)))
                     {
-                        while (controller.SerialNumber == null)
-                            await Task.Delay(1000);
-
-                        lock (clientsBindedToInputAssignment)
+                        try
                         {
-                            if (clientsBindedToInputAssignment.Contains(controller))
-                                continue;
-                            clientsBindedToInputAssignment.Add(controller);
+                            im.RegisterSource(new CurrentPowerstateSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentBrightnessSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentCTSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentHueSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentSaturationSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentEffectSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentOrientationSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentNumberOfPanelsSource(controller.SerialNumber));
+                            im.RegisterSource(new CurrentTouchedPanelsSource(controller.SerialNumber));
+
+                            im.RegisterSource(CanvasGestureSource.CreateSingleTap(controller.SerialNumber));
+                            im.RegisterSource(CanvasGestureSource.CreateDoubleTap(controller.SerialNumber));
+                            im.RegisterSource(CanvasGestureSource.CreateSwipeDown(controller.SerialNumber));
+                            im.RegisterSource(CanvasGestureSource.CreateSwipeUp(controller.SerialNumber));
+                            im.RegisterSource(CanvasGestureSource.CreateSwipeRight(controller.SerialNumber));
+                            im.RegisterSource(CanvasGestureSource.CreateSwipeLeft(controller.SerialNumber));
+
+                            im.RegisterSink(new BrightnessSink(controller.SerialNumber));
                         }
+                        catch (Exception ex)
+                        {
+                            Log.Error(string.Empty, ex);
+                        }
+                    }
 
-                        var im = InputManager.getInstance();
-                        im.RegisterSource(new CurrentPowerstateSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentBrightnessSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentCTSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentHueSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentSaturationSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentEffectSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentOrientationSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentNumberOfPanelsSource(controller.SerialNumber));
-                        im.RegisterSource(new CurrentTouchedPanelsSource(controller.SerialNumber));
-
-                        im.RegisterSource(CanvasGestureSource.CreateSingleTap(controller.SerialNumber));
-                        im.RegisterSource(CanvasGestureSource.CreateDoubleTap(controller.SerialNumber));
-                        im.RegisterSource(CanvasGestureSource.CreateSwipeDown(controller.SerialNumber));
-                        im.RegisterSource(CanvasGestureSource.CreateSwipeUp(controller.SerialNumber));
-                        im.RegisterSource(CanvasGestureSource.CreateSwipeRight(controller.SerialNumber));
-                        im.RegisterSource(CanvasGestureSource.CreateSwipeLeft(controller.SerialNumber));
-
-                        im.RegisterSink(new BrightnessSink(controller.SerialNumber));
-
-                        foreach (Panel panel in controller.Panels)
+                    foreach (Panel panel in controller.Panels)
+                    {
+                        var panelSources = im.Sinks.OfType<CanvasSink>().Where(s => s.ID.Contains(panel.ID.ToString())).ToList();
+                        if (!panelSources.Empty())
+                            continue;
+                        try
                         {
                             im.RegisterSource(CanvasPositionSource.CreateX(controller.SerialNumber, panel.ID));
                             im.RegisterSource(CanvasPositionSource.CreateY(controller.SerialNumber, panel.ID));
@@ -283,12 +289,17 @@ namespace Nanoleaf_Plugin
 
                             im.RegisterSink(new CanvasSink(controller.SerialNumber, panel, true));
                         }
+                        catch (Exception ex)
+                        {
+                            Log.Error(string.Empty, ex);
+                        }
                     }
-                    catch (Exception e)
-                    {
-                        Log.Error(string.Empty, e);
-                    }
-            }
+                }
+                catch (Exception e)
+                {
+                    Log.Error(string.Empty, e);
+                }
+
             bindInputAssignmentRunning = false;
         }
 
@@ -301,8 +312,6 @@ namespace Nanoleaf_Plugin
                 var sources = im.Sources.Where(s => s.Category.Name.Equals("Nanoleaf"));
                 im.UnregisterSinks(sinks);
                 im.UnregisterSources(sources);
-                lock (clientsBindedToInputAssignment)
-                    clientsBindedToInputAssignment.Clear();
                 Log.Info("Unregisterd {0} Sinks and {1} Sources", sinks.Count(), sources.Count());
             }
             catch(Exception e)
@@ -320,8 +329,6 @@ namespace Nanoleaf_Plugin
                 var sources = im.Sources.Where(s => s.ID.Equals("Nanoleaf-" + controller.SerialNumber));
                 im.UnregisterSinks(sinks);
                 im.UnregisterSources(sources);
-                lock (clientsBindedToInputAssignment)
-                    clientsBindedToInputAssignment.Remove(controller);
                 Log.Info("Unregisterd {0} Sinks and {1} Sources of Controller {2}", sinks.Count(), sources.Count(), controller.SerialNumber);
             }
             catch (Exception e)
