@@ -61,13 +61,22 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnGestureEvent(object sender, GestureEventArgs e)
         {
-            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
-                return;
+            try
+            {
+                if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
+                    return;
 
-            GestureEvents events = e.GestureEvents;
-            var val = events.Events.First(g => g.Gesture == GestureType);
-            beatValue++;
-            CurrentValue = beatValue;
+                GestureEvents events = e.GestureEvents;
+                var val = events.Events.FirstOrDefault(g => g.Gesture == GestureType);
+                if (val.Gesture == EGesture.UNKNOWN)
+                    return;
+                beatValue++;
+                CurrentValue = beatValue;
+            }
+            catch (Exception ex)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(ex);
+            }
         }
 
         private static string getID(string serialNumber, EGesture part)

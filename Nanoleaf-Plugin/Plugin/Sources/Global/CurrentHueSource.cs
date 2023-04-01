@@ -32,12 +32,22 @@ namespace Nanoleaf_Plugin
 
         private void ExternalControlEndpoint_StaticOnStateEvent(object sender, StateEventArgs e)
         {
-            if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
-                return;
+            try
+            {
+                if (!e.IP.Equals(NanoleafPlugin.getClient(this.SerialNumber)?.IP))
+                    return;
 
-            StateEvents events = e.StateEvents;
-            var value = events.Events.First(v => v.Attribute == StateEvent.EAttribute.Hue);
-            this.CurrentValue = value.Value;
+                if (!e.StateEvents.Events.Any(v => v.Attribute == StateEvent.EAttribute.Hue))
+                    return;
+
+                StateEvents events = e.StateEvents;
+                var value = events.Events.First(v => v.Attribute == StateEvent.EAttribute.Hue);
+                this.CurrentValue = value.Value;
+            }
+            catch (Exception ex)
+            {
+                NanoleafPlugin.Log.ErrorOrDebug(ex);
+            }
         }
 
         private static string getID(string serialNumber)
