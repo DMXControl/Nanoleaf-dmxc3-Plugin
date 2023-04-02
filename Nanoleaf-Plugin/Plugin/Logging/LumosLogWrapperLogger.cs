@@ -2,6 +2,7 @@
 using LumosLIB.Kernel.Log;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using IMELLogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Nanoleaf_Plugin.Plugin.Logging
@@ -31,6 +32,10 @@ namespace Nanoleaf_Plugin.Plugin.Logging
             {
                 case LogLevel.Trace:
                 case LogLevel.Debug:
+                    if (Debugger.IsAttached)
+                        return true;
+                    else
+                        return false;
                 case LogLevel.Information:
                 case LogLevel.Warning:
                 case LogLevel.Error:
