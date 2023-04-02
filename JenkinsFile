@@ -89,6 +89,7 @@ pipeline {
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Microsoft.*\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\System.ComponentModel.Annotations.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				
 				archiveArtifacts artifacts: 'Releases/**/*.*'
