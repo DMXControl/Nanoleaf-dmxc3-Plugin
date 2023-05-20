@@ -5,14 +5,14 @@ env:
   PluginName: "Nanoleaf-Plugin"
   SolutionName: "Nanoleaf-Plugin"
 
-on: [push, pull_request]
+on: push
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1
@@ -22,48 +22,52 @@ jobs:
 
       - name: Navigate to Workspace
         run: cd $GITHUB_WORKSPACE
-        
+
       - name: Download and extract DMXCDependencies
         run: |
-          foreach ($folder in Get-ChildItem -Directory) {
-            If(Test-Path -Path $folder/dmxcplug.json) {
-              $dmxcplug = (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json)
-              Invoke-RestMethod -Uri "https://www.dmxcontrol.de/files/DMXControl_3/plugin-lib/dmxc-plugin-lib-$($dmxcplug.version).zip" -OutFile "deps.zip"
-              Expand-Archive "deps.zip" "${folder}/bin/Release"
-              Expand-Archive "deps.zip" "${folder}/temp"
+          foreach ($folder in (Get-ChildItem -Filter dmxcplug.json -Recurse -Depth 1).DirectoryName) {
+            $dmxcplugver = (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json).version
+            $dmxctypes = (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json).type
+            $dmxczip = "deps-${dmxcplugver}.zip"
+            If(-Not (Test-Path -Path "${dmxczip}")) {
+              Invoke-RestMethod -Uri "https://www.dmxcontrol.de/files/DMXControl_3/plugin-lib/dmxc-plugin-lib-${dmxcplugver}.zip" -OutFile "${dmxczip}"
+            }
+            Expand-Archive "${dmxczip}" "${folder}/temp"
+            foreach ($type in $dmxctypes){
+              Copy-Item -Path "${folder}/temp/${type}/*" -Destination "${folder}/bin/Release"
             }
           }
-          
+
       - name: Restore nuget packages
-        run: | 
+        run: |
           msbuild.exe ${{env.SolutionName}}.sln /t:restore
           nuget restore ${{env.SolutionName}}.sln
 
       - name: Build Solution
         run: |
           msbuild.exe ${{env.SolutionName}}.sln /p:platform="Any CPU" /p:configuration="Release" /p:PostBuildEvent=
-          
+
       - name: Copy Artifacts
         run: |
-          foreach ($folder in Get-ChildItem -Directory) {
-            If(Test-Path -Path $folder/dmxcplug.json) {
-              $dmxcplug = (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json)
-              $filter = Get-ChildItem "${folder}/temp/" -Name
-              foreach($type in $dmxcplug.type) { New-Item -ItemType "directory" -Path "dist/${type}/${{env.PluginName}}" }
-              foreach($type in $dmxcplug.type) { Get-ChildItem "${folder}/bin/Release" -Name | where {$filter -NotContains $_} | %{ Copy-Item -Path "${folder}/bin/Release/${_}" -Destination "dist/${type}/${{env.PluginName}}/${_}"} }
+          foreach ($folder in (Get-ChildItem -Filter dmxcplug.json -Recurse -Depth 1).DirectoryName) {
+            foreach($type in (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json).type) {
+              $filter = Get-ChildItem "${folder}/temp/${type}" -Name
+              New-Item -ItemType "directory" -Path "dist/${type}/${{env.PluginName}}"
+              Get-ChildItem "${folder}/bin/Release" -Name | where {$filter -NotContains $_} | %{ Copy-Item -Path "${folder}/bin/Release/${_}" -Destination "dist/${type}/${{env.PluginName}}/${_}"}
             }
           }
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v3
         with:
           name: DllBundle
           path: "dist"
-      
+
       - name: Create Releasezip
         run: |
           Compress-Archive -Path dist/* -DestinationPath ${{env.PluginName}}.zip
           "${{env.PluginName}}.zip: `$SHA256`$$((Get-FileHash ${{env.PluginName}}.zip -Algorithm SHA256).Hash)" > checksums
-      
+
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
