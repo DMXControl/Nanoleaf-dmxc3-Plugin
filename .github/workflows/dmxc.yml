@@ -33,6 +33,7 @@ jobs:
               Invoke-RestMethod -Uri "https://www.dmxcontrol.de/files/DMXControl_3/plugin-lib/dmxc-plugin-lib-${dmxcplugver}.zip" -OutFile "${dmxczip}"
             }
             Expand-Archive "${dmxczip}" "${folder}/temp"
+            New-Item -ItemType Directory -Force -Path "${folder}/bin/Release"
             foreach ($type in $dmxctypes){
               Copy-Item -Path "${folder}/temp/${type}/*" -Destination "${folder}/bin/Release"
             }
