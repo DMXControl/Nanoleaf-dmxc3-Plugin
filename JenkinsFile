@@ -85,15 +85,14 @@ pipeline {
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\HttpMachine.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\IHttpMachine.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Zeroconf.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\System.Reactive.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\System.Text.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\System.Text.Encodings.Web.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Microsoft.Extensions.*\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\System.*\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Microsoft.*\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\System.ComponentModel.Annotations.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
 				
-				archiveArtifacts artifacts: 'Releases/Nanoleaf-Plugin.dll, Releases/Nanoleaf-Plugin.pdb, Releases/dependencies/Newtonsoft.Json.dll, Releases/dependencies/NanoleafAPI.dll, Releases/dependencies/RestSharp.dll, Releases/dependencies/Zeroconf.dll, Releases/dependencies/System.Reactive.dll, Releases/dependencies/System.Text.Encodings.Web.dll, Releases/dependencies/System.Text.Json.dll, Releases/NanoleafGUI-Plugin.dll, Releases/NanoleafGUI-Plugin.pdb, Releases/dependencies/System.ComponentModel.Annotations.dll, Releases/dependencies/Microsoft.Extensions.Options.dll, Releases/dependencies/Microsoft.Extensions.Logging.dll, Releases/dependencies/Microsoft.Extensions.Logging.Abstractions.dll, Releases/dependencies/Microsoft.Extensions.DependencyInjection.dll, Releases/dependencies/Microsoft.Extensions.DependencyInjection.Abstractions.dll, Releases/dependencies/Microsoft.Extensions.Primitives.dll'
+				archiveArtifacts artifacts: 'Releases/**/*.*'
 			}			
 		}
 	}
