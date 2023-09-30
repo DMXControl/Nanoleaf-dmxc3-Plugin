@@ -34,17 +34,17 @@ pipeline {
 				script{
 					try {
 						println('Copy Kernel artefacts from Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'Lumos/bin/Release/net6.0/*', target: 'dep');
+						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'Lumos/*', target: 'dep');
 					} catch (hudson.AbortException e) {
 						println('Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'Lumos/bin/Release/net6.0/*', target: 'dep');
+						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'Lumos/*', target: 'dep');
 					}
 					try {
 						println('Copy GUI artefacts from Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\"')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
+						copyArtifacts(projectName: 'Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F"), flatten: true, filter: 'LumosGUI/*', target: 'dep');
 					} catch (hudson.AbortException e) {
 						println('Job \"Lumos (Pipeline)/' + env.BRANCH_NAME.replaceAll("/", "%2F") + '\" does not exist. Copy from default Job')
-						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'LumosGUI/bin/Release/*', target: 'dep');
+						copyArtifacts(projectName: 'Lumos (Pipeline)/master', flatten: true, filter: 'LumosGUI/*', target: 'dep');
 					}
 				}
 			}
@@ -75,24 +75,26 @@ pipeline {
 		}
 		stage('Archive Artifacts'){
 			steps {
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\NanoleafAPI.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SSDP.UPnP.PCL.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\ISSDP.UPnP.PCL.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SimpleHttpListener.Rx.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\ISimpleHttpListener.Rx.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\HttpMachine.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\IHttpMachine.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Zeroconf.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\System.*\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Microsoft.*\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\Releases\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\Newtonsoft.Json.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\System.ComponentModel.Annotations.dll\" \"$WORKSPACE\\Releases\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\NanoleafAPI.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SSDP.UPnP.PCL.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\ISSDP.UPnP.PCL.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\ISimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\HttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\IHttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Zeroconf.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\System.*\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Microsoft.*\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\Newtonsoft.Json.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\System.ComponentModel.Annotations.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
 				
-				archiveArtifacts artifacts: 'Releases/**/*.*'
+				dir('output') {
+					archiveArtifacts artifacts: '**/*.*'
+				}
 			}			
 		}
 	}
