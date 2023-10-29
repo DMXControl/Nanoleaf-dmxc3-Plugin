@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
 
 namespace Nanoleaf_Plugin
 {
@@ -45,12 +44,12 @@ namespace Nanoleaf_Plugin
 
                 //Find the next ID if possible
                 var lamps = org.dmxc.lumos.Kernel.Project.DeviceManager.getInstance()
-                    .Devices.OfType<NanoleafDevice>().Where(c=>c.DeviceType.Equals(d.DeviceType)).Select(c => c.PanelID);
-                var firstid = NanoleafPlugin.getAllPanels(d.DeviceType).Select(p=>p.ID)
+                    .Devices.OfType<NanoleafDevice>().Where(c => c.DeviceType.Equals(d.DeviceType)).Select(c => c.PanelID);
+                var firstid = NanoleafPlugin.getAllPanels(d.DeviceType).Select(p => p.ID)
                     .Except(lamps)
                     .FirstOrDefault();
 
-                if (firstid!=0)
+                if (firstid != 0)
                 {
                     d.PanelID = firstid;
                     return d;

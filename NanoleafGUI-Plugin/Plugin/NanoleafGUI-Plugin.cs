@@ -36,7 +36,7 @@ namespace NanoleafGUI_Plugin
         internal const string NANOLEAF_REMOVE_CONTROLLER = "NANOLEAF.REMOVE_CONTROLLER";
 
         private SettingsBranch settingsBranch;
-        public NanoleafGUI_Plugin(): base("295c2ab8-4d2b-4741-a1bd-16de8f4da957", "NanoleafGUI-Plugin")
+        public NanoleafGUI_Plugin() : base("295c2ab8-4d2b-4741-a1bd-16de8f4da957", "NanoleafGUI-Plugin")
         {
             //while (!Debugger.IsAttached)
             //{
@@ -57,7 +57,7 @@ namespace NanoleafGUI_Plugin
                 settingsBranch.AddRecursive(settingsBranch.ID, nanoleafNode);
                 Log.Info("GUI Version: {0}", Assembly.GetExecutingAssembly().GetName().Version);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.Error(e);
             }

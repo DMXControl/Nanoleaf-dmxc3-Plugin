@@ -19,7 +19,7 @@ namespace Nanoleaf_Plugin
         public int PanelID { get; private set; }
         public EPositionPart Part { get; private set; }
         private CanvasPositionSource(string serialNumber, int panelID, EPositionPart part) :
-            base(getID(serialNumber, panelID, part), getDisplayName(part),getCategory(serialNumber, panelID), default)
+            base(getID(serialNumber, panelID, part), getDisplayName(part), getCategory(serialNumber, panelID), default)
         {
             NanoleafMainSwitch.getInstance().EnabledChanged += CanvasPositionSource_EnabledChanged;
             AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
@@ -96,7 +96,7 @@ namespace Nanoleaf_Plugin
                 NanoleafPlugin.Log.ErrorOrDebug(ex);
             }
         }
-        
+
         private static string getID(string serialNumber, int panelID, EPositionPart part)
         {
             return $"Nanoleaf-{serialNumber}-Canvas:{panelID}-Position:{part}";

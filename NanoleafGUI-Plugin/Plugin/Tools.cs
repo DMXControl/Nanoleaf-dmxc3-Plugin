@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NanoleafGUI_Plugin
 {
     public static class Tools
-    {        
+    {
         public static bool ValidateIPv4(this string ipString)
         {
             try

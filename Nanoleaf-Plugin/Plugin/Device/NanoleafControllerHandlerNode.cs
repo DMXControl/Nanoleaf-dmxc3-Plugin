@@ -5,7 +5,6 @@ using NanoleafAPI;
 using org.dmxc.lumos.Kernel.DeviceProperties;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.HAL.Handler;
-using org.dmxc.lumos.Kernel.HAL.Handler.Helper;
 using org.dmxc.lumos.Kernel.PropertyType;
 using System;
 using System.Collections.Generic;
@@ -28,7 +27,7 @@ namespace Nanoleaf_Plugin
             {
                 this.dimmerValue = value;
                 sendDimmerValueToController();
-                    
+
             }
         }
 
@@ -156,7 +155,7 @@ namespace Nanoleaf_Plugin
 
         private void sendDimmerValueToController()
         {
-            if(canSendValueToController())
+            if (canSendValueToController())
                 _instance.Brightness = (ushort)(dimmerValue * 100);
         }
 

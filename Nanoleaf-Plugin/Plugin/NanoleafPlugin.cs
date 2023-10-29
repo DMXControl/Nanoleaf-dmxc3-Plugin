@@ -56,7 +56,7 @@ namespace Nanoleaf_Plugin
 
         internal static bool ShowInInputAssignment = true, Discover = true, AutoConnect = true, AutoRequestToken = true;
 
-        private static int refreshRate=44;
+        private static int refreshRate = 44;
         internal static int RefreshRate
         {
             get => refreshRate;
@@ -89,7 +89,7 @@ namespace Nanoleaf_Plugin
         internal static IReadOnlyCollection<Panel> getAllPanels(EDeviceType deviceType)
         {
             List<Panel> panels = new List<Panel>();
-            foreach (var controller in clients.Where(c => c.DeviceType == deviceType|| deviceType== EDeviceType.UNKNOWN))
+            foreach (var controller in clients.Where(c => c.DeviceType == deviceType || deviceType == EDeviceType.UNKNOWN))
                 panels.AddRange(controller.Panels);
             return panels.AsReadOnly();
         }
@@ -120,11 +120,11 @@ namespace Nanoleaf_Plugin
                 Log?.Info($"Port is: {port}, falback to 16021");
                 port = "16021";
             }
-            string json= JsonSerializer.Serialize(Communication.DiscoveredDevices);
+            string json = JsonSerializer.Serialize(Communication.DiscoveredDevices);
             sm.SetKernelSetting(ESettingsType.APPLICATION, NANOLEAF_DISCOVERED_CONTROLLERS, json);
             _ = addControllerAsync(Controller.CreateFromIPPort(ip, port));
         }
-        private async Task addControllerAsync(Controller controller, bool setSettings=true)
+        private async Task addControllerAsync(Controller controller, bool setSettings = true)
         {
             try
             {
@@ -314,7 +314,7 @@ namespace Nanoleaf_Plugin
                 im.UnregisterSources(sources);
                 Log.Info("Unregisterd {0} Sinks and {1} Sources", sinks.Count(), sources.Count());
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.Error(string.Empty, e);
             }
@@ -355,13 +355,15 @@ namespace Nanoleaf_Plugin
         {
             if (NanoleafMainSwitch.getInstance().Enabled)
             {
-                clients.ForEach(client => {
+                clients.ForEach(client =>
+                {
                     _ = client.StartStreaming();
                 });
             }
             else
             {
-                clients.ForEach(client => {
+                clients.ForEach(client =>
+                {
                     _ = client.StopStreaming();
                 });
             }
@@ -377,7 +379,7 @@ namespace Nanoleaf_Plugin
             {
                 Communication.StopEventListener();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 //Needed to prevent exception when stopping the Nanoleaf plugin
             }
@@ -467,7 +469,7 @@ namespace Nanoleaf_Plugin
                             Communication.StopDiscoverymDNSTask();
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Log.ErrorOrDebug(e);
                     }
@@ -519,7 +521,7 @@ namespace Nanoleaf_Plugin
 
         protected override void DisposePlugin(bool disposing)
         {
-            clients.ForEach(c => 
+            clients.ForEach(c =>
             {
                 c.AuthTokenReceived -= Controller_AuthTokenReceived;
                 c.UpdatedInfos -= Controller_UpdatedInfos;

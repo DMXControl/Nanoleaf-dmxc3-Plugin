@@ -24,7 +24,7 @@ namespace Nanoleaf_Plugin
 
         private void CurrentTouchedPanelsSource_EnabledChanged(object sender, System.EventArgs e)
         {
-            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;  
+            AutofireChangedEvent = NanoleafMainSwitch.getInstance().Enabled;
         }
 
         private void ExternalControlEndpoint_StaticOnTouchEvent(object sender, TouchEventArgs e)

@@ -60,7 +60,7 @@ namespace Nanoleaf_Plugin
         }
         private static ParameterCategory getCategory(string serialNumber)
         {
-            return ParameterCategoryTools.FromNames("Nanoleaf",serialNumber);
+            return ParameterCategoryTools.FromNames("Nanoleaf", serialNumber);
         }
         public override EWellKnownInputType AutoGraphIOType
         {

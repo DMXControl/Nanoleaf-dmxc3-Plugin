@@ -1,6 +1,5 @@
 ﻿using Lumos.GUI.BaseWindow;
 using Lumos.GUI.Settings;
-using LumosControls.Controls;
 using LumosLIB.Tools.I18n;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -322,7 +321,7 @@ namespace NanoleafGUI_Plugin
 
                                 rect_text = new RectangleF(x_tri - (size / 2), y_tri - (size / 2), size, size);
                                 var localFont = font;
-                                if (shape == 9) localFont = new Font("Microsoft Sans Serif",7);
+                                if (shape == 9) localFont = new Font("Microsoft Sans Serif", 7);
 
                                 //Create 3 points
                                 var points_tri = new PointF[3];
@@ -342,8 +341,9 @@ namespace NanoleafGUI_Plugin
                                 int x_offset = 0;
                                 float y_offset = 0;
 
-                                switch (orientation) {
-                                    
+                                switch (orientation)
+                                {
+
                                     case 0:
                                     case -360:
                                         x_offset = 9;
@@ -375,11 +375,11 @@ namespace NanoleafGUI_Plugin
                                         y_offset = -4.5f;
                                         break;
                                 }
-                                     
+
 
                                 var x_ctrl = x + maxSize + x_offset;
                                 var y_ctrl = y + maxSize + y_offset;
-                                
+
 
                                 //Create 4 points
                                 var points_ctrl = new PointF[4];

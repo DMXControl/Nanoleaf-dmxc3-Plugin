@@ -7,13 +7,12 @@ using NanoleafAPI.API;
 using org.dmxc.lumos.Kernel.Input.v2;
 using System;
 using System.Linq;
-using static NanoleafAPI.GestureEvent;
 
 namespace Nanoleaf_Plugin
 {
     public class CanvasGestureSource : AbstractInputSource
     {
-        
+
 
         public string SerialNumber { get; private set; }
         public EGesture GestureType { get; private set; }
