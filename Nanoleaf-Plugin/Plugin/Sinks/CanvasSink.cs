@@ -79,7 +79,7 @@ namespace Nanoleaf_Plugin
             else return false;
             try
             {
-                var Controler = NanoleafPlugin.getClient(SerialNumber);                
+                var Controler = NanoleafPlugin.getClient(SerialNumber);
                 return Controler.SetPanelColor(Panel.ID, rgbw);
             }
             catch (Exception e)

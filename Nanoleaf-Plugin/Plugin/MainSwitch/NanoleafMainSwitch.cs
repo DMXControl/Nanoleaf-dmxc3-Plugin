@@ -6,7 +6,7 @@ namespace Nanoleaf_Plugin.Plugin.MainSwitch
 {
     public class NanoleafMainSwitch : IMainSwitch
     {
-        private static readonly NanoleafMainSwitch instance = new ();
+        private static readonly NanoleafMainSwitch instance = new();
         public static NanoleafMainSwitch getInstance() => instance;
         private bool _enabled;
         public event EventHandler<EventArgs> EnabledChanged;

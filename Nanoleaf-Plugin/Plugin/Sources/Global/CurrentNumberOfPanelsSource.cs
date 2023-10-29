@@ -20,7 +20,7 @@ namespace Nanoleaf_Plugin
             Communication.StaticOnLayoutEvent += ExternalControlEndpoint_StaticOnLayoutEvent;
             SerialNumber = serialNumber;
             var numberOfPanels = NanoleafPlugin.getClient(SerialNumber).NumberOfPanels;
-            min =0;
+            min = 0;
             max = int.MaxValue;
             CurrentValue = numberOfPanels;
         }

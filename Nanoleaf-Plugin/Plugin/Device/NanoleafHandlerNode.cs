@@ -1,16 +1,14 @@
-﻿using NanoleafAPI;
+﻿using LumosLIB.Tools;
+using Nanoleaf_Plugin.Plugin.MainSwitch;
+using NanoleafAPI;
 using org.dmxc.lumos.Kernel.DeviceProperties;
 using org.dmxc.lumos.Kernel.Devices;
 using org.dmxc.lumos.Kernel.HAL.Handler;
+using org.dmxc.lumos.Kernel.HAL.Handler.Helper;
 using org.dmxc.lumos.Kernel.PropertyType;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using org.dmxc.lumos.Kernel.HAL.Handler.Matrix;
-using LumosLIB.Tools;
-using org.dmxc.lumos.Kernel.HAL.Handler.Helper;
-using Nanoleaf_Plugin.Plugin.MainSwitch;
 
 namespace Nanoleaf_Plugin
 {
@@ -80,7 +78,7 @@ namespace Nanoleaf_Plugin
                     ((NanoleafDevice)value.ParentDevice).PanelIDChanged += new EventHandler(NanoleafHandlerNode_PanelIDChanged);
                     panelId = ((NanoleafDevice)value.ParentDevice).PanelID;
                     deviceType = ((NanoleafDevice)value.ParentDevice).DeviceType;
-                    this._instance = NanoleafPlugin.getAllPanels(deviceType).FirstOrDefault(p=>p.ID.Equals(panelId));
+                    this._instance = NanoleafPlugin.getAllPanels(deviceType).FirstOrDefault(p => p.ID.Equals(panelId));
                 }
                 else
                     throw new ArgumentException("This Type of Handler needs to be assigned to a " + NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME);

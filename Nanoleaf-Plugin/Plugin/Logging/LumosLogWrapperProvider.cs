@@ -1,14 +1,7 @@
-﻿using log4net;
-using log4net.Config;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Runtime.Versioning;
-using System.Xml;
-using System.Xml.Linq;
 
 namespace Nanoleaf_Plugin.Plugin.Logging
 {
@@ -85,7 +78,7 @@ namespace Nanoleaf_Plugin.Plugin.Logging
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose (bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
