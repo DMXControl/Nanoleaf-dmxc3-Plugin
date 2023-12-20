@@ -29,6 +29,12 @@
 		<HintPath Condition="Exists('..\dep')">..\dep\LumosLIB.dll</HintPath>
 		<Private>True</Private>
 	</Reference>
+	<Reference Include="LumosControls">
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosControls\bin\Debug')">..\..\Lumos\3.3\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+		<HintPath Condition="Exists('..\..\Lumos\LumosControls\bin\Debug')">..\..\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosControls.dll</HintPath>
+		<Private>True</Private>
+	</Reference>
 	<Reference Include="LumosToolsLIB">
 		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosToolsLIB\bin\Debug\netstandard2.0')">..\..\Lumos\3.3\LumosToolsLIB\bin\Debug\netstandard2.0\LumosToolsLIB.dll</HintPath>
 		<HintPath Condition="Exists('..\..\Lumos\LumosToolsLIB\bin\Debug\netstandard2.0')">..\..\Lumos\LumosToolsLIB\bin\Debug\netstandard2.0\LumosToolsLIB.dll</HintPath>
