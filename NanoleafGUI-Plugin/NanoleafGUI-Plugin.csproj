@@ -18,15 +18,21 @@
   </PropertyGroup>
 <ItemGroup>
 	<Reference Include="LumosGUI">
-		<HintPath Condition="Exists('..\..\Lumos\3.3\Lumos\bin\Debug\net6.0')">..\..\Lumos\3.3\Lumos\bin\Debug\net6.0\Lumos.dll</HintPath>
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosGUI\bin\Debug')">..\..\Lumos\3.3\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
 		<HintPath Condition="Exists('..\..\Lumos\LumosGUI\bin\Debug')">..\..\Lumos\LumosGUI\bin\Debug\LumosGUI.exe</HintPath>
-		<HintPath Condition="Exists('..\dep')">..\dep\Lumos.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosGUI.exe</HintPath>
 		<Private>True</Private>
 	</Reference>
 	<Reference Include="LumosLIB">
 		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0')">..\..\Lumos\3.3\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
 		<HintPath Condition="Exists('..\..\Lumos\LumosLIB\bin\Debug\netstandard2.0')">..\..\Lumos\LumosLIB\bin\Debug\netstandard2.0\LumosLIB.dll</HintPath>
 		<HintPath Condition="Exists('..\dep')">..\dep\LumosLIB.dll</HintPath>
+		<Private>True</Private>
+	</Reference>
+	<Reference Include="LumosControls">
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosControls\bin\Debug')">..\..\Lumos\3.3\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+		<HintPath Condition="Exists('..\..\Lumos\LumosControls\bin\Debug')">..\..\Lumos\LumosControls\bin\Debug\LumosControls.dll</HintPath>
+		<HintPath Condition="Exists('..\dep')">..\dep\LumosControls.dll</HintPath>
 		<Private>True</Private>
 	</Reference>
 	<Reference Include="LumosToolsLIB">

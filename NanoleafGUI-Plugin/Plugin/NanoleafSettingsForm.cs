@@ -1,5 +1,6 @@
 ﻿using Lumos.GUI.BaseWindow;
 using Lumos.GUI.Settings;
+using LumosControls.Controls;
 using LumosLIB.Tools.I18n;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
