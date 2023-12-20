@@ -48,7 +48,7 @@
 		<Private>True</Private>
 	</Reference>
 	<Reference Include="log4net">
-		<HintPath Condition="Exists('..\..\Lumos\3.3\Lumos\bin\Debug\net6.0')">..\..\Lumos\3.3\Lumos\bin\Debug\net6.0\log4net.dll</HintPath>
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosGUI\bin\Debug')">..\..\Lumos\3.3\LumosGUI\bin\Debug\log4net.dll</HintPath>
 		<HintPath Condition="Exists('..\..\Lumos\LumosGUI\bin\Debug')">..\..\Lumos\LumosGUI\bin\Debug\log4net.dll</HintPath>
 		<HintPath Condition="Exists('..\dep')">..\dep\log4net.dll</HintPath>
 	</Reference>
