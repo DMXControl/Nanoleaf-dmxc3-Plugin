@@ -90,7 +90,7 @@ namespace Nanoleaf_Plugin
 
             string id = item.getValue<string>("ID");
             if (String.IsNullOrEmpty(id))
-                throw ItemLoadException.UnableToLoad("ID", "NanoleafDeviceOrController");
+                throw ItemLoadException.UnableToLoad("ID", "NanoleafDeviceOrController", LumosProtobuf.Resource.EErrorType.Warning);
 
             if (item.Name.Equals(NanoleafDevice.NANOLEAF_DEVICE_TYPE_NAME))
             {
