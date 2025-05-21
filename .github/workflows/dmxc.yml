@@ -1,0 +1,78 @@
+
+name: Build DMXControl Plugin
+
+env: 
+  PluginName: "Nanoleaf-Plugin"
+  SolutionName: "Nanoleaf-Plugin"
+
+on: push
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Setup Nuget
+        uses: nuget/setup-nuget@v1
+
+      - name: Navigate to Workspace
+        run: cd $GITHUB_WORKSPACE
+
+      - name: Download and extract DMXCDependencies
+        run: |
+          foreach ($folder in (Get-ChildItem -Filter dmxcplug.json -Recurse -Depth 1).DirectoryName) {
+            $dmxcplugver = (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json).version
+            $dmxctypes = (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json).type
+            $dmxczip = "deps-${dmxcplugver}.zip"
+            If(-Not (Test-Path -Path "${dmxczip}")) {
+              Invoke-RestMethod -Uri "https://www.dmxcontrol.de/files/DMXControl_3/plugin-lib/dmxc-plugin-lib-${dmxcplugver}.zip" -OutFile "${dmxczip}"
+            }
+            Expand-Archive "${dmxczip}" "${folder}/temp"
+            New-Item -ItemType Directory -Force -Path "${folder}/bin/Release"
+            foreach ($type in $dmxctypes){
+              Copy-Item -Path "${folder}/temp/${type}/*" -Destination "${folder}/bin/Release"
+            }
+          }
+
+      - name: Restore nuget packages
+        run: |
+          msbuild.exe ${{env.SolutionName}}.sln /t:restore
+          nuget restore ${{env.SolutionName}}.sln
+
+      - name: Build Solution
+        run: |
+          msbuild.exe ${{env.SolutionName}}.sln /p:platform="Any CPU" /p:configuration="Release" /p:PostBuildEvent=
+
+      - name: Copy Artifacts
+        run: |
+          foreach ($folder in (Get-ChildItem -Filter dmxcplug.json -Recurse -Depth 1).DirectoryName) {
+            foreach($type in (Get-Content "${folder}/dmxcplug.json" | ConvertFrom-Json).type) {
+              $filter = Get-ChildItem "${folder}/temp/${type}" -Name
+              New-Item -ItemType "directory" -Path "dist/${type}/${{env.PluginName}}"
+              Get-ChildItem "${folder}/bin/Release" -Name | where {$filter -NotContains $_} | %{ Copy-Item -Path "${folder}/bin/Release/${_}" -Destination "dist/${type}/${{env.PluginName}}/${_}"}
+            }
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: DllBundle
+          path: "dist"
+
+      - name: Create Releasezip
+        run: |
+          Compress-Archive -Path dist/* -DestinationPath ${{env.PluginName}}.zip
+          "${{env.PluginName}}.zip: `$SHA256`$$((Get-FileHash ${{env.PluginName}}.zip -Algorithm SHA256).Hash)" > checksums
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{env.PluginName}}.zip
+            checksums
