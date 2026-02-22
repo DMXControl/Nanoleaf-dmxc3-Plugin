@@ -42,8 +42,8 @@
 		<Private>True</Private>
 	</Reference>
 	<Reference Include="LumosProtobuf">
-		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosProtobuf\bin\Debug\netstandard2.0')">..\..\Lumos\3.3\LumosProtobuf\bin\Debug\netstandard2.0\LumosProtobuf.dll</HintPath>
-		<HintPath Condition="Exists('..\..\Lumos\LumosProtobuf\bin\Debug\netstandard2.0')">..\..\Lumos\LumosProtobuf\bin\Debug\netstandard2.0\LumosProtobuf.dll</HintPath>
+		<HintPath Condition="Exists('..\..\Lumos\3.3\LumosProtobuf\csharp\bin\Debug\netstandard2.0')">..\..\Lumos\3.3\LumosProtobuf\csharp\bin\Debug\netstandard2.0\LumosProtobuf.dll</HintPath>
+		<HintPath Condition="Exists('..\..\Lumos\LumosProtobuf\csharp\bin\Debug\netstandard2.0')">..\..\Lumos\LumosProtobuf\csharp\bin\Debug\netstandard2.0\LumosProtobuf.dll</HintPath>
 		<HintPath Condition="Exists('..\dep')">..\dep\LumosProtobuf.dll</HintPath>
 		<Private>True</Private>
 	</Reference>
