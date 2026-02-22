@@ -82,7 +82,7 @@ pipeline {
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\ISSDP.UPnP.PCL.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\SimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\ISimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\HttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\HttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\IHttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\Zeroconf.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\System.*\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
