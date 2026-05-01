@@ -9,11 +9,11 @@ pipeline {
 		node{
 			label 'Win10'
 		}
-	}	
+	}
 	environment {
 		//  Define the VisualStudio tools
-		MSBuild = tool 'MSBuild VS 2022'
-		VSTestConsole = tool 'VSTest VS 2022'
+		MSBuild = tool 'MSBuild VS Current'
+		VSTestConsole = tool 'VSTest VS Current'
 		
 		//  Define the additional tools
 		CLOC = tool 'CLOC_current'
@@ -75,18 +75,18 @@ pipeline {
 		}
 		stage('Archive Artifacts'){
 			steps {
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\NanoleafAPI.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SSDP.UPnP.PCL.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\ISSDP.UPnP.PCL.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\SimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\ISimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\HttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\IHttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Zeroconf.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\System.*\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
-				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net6.0\\Microsoft.*\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\Nanoleaf-Plugin.dll\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\Nanoleaf-Plugin.pdb\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\NanoleafAPI.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\SSDP.UPnP.PCL.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\ISSDP.UPnP.PCL.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\SimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\ISimpleHttpListener.Rx.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\HttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\IHttpMachine.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\Zeroconf.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\System.*\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
+				bat "xcopy \"$WORKSPACE\\Nanoleaf-Plugin\\bin\\Release\\net8.0\\Microsoft.*\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.dll\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\NanoleafGUI-Plugin.pdb\" \"$WORKSPACE\\output\\\" /F /R /Y /I"
 				bat "xcopy \"$WORKSPACE\\NanoleafGUI-Plugin\\bin\\Release\\net48\\Newtonsoft.Json.dll\" \"$WORKSPACE\\output\\dependencies\\\" /F /R /Y /I"
@@ -95,7 +95,7 @@ pipeline {
 				dir('output') {
 					archiveArtifacts artifacts: '**/*.*'
 				}
-			}			
+			}
 		}
 	}
 	post {
